@@ -120,209 +120,7 @@
             align-items: center;
             gap: 12px;
         }
-        
-        .add-btn {
-            background: #1e3a8a;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 500;
-            font-size: 14px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            transition: all 0.2s ease;
-        }
-        
-        .add-btn:hover {
-            background: #3730a3;
-            transform: translateY(-1px);
-        }
-        
-        .form-mockup {
-            background: #f8fafc;
-            padding: 24px;
-            border-radius: 8px;
-            margin: 24px 0;
-            border: 1px solid #e2e8f0;
-        }
-        
-        .form-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-            margin-bottom: 20px;
-        }
-        
-        .form-field {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-        }
-        
-        .form-field.full-width {
-            grid-column: 1 / -1;
-        }
-        
-        .form-label {
-            font-weight: 600;
-            color: #1e3a8a;
-            font-size: 14px;
-        }
-        
-        .form-input {
-            padding: 12px 16px;
-            border: 1px solid #cbd5e0;
-            border-radius: 6px;
-            background: white;
-            font-size: 14px;
-            transition: border-color 0.2s ease;
-            color: #374151;
-        }
-        
-        .form-input:focus {
-            outline: none;
-            border-color: #1e3a8a;
-            box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.1);
-        }
-        
-        .file-upload {
-            border: 2px dashed #94a3b8;
-            border-radius: 8px;
-            padding: 48px 24px;
-            text-align: center;
-            background: #f8fafc;
-            margin-bottom: 24px;
-            transition: all 0.2s ease;
-            cursor: pointer;
-        }
-        
-        .file-upload:hover {
-            border-color: #1e3a8a;
-            background: #eff6ff;
-        }
-        
-        .upload-icon {
-            font-size: 48px;
-            color: #64748b;
-            margin-bottom: 16px;
-        }
-        
-        .upload-text {
-            font-size: 16px;
-            font-weight: 500;
-            color: #1e3a8a;
-            margin-bottom: 8px;
-        }
-        
-        .upload-subtext {
-            color: #64748b;
-            font-size: 14px;
-        }
-        
-        .table-container {
-            background: white;
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 4px 6px -1px rgba(30, 58, 138, 0.1);
-            margin: 24px 0;
-            border: 1px solid #e2e8f0;
-        }
-        
-        .table-header {
-            background: #1e3a8a;
-            color: white;
-            padding: 16px 20px;
-            display: grid;
-            grid-template-columns: 3fr 1fr 1fr 1fr 1fr;
-            gap: 20px;
-            font-weight: 600;
-            font-size: 14px;
-        }
-        
-        .table-row {
-            padding: 16px 20px;
-            display: grid;
-            grid-template-columns: 3fr 1fr 1fr 1fr 1fr;
-            gap: 20px;
-            border-bottom: 1px solid #f1f5f9;
-            align-items: center;
-            transition: background-color 0.2s ease;
-        }
-        
-        .table-row:hover {
-            background: #f8fafc;
-        }
-        
-        .table-row:last-child {
-            border-bottom: none;
-        }
-        
-        .drill-name {
-            color: #1e3a8a;
-            text-decoration: none;
-            cursor: pointer;
-            font-weight: 600;
-            font-size: 15px;
-        }
-        
-        .drill-name:hover {
-            text-decoration: underline;
-            color: #3730a3;
-        }
-        
-        .drill-description {
-            font-size: 13px;
-            color: #64748b;
-            margin-top: 4px;
-            line-height: 1.4;
-        }
-        
-        .skill-badge {
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 500;
-            text-align: center;
-        }
-        
-        .skill-passing { background: #dbeafe; color: #1e40af; }
-        .skill-awareness { background: #e0f2fe; color: #0369a1; }
-        .skill-defense { background: #f0f9ff; color: #0c4a6e; }
-        
-        .duration-badge {
-            background: #e0f2fe;
-            color: #0369a1;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 500;
-            text-align: center;
-        }
-        
-        .star-rating {
-            color: #fbbf24;
-            font-size: 16px;
-        }
-        
-        .rate-btn {
-            background: #64748b;
-            color: white;
-            border: none;
-            padding: 6px 12px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 12px;
-            font-weight: 500;
-            transition: background-color 0.2s ease;
-        }
-        
-        .rate-btn:hover {
-            background: #1e3a8a;
-        }
-        
+
         .calendar-container {
             background: white;
             border-radius: 8px;
@@ -434,161 +232,6 @@
         .event.vacation {
             background: #64748b;
         }
-        
-        .filters {
-            display: flex;
-            gap: 12px;
-            margin-bottom: 24px;
-            flex-wrap: wrap;
-        }
-        
-        .filter-btn {
-            background: white;
-            border: 1px solid #cbd5e0;
-            padding: 8px 16px;
-            border-radius: 6px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            font-size: 14px;
-            font-weight: 500;
-            color: #1e3a8a;
-        }
-        
-        .filter-btn:hover {
-            background: #f1f5f9;
-            border-color: #1e3a8a;
-        }
-        
-        .filter-btn.active {
-            background: #1e3a8a;
-            color: white;
-            border-color: #1e3a8a;
-        }
-        
-        .search-box {
-            width: 100%;
-            padding: 12px 16px;
-            border: 1px solid #cbd5e0;
-            border-radius: 8px;
-            font-size: 16px;
-            margin-bottom: 24px;
-            background: white;
-            color: #374151;
-        }
-        
-        .search-box:focus {
-            outline: none;
-            border-color: #1e3a8a;
-            box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.1);
-        }
-        
-        .features-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-            gap: 24px;
-            margin-top: 32px;
-        }
-        
-        .feature-card {
-            background: white;
-            padding: 24px;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px -1px rgba(30, 58, 138, 0.1);
-            border: 1px solid #e2e8f0;
-            border-left: 4px solid #1e3a8a;
-        }
-        
-        .feature-card h3 {
-            font-size: 18px;
-            font-weight: 600;
-            margin-bottom: 12px;
-            color: #1e3a8a;
-        }
-        
-        .feature-card p {
-            color: #64748b;
-            line-height: 1.6;
-        }
-        
-        .btn-primary {
-            background: #1e3a8a;
-            color: white;
-            border: none;
-            padding: 12px 24px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 500;
-            font-size: 14px;
-            transition: all 0.2s ease;
-        }
-        
-        .btn-primary:hover {
-            background: #3730a3;
-        }
-        
-        .btn-secondary {
-            background: white;
-            color: #1e3a8a;
-            border: 1px solid #cbd5e0;
-            padding: 12px 24px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 500;
-            font-size: 14px;
-            transition: all 0.2s ease;
-            margin-right: 12px;
-        }
-        
-        .btn-secondary:hover {
-            background: #f1f5f9;
-            border-color: #1e3a8a;
-        }
-        
-        .google-sheets-info {
-            background: #eff6ff;
-            border: 1px solid #93c5fd;
-            border-radius: 8px;
-            padding: 16px;
-            margin-bottom: 24px;
-        }
-        
-        .google-sheets-info h4 {
-            color: #1e3a8a;
-            font-weight: 600;
-            margin-bottom: 8px;
-        }
-        
-        .google-sheets-info p {
-            color: #3730a3;
-            font-size: 14px;
-            line-height: 1.5;
-        }
-        
-        @media (max-width: 768px) {
-            .table-header, .table-row {
-                grid-template-columns: 1fr;
-                gap: 8px;
-            }
-            
-            .form-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .calendar-nav {
-                flex-wrap: wrap;
-                gap: 8px;
-            }
-        }
-
-        .success-message {
-            background: #dcfce7;
-            border: 1px solid #16a34a;
-            color: #15803d;
-            padding: 12px 16px;
-            border-radius: 8px;
-            margin: 16px 0;
-            display: none;
-        }
     </style>
 </head>
 <body>
@@ -599,206 +242,257 @@
         </header>
         
         <nav class="mockup-nav">
-            <button class="mockup-btn active" onclick="showMockup('drills')">Drills</button>
-            <button class="mockup-btn" onclick="showMockup('calendar')">Practice Calendar</button>
-            <button class="mockup-btn" onclick="showMockup('overview')">System Overview</button>
+            <button class="mockup-btn" onclick="showSection('drills')">Drills</button>
+            <button class="mockup-btn active" onclick="showSection('calendar')">Practice Calendar</button>
+            <button class="mockup-btn" onclick="showSection('overview')">System Overview</button>
         </nav>
         
-        <!-- Drills Section -->
-        <section id="drills" class="mockup-section active">
+        <!-- Calendar Section -->
+        <section id="calendar" class="mockup-section active">
             <div class="section-header">
-                <h2 class="section-title">📋 Drills Management</h2>
-                <button class="add-btn" onclick="toggleDrillForm()">
-                    <span>+</span> Add New Drill
-                </button>
+                <h2 class="section-title">📅 Practice Calendar</h2>
             </div>
             
-            <div id="drill-success" class="success-message">
-                Drill added successfully!
-            </div>
-            
-            <!-- Upload Section (Initially Hidden) -->
-            <div id="drill-form" style="display: none;">
-                <div class="file-upload" onclick="handleFileUpload()">
-                    <div class="upload-icon">📄</div>
-                    <div class="upload-text">Upload Drill Document</div>
-                    <div class="upload-subtext">Drop your PowerPoint, Word, or PDF document here, or click to browse</div>
-                    <div class="upload-subtext" style="margin-top: 8px;">Supported formats: .pptx, .docx, .pdf (Max 10MB)</div>
-                </div>
-                
-                <div class="form-mockup">
-                    <h3 style="margin-bottom: 24px; color: #1e3a8a; font-weight: 600;">Drill Information</h3>
-                    
-                    <div class="form-grid">
-                        <div class="form-field">
-                            <label class="form-label">Drill Name *</label>
-                            <input type="text" id="drill-name" class="form-input" placeholder="Enter drill name..." value="">
-                        </div>
-                        
-                        <div class="form-field">
-                            <label class="form-label">Skill Category *</label>
-                            <select id="drill-skill" class="form-input">
-                                <option value="">Select skill...</option>
-                                <option>Passing</option>
-                                <option>Awareness</option>
-                                <option>Defense</option>
-                            </select>
-                        </div>
-                        
-                        <div class="form-field">
-                            <label class="form-label">Duration *</label>
-                            <select id="drill-duration" class="form-input">
-                                <option value="">Select duration...</option>
-                                <option>15 minutes</option>
-                                <option>30 minutes</option>
-                                <option>45 minutes</option>
-                                <option>60 minutes</option>
-                            </select>
-                        </div>
-                        
-                        <div class="form-field">
-                            <label class="form-label">Rating</label>
-                            <select id="drill-rating" class="form-input">
-                                <option>Select rating...</option>
-                                <option>⭐ 1 Star</option>
-                                <option>⭐⭐ 2 Stars</option>
-                                <option>⭐⭐⭐ 3 Stars</option>
-                                <option>⭐⭐⭐⭐ 4 Stars</option>
-                                <option>⭐⭐⭐⭐⭐ 5 Stars</option>
-                            </select>
-                        </div>
-                        
-                        <div class="form-field full-width">
-                            <label class="form-label">Description *</label>
-                            <textarea id="drill-description" class="form-input" rows="4" placeholder="Describe the drill objectives, setup, and key coaching points..."></textarea>
-                        </div>
-                    </div>
-                    
-                    <div style="display: flex; gap: 12px; justify-content: flex-end; margin-top: 24px;">
-                        <button class="btn-secondary" onclick="toggleDrillForm()">Cancel</button>
-                        <button class="btn-primary" onclick="addDrillToRepository()">Save Drill</button>
+            <div class="calendar-container">
+                <div class="calendar-header">
+                    <div class="calendar-title" id="calendar-title">March 2025</div>
+                    <div class="calendar-nav">
+                        <button class="calendar-btn" onclick="changeMonth(-1)">← Prev</button>
+                        <button class="calendar-btn" onclick="goToToday()">Today</button>
+                        <button class="calendar-btn" onclick="changeMonth(1)">Next →</button>
+                        <button class="calendar-btn active">Month</button>
                     </div>
                 </div>
-            </div>
-            
-            <!-- Repository Section -->
-            <div id="drill-repository-section">
-                <h3 style="margin: 32px 0 24px 0; color: #1e3a8a; font-weight: 600; font-size: 1.5rem;">📊 Drill Repository</h3>
                 
-                <input type="text" class="search-box" placeholder="🔍 Search drills by name, skill, or description..." oninput="filterDrills()">
-                
-                <div class="filters">
-                    <button class="filter-btn active" onclick="filterBySkill('all')">All Skills</button>
-                    <button class="filter-btn" onclick="filterBySkill('Passing')">Passing</button>
-                    <button class="filter-btn" onclick="filterBySkill('Awareness')">Awareness</button>
-                    <button class="filter-btn" onclick="filterBySkill('Defense')">Defense</button>
-                </div>
-                
-                <div class="filters">
-                    <button class="filter-btn active" onclick="filterByDuration('all')">All Durations</button>
-                    <button class="filter-btn" onclick="filterByDuration('15 minutes')">15 min</button>
-                    <button class="filter-btn" onclick="filterByDuration('30 minutes')">30 min</button>
-                    <button class="filter-btn" onclick="filterByDuration('45 minutes')">45 min</button>
-                    <button class="filter-btn" onclick="filterByDuration('60 minutes')">60 min</button>
-                </div>
-                
-                <div class="table-container">
-                    <div class="table-header">
-                        <div>Drill Name & Description</div>
-                        <div>Skill</div>
-                        <div>Duration</div>
-                        <div>Rating</div>
-                        <div>Actions</div>
+                <div class="calendar-grid">
+                    <div class="calendar-day-header">Sun</div>
+                    <div class="calendar-day-header">Mon</div>
+                    <div class="calendar-day-header">Tue</div>
+                    <div class="calendar-day-header">Wed</div>
+                    <div class="calendar-day-header">Thu</div>
+                    <div class="calendar-day-header">Fri</div>
+                    <div class="calendar-day-header">Sat</div>
+                    
+                    <!-- March 2025 Calendar Days -->
+                    <div class="calendar-day">
+                        <div class="day-number">23</div>
+                    </div>
+                    <div class="calendar-day">
+                        <div class="day-number">24</div>
+                    </div>
+                    <div class="calendar-day">
+                        <div class="day-number">25</div>
+                    </div>
+                    <div class="calendar-day">
+                        <div class="day-number">26</div>
+                    </div>
+                    <div class="calendar-day">
+                        <div class="day-number">27</div>
+                    </div>
+                    <div class="calendar-day">
+                        <div class="day-number">28</div>
+                    </div>
+                    <div class="calendar-day">
+                        <div class="day-number">1</div>
                     </div>
                     
-                    <div id="drills-table-body">
-                        <div class="table-row" data-skill="Passing" data-duration="30 minutes">
-                            <div>
-                                <div class="drill-name" onclick="viewDrillDetails('passing-triangle')">Passing Triangle Drill</div>
-                                <div class="drill-description">A fundamental passing drill focusing on accuracy and quick decision-making in a triangular formation.</div>
-                            </div>
-                            <div><span class="skill-badge skill-passing">Passing</span></div>
-                            <div><span class="duration-badge">30 min</span></div>
-                            <div><span class="star-rating">★★★★★</span></div>
-                            <div><button class="rate-btn" onclick="rateDrill('passing-triangle')">Rate</button></div>
-                        </div>
-                        
-                        <div class="table-row" data-skill="Defense" data-duration="45 minutes">
-                            <div>
-                                <div class="drill-name" onclick="viewDrillDetails('defensive-positioning')">Defensive Positioning</div>
-                                <div class="drill-description">Training defensive awareness and positioning in small-sided games.</div>
-                            </div>
-                            <div><span class="skill-badge skill-defense">Defense</span></div>
-                            <div><span class="duration-badge">45 min</span></div>
-                            <div><span class="star-rating">★★★★☆</span></div>
-                            <div><button class="rate-btn" onclick="rateDrill('defensive-positioning')">Rate</button></div>
-                        </div>
-                        
-                        <div class="table-row" data-skill="Awareness" data-duration="15 minutes">
-                            <div>
-                                <div class="drill-name" onclick="viewDrillDetails('situational-awareness')">Situational Awareness</div>
-                                <div class="drill-description">Developing quick decision-making skills under pressure situations.</div>
-                            </div>
-                            <div><span class="skill-badge skill-awareness">Awareness</span></div>
-                            <div><span class="duration-badge">15 min</span></div>
-                            <div><span class="star-rating">★★★☆☆</span></div>
-                            <div><button class="rate-btn" onclick="rateDrill('situational-awareness')">Rate</button></div>
-                        </div>
-                        
-                        <div class="table-row" data-skill="Passing" data-duration="60 minutes">
-                            <div>
-                                <div class="drill-name" onclick="viewDrillDetails('advanced-passing')">Advanced Passing Patterns</div>
-                                <div class="drill-description">Complex passing sequences with multiple players and timing elements.</div>
-                            </div>
-                            <div><span class="skill-badge skill-passing">Passing</span></div>
-                            <div><span class="duration-badge">60 min</span></div>
-                            <div><span class="star-rating">★★★★★</span></div>
-                            <div><button class="rate-btn" onclick="rateDrill('advanced-passing')">Rate</button></div>
-                        </div>
+                    <div class="calendar-day">
+                        <div class="day-number">2</div>
+                        <div class="event practice">Practice</div>
+                    </div>
+                    <div class="calendar-day">
+                        <div class="day-number">3</div>
+                    </div>
+                    <div class="calendar-day">
+                        <div class="day-number">4</div>
+                    </div>
+                    <div class="calendar-day">
+                        <div class="day-number">5</div>
+                        <div class="event practice">Training</div>
+                    </div>
+                    <div class="calendar-day">
+                        <div class="day-number">6</div>
+                    </div>
+                    <div class="calendar-day">
+                        <div class="day-number">7</div>
+                    </div>
+                    <div class="calendar-day">
+                        <div class="day-number">8</div>
+                        <div class="event festival">Festival</div>
+                    </div>
+                    
+                    <div class="calendar-day">
+                        <div class="day-number">9</div>
+                    </div>
+                    <div class="calendar-day">
+                        <div class="day-number">10</div>
+                        <div class="event practice">Practice</div>
+                    </div>
+                    <div class="calendar-day">
+                        <div class="day-number">11</div>
+                    </div>
+                    <div class="calendar-day">
+                        <div class="day-number">12</div>
+                    </div>
+                    <div class="calendar-day">
+                        <div class="day-number">13</div>
+                    </div>
+                    <div class="calendar-day">
+                        <div class="day-number">14</div>
+                    </div>
+                    <div class="calendar-day">
+                        <div class="day-number">15</div>
+                        <div class="event festival">Surrey Cup</div>
+                    </div>
+                    
+                    <div class="calendar-day">
+                        <div class="day-number">16</div>
+                    </div>
+                    <div class="calendar-day">
+                        <div class="day-number">17</div>
+                        <div class="event practice">Training</div>
+                    </div>
+                    <div class="calendar-day">
+                        <div class="day-number">18</div>
+                    </div>
+                    <div class="calendar-day">
+                        <div class="day-number">19</div>
+                    </div>
+                    <div class="calendar-day">
+                        <div class="day-number">20</div>
+                    </div>
+                    <div class="calendar-day">
+                        <div class="day-number">21</div>
+                    </div>
+                    <div class="calendar-day">
+                        <div class="day-number">22</div>
+                        <div class="event practice">Match Day</div>
+                    </div>
+                    
+                    <div class="calendar-day">
+                        <div class="day-number">23</div>
+                    </div>
+                    <div class="calendar-day">
+                        <div class="day-number">24</div>
+                    </div>
+                    <div class="calendar-day">
+                        <div class="day-number">25</div>
+                    </div>
+                    <div class="calendar-day">
+                        <div class="day-number">26</div>
+                    </div>
+                    <div class="calendar-day">
+                        <div class="day-number">27</div>
+                    </div>
+                    <div class="calendar-day">
+                        <div class="day-number">28</div>
+                    </div>
+                    <div class="calendar-day">
+                        <div class="day-number">29</div>
+                        <div class="event festival">Spring Festival</div>
+                    </div>
+                    
+                    <div class="calendar-day">
+                        <div class="day-number">30</div>
+                    </div>
+                    <div class="calendar-day">
+                        <div class="day-number">31</div>
+                    </div>
+                    <div class="calendar-day">
+                        <div class="day-number">1</div>
+                    </div>
+                    <div class="calendar-day">
+                        <div class="day-number">2</div>
+                    </div>
+                    <div class="calendar-day">
+                        <div class="day-number">3</div>
+                    </div>
+                    <div class="calendar-day">
+                        <div class="day-number">4</div>
+                    </div>
+                    <div class="calendar-day">
+                        <div class="day-number">5</div>
                     </div>
                 </div>
             </div>
         </section>
         
-        <!-- Calendar Section -->
-        <section id="calendar" class="mockup-section">
+        <!-- Drills Section -->
+        <section id="drills" class="mockup-section">
             <div class="section-header">
-                <h2 class="section-title">📅 Practice Calendar</h2>
-                <button class="add-btn" onclick="toggleEventForm()">
-                    <span>+</span> Add Event
-                </button>
+                <h2 class="section-title">📋 Drills Management</h2>
             </div>
-            
-            <div class="google-sheets-info">
-                <h4>🔗 Google Sheets Integration</h4>
-                <p>Festival data is automatically synced from Google Sheets. The system includes 8 rugby festivals with dates, locations, and tournament links from Surrey Rugby competitions.</p>
+            <p>Drills section content would go here...</p>
+        </section>
+        
+        <!-- Overview Section -->
+        <section id="overview" class="mockup-section">
+            <div class="section-header">
+                <h2 class="section-title">📊 System Overview</h2>
             </div>
+            <p>System overview content would go here...</p>
+        </section>
+    </div>
+
+    <script>
+        // Store calendar state in variables (memory in HTML)
+        let currentMonth = 2; // March (0-indexed)
+        let currentYear = 2025;
+        
+        const monthNames = [
+            'January', 'February', 'March', 'April', 'May', 'June',
+            'July', 'August', 'September', 'October', 'November', 'December'
+        ];
+        
+        // Function to show different sections
+        function showSection(sectionName) {
+            // Hide all sections
+            document.querySelectorAll('.mockup-section').forEach(section => {
+                section.classList.remove('active');
+            });
             
-            <div id="event-success" class="success-message">
-                Event added successfully!
-            </div>
+            // Remove active class from all nav buttons
+            document.querySelectorAll('.mockup-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
             
-            <!-- Add Event Form (Initially Hidden) -->
-            <div id="event-form" style="display: none;">
-                <div class="form-mockup">
-                    <h3 style="margin-bottom: 24px; color: #1e3a8a; font-weight: 600;">Add New Event</h3>
-                    
-                    <div class="form-grid">
-                        <div class="form-field">
-                            <label class="form-label">Event Name *</label>
-                            <input type="text" id="event-name" class="form-input" placeholder="Enter event name...">
-                        </div>
-                        
-                        <div class="form-field">
-                            <label class="form-label">Event Type *</label>
-                            <select id="event-type" class="form-input">
-                                <option value="">Select type...</option>
-                                <option>Practice</option>
-                                <option>Festival</option>
-                                <option>Match</option>
-                                <option>Vacation</option>
-                                <option>Meeting</option>
-                            </select>
-                        </div>
-                        
-                        <div class="
+            // Show selected section
+            document.getElementById(sectionName).classList.add('active');
+            
+            // Add active class to clicked button
+            event.target.classList.add('active');
+        }
+        
+        // Function to change month
+        function changeMonth(direction) {
+            currentMonth += direction;
+            
+            if (currentMonth > 11) {
+                currentMonth = 0;
+                currentYear++;
+            } else if (currentMonth < 0) {
+                currentMonth = 11;
+                currentYear--;
+            }
+            
+            // Update calendar title
+            document.getElementById('calendar-title').textContent = 
+                `${monthNames[currentMonth]} ${currentYear}`;
+            
+            console.log(`Calendar changed to ${monthNames[currentMonth]} ${currentYear}`);
+        }
+        
+        // Function to go to today
+        function goToToday() {
+            const today = new Date();
+            currentMonth = today.getMonth();
+            currentYear = today.getFullYear();
+            
+            document.getElementById('calendar-title').textContent = 
+                `${monthNames[currentMonth]} ${currentYear}`;
+            
+            console.log('Calendar reset to current month');
+        }
+    </script>
+</body>
+</html>
