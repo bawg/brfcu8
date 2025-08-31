@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rugby Movement Designer</title>
+    <style>
+        .rugby-widget {
+            width: 800px;
+            height: 400px;
+            border: 2px solid #333;
+            background: white;
+            position: relative;
+            margin: 20px auto;
+            overflow: hidden;
+            cursor: crosshair;
+        }
+
+        .rugby-widget.playing {
+            cursor: default;
+        }
+
+        .player {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 8px;
+            font-weight: bold;
+            color: white;
+            cursor: pointer;
+            z-index: 10;
+            border: 2px solid rgba(255,255,255,0.5);
+        }
+
+        .player.selected {
+            border: 2px solid #333;
+            box-shadow: 0 0 0 2px #ffd700;
+        }
+
+        .team-a {
+            background: #e74c3c;
+        }
+
+        .team-b {
+            background: #3498db;
+        }
+
+        .connection-line {
+            position: absolute;
+            background: rgba(0,0,0,0.4);
+            height: 1px;
+            transform-origin: left center;
+            z-index: 5;
+        }
+
+        .movement-path {
+            position: absolute;
+            stroke: rgba(0,0,0,0.3);
+            stroke-width: 1;
+            fill: none;
+            stroke-dasharray: 3,3;
+            z-index: 1;
+        }
+
+        .start-position {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            border: 2px solid #333;
+            background: white;
+            border-radius: 50%;
+            z-index: 8;
+        }
+
+        .setup-controls {
+            text-align: center;
+            margin: 20px 0;
+            font-family: Arial, sans-serif;
+            background: #f8f9fa;
+            padding: 15px;
+            border: 1px solid #dee2e6;
+            width: 780px;
+            margin: 20px auto;
+        }
+
+        .setup-row {
+            margin: 10px 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .setup-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .controls {
+            text-align: center;
+            margin: 20px 0;
+            font-family: Arial, sans-serif;
+        }
+
+        .control-btn {
+            background: #333;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            margin: 0 5px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .control-btn:hover {
+            background: #555;
+        }
+
+        .control-btn.active {
+            background: #e74c3c;
+        }
+
+        .setup-btn {
+            background: #2c3e50;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            margin: 0 5px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .setup-btn:hover {
+            background: #34495e;
+        }
+
+        .setup-btn.active {
+            background: #27ae60;
+        }
+
+        select {
+            padding: 5px 10px;
+            font-size: 12px;
+            border: 1px solid #ccc;
+        }
+
+        .timeline {
+            width: 600px;
+            margin: 10px auto;
+            background: #f0f0f0;
+            height: 20px;
+            position: relative;
+            border: 1px solid #ccc;
+        }
+
+        .timeline-marker {
+            position: absolute;
+            top: 0;
+            width: 2px;
+            height: 20px;
+            background: #333;
+            transition: left 0.1s linear;
+        }
+
+        .info {
+            text-align: center;
+            margin: 10px 0;
+            font-family: Arial, sans-serif;
+            font-size: 14px;
+        }
+
+        .mode-indicator {
+            background: #f8f9fa;
+            padding: 10px;
+            text-align: center;
+            font-family: Arial, sans-serif;
+            font-size: 12px;
+            border: 1px solid #dee2e6;
+            margin: 10px auto;
+            width: 780px;
+        }
+
+        .design-mode {
+            background: #e8f5e8;
+            border-color: #28a745;
+        }
+
+        .play-mode {
+            background: #fff3cd;
+            border-color: #ffc107;
+        }
+    </style>
+</head>
+<body>
+    <div class="info">
+        <h3>Rugby Movement Designer</h3>
+        <p>Design custom player movements for drills or match scenarios</p>
+    </div>
+
+    <div class="setup-controls">
+        <div class="setup-row">
+            <div class="setup-group">
+                <label>Mode:</label>
+                <button class="setup-btn active" id="drillModeBtn" onclick="setMode('drill')">Drill</button>
+                <button class="setup-btn" id="matchModeBtn" onclick="setMode('match')">Match</button>
+            </div>
+            
+            <div class="setup-group" id="drillSettings">
+                <label>Players:</label>
+                <select id="playerCount" onchange="updatePlayerCount()">
+                    <option value="3">3 Players</option>
+                    <option value="5" selected>5 Players</option>
+                    <option value="7">7 Players</option>
+                    <option value="10">10 Players</option>
+                    <option value="15">15 Players</option>
+                </select>
+            </div>
+
+            <div class="setup-group" id="matchSettings" style="display: none;">
+                <label>Team A:</label>
+                <select id="teamACount" onchange="updateTeamCounts()">
+                    <option value="7">7 Players</option>
+                    <option value="15" selected>15 Players</option>
+                </select>
+                <label>Team B:</label>
+                <select id="teamBCount" onchange="updateTeamCounts()">
+                    <option value="7">7 Players</option>
+                    <option value="15" selected>15 Players</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <div class="mode-indicator" id="modeIndicator">
+        <strong>DRILL MODE:</strong> Click a player to set their movement
+    </div>
+    
+    <div class="rugby-widget" id="rugbyPitch">
+        <svg class="movement-paths" style="position: absolute; width: 100%; height: 100%; pointer-events: none;">
+        </svg>
+    </div>
+
+    <div class="timeline" id="timeline">
+        <div class="timeline-marker" id="timelineMarker"></div>
+    </div>
+
+    <div class="controls">
+        <button class="control-btn active" id="designBtn" onclick="enterDesignMode()">Design Mode</button>
+        <button class="control-btn" onclick="playMovement()">Play</button>
+        <button class="control-btn" onclick="pauseMovement()">Pause</button>
+        <button class="control-btn" onclick="resetMovement()">Reset</button>
+        <button class="control-btn" onclick="clearAll()">Clear All</button>
+        <button class="control-btn" onclick="loadSample()">Load Sample</button>
+    </div>
+
+    <script>
+        class RugbyDesigner {
+            constructor() {
+                this.pitch = document.getElementById('rugbyPitch');
+                this.timeline = document.getElementById('timeline');
+                this.timelineMarker = document.getElementById('timelineMarker');
+                this.modeIndicator = document.getElementById('modeIndicator');
+                this.pathsSvg = this.pitch.querySelector('.movement-paths');
+                
+                this.players = [];
+                this.startPositions = [];
+                this.connections = [];
+                this.currentDrill = null;
+                this.isPlaying = false;
+                this.isDesignMode = true;
+                this.currentTime = 0;
+                this.totalTime = 3000;
+                this.animationFrame = null;
+                this.selectedPlayer = null;
+                this.settingEndPosition = false;
+                this.mode = 'drill'; // 'drill' or 'match'
+                this.playerCount = 5;
+                this.teamACount = 15;
+                this.teamBCount = 15;
+                
+                this.bindEvents();
+                this.initPlayers();
+            }
+
+            bindEvents() {
+                this.pitch.addEventListener('click', (e) => this.handlePitchClick(e));
+            }
+
+            setMode(mode) {
+                this.mode = mode;
+                document.getElementById('drillModeBtn').classList.toggle('active', mode === 'drill');
+                document.getElementById('matchModeBtn').classList.toggle('active', mode === 'match');
+                document.getElementById('drillSettings').style.display = mode === 'drill' ? 'flex' : 'none';
+                document.getElementById('matchSettings').style.display = mode === 'match' ? 'flex' : 'none';
+                
+                this.clearAllPlayers();
+                this.initPlayers();
+            }
+
+            updatePlayerCount() {
+                if (this.mode !== 'drill') return;
+                this.playerCount = parseInt(document.getElementById('playerCount').value);
+                this.clearAllPlayers();
+                this.initPlayers();
+            }
+
+            updateTeamCounts() {
+                if (this.mode !== 'match') return;
+                this.teamACount = parseInt(document.getElementById('teamACount').value);
+                this.teamBCount = parseInt(document.getElementById('teamBCount').value);
+                this.clearAllPlayers();
+                this.initPlayers();
+            }
+
+            clearAllPlayers() {
+                this.players.forEach(player => player.remove());
+                this.startPositions.forEach(pos => pos.remove());
+                this.connections.forEach(line => line.remove());
+                this.players = [];
+                this.startPositions = [];
+                this.connections = [];
+                this.selectedPlayer = null;
+                this.settingEndPosition = false;
+                this.pathsSvg.innerHTML = '';
+            }
+
+            initPlayers() {
+                if (this.mode === 'drill') {
+                    this.initDrillPlayers();
+                } else {
+                    this.initMatchPlayers();
+                }
+                this.drawConnections();
+                this.updateModeDisplay();
+            }
+
+            initDrillPlayers() {
+                const spacing = Math.min(60, 600 / this.playerCount);
+                const startX = 100 + (600 - (this.playerCount - 1) * spacing) / 2;
+                
+                for (let i = 0; i < this.playerCount; i++) {
+                    this.createPlayer(startX + i * spacing, 200, 'team-a', i + 1);
+                }
+            }
+
+            initMatchPlayers() {
+                // Team A formation
+                const teamASpacing = Math.min(40, 350 / this.teamACount);
+                const teamAStartY = 200 - (this.teamACount - 1) * teamASpacing / 2;
+                
+                for (let i = 0; i < this.teamACount; i++) {
+                    this.createPlayer(150, teamAStartY + i * teamASpacing, 'team-a', i + 1);
+                }
+                
+                // Team B formation
+                const teamBSpacing = Math.min(40, 350 / this.teamBCount);
+                const teamBStartY = 200 - (this.teamBCount - 1) * teamBSpacing / 2;
+                
+                for (let i = 0; i < this.teamBCount; i++) {
+                    this.createPlayer(650, teamBStartY + i * teamBSpacing, 'team-b', i + 1);
+                }
+            }
+
+            createPlayer(x, y, team, number) {
+                const player = document.createElement('div');
+                player.className = `player ${team}`;
+                player.style.left = x + 'px';
+                player.style.top = y + 'px';
+                player.textContent = number;
+                player.dataset.startX = x;
+                player.dataset.startY = y;
+                player.dataset.endX = x;
+                player.dataset.endY = y;
+                player.dataset.team = team;
+                player.dataset.number = number;
+                
+                this.pitch.appendChild(player);
+                this.players.push(player);
+                
+                // Create start position marker
+                const startPos = document.createElement('div');
+                startPos.className = 'start-position';
+                startPos.style.left = (x + 2) + 'px';
+                startPos.style.top = (y + 2) + 'px';
+                this.pitch.appendChild(startPos);
+                this.startPositions.push(startPos);
+            }
+
+            updateModeDisplay() {
+                const modeText = this.mode === 'drill' 
+                    ? `DRILL MODE (${this.playerCount} players)` 
+                    : `MATCH MODE (Team A: ${this.teamACount}, Team B: ${this.teamBCount})`;
+                this.updateModeIndicator(modeText + ": Click a player to set their movement");
+            }
+
+            handlePitchClick(e) {
+                if (!this.isDesignMode || this.isPlaying) return;
+                
+                const rect = this.pitch.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                
+                const clickedPlayer = this.getPlayerAt(x, y);
+                
+                if (clickedPlayer && !this.settingEndPosition) {
+                    this.selectPlayer(clickedPlayer);
+                    this.settingEndPosition = true;
+                    this.updateModeIndicator(`Click where player ${clickedPlayer.dataset.number} (${clickedPlayer.dataset.team === 'team-a' ? 'Red' : 'Blue'}) should move to`);
+                } else if (this.settingEndPosition && this.selectedPlayer) {
+                    this.setPlayerEndPosition(this.selectedPlayer, x, y);
+                    this.settingEndPosition = false;
+                    this.selectedPlayer.classList.remove('selected');
+                    this.selectedPlayer = null;
+                    this.updateModeDisplay();
+                    this.drawConnections();
+                    this.drawPaths();
+                }
+            }
+
+            getPlayerAt(x, y) {
+                return this.players.find(player => {
+                    const px = parseInt(player.style.left);
+                    const py = parseInt(player.style.top);
+                    const distance = Math.sqrt((x - px - 6) ** 2 + (y - py - 6) ** 2);
+                    return distance < 15;
+                });
+            }
+
+            selectPlayer(player) {
+                if (this.selectedPlayer) {
+                    this.selectedPlayer.classList.remove('selected');
+                }
+                this.selectedPlayer = player;
+                player.classList.add('selected');
+            }
+
+            setPlayerEndPosition(player, x, y) {
+                player.dataset.endX = x - 6;
+                player.dataset.endY = y - 6;
+            }
+
+            drawConnections() {
+                this.connections.forEach(line => line.remove());
+                this.connections = [];
+
+                if (this.mode === 'drill') {
+                    // Connect all players in sequence for drills
+                    for (let i = 0; i < this.players.length - 1; i++) {
+                        const player1 = this.players[i];
+                        const player2 = this.players[i + 1];
+                        this.createConnection(player1, player2);
+                    }
+                } else {
+                    // Connect teammates for matches
+                    const teamAPlayers = this.players.filter(p => p.dataset.team === 'team-a');
+                    const teamBPlayers = this.players.filter(p => p.dataset.team === 'team-b');
+                    
+                    // Connect Team A players
+                    for (let i = 0; i < teamAPlayers.length - 1; i++) {
+                        this.createConnection(teamAPlayers[i], teamAPlayers[i + 1]);
+                    }
+                    
+                    // Connect Team B players
+                    for (let i = 0; i < teamBPlayers.length - 1; i++) {
+                        this.createConnection(teamBPlayers[i], teamBPlayers[i + 1]);
+                    }
+                }
+            }
+
+            createConnection(player1, player2) {
+                const x1 = parseInt(player1.style.left) + 6;
+                const y1 = parseInt(player1.style.top) + 6;
+                const x2 = parseInt(player2.style.left) + 6;
+                const y2 = parseInt(player2.style.top) + 6;
+                
+                const line = document.createElement('div');
+                line.className = 'connection-line';
+                
+                const length = Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2);
+                const angle = Math.atan2(y2 - y1, x2 - x1) * 180 / Math.PI;
+                
+                line.style.left = x1 + 'px';
+                line.style.top = y1 + 'px';
+                line.style.width = length + 'px';
+                line.style.transform = `rotate(${angle}deg)`;
+                
+                this.pitch.appendChild(line);
+                this.connections.push(line);
+            }
+
+            drawPaths() {
+                this.pathsSvg.innerHTML = '';
+                
+                this.players.forEach(player => {
+                    const startX = parseInt(player.dataset.startX) + 6;
+                    const startY = parseInt(player.dataset.startY) + 6;
+                    const endX = parseInt(player.dataset.endX) + 6;
+                    const endY = parseInt(player.dataset.endY) + 6;
+                    
+                    if (startX !== endX || startY !== endY) {
+                        const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                        path.setAttribute('d', `M ${startX} ${startY} L ${endX} ${endY}`);
+                        path.setAttribute('class', 'movement-path');
+                        
+                        // Different colors for different teams in match mode
+                        if (this.mode === 'match') {
+                            const color = player.dataset.team === 'team-a' ? 'rgba(231,76,60,0.5)' : 'rgba(52,152,219,0.5)';
+                            path.setAttribute('stroke', color);
+                        }
+                        
+                        this.pathsSvg.appendChild(path);
+                    }
+                });
+            }
+
+            enterDesignMode() {
+                this.isDesignMode = true;
+                this.pauseMovement();
+                this.resetMovement();
+                this.pitch.classList.remove('playing');
+                this.updateModeDisplay();
+                document.getElementById('designBtn').classList.add('active');
+            }
+
+            enterPlayMode() {
+                this.isDesignMode = false;
+                this.settingEndPosition = false;
+                if (this.selectedPlayer) {
+                    this.selectedPlayer.classList.remove('selected');
+                    this.selectedPlayer = null;
+                }
+                this.pitch.classList.add('playing');
+                this.generateCurrentDrill();
+                document.getElementById('designBtn').classList.remove('active');
+            }
+
+            generateCurrentDrill() {
+                const movements = this.players.map(player => ({
+                    startX: parseInt(player.dataset.startX),
+                    startY: parseInt(player.dataset.startY),
+                    endX: parseInt(player.dataset.endX),
+                    endY: parseInt(player.dataset.endY)
+                }));
+
+                this.curren
