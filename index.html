@@ -120,6 +120,151 @@
             align-items: center;
             gap: 12px;
         }
+        
+        .add-btn {
+            background: #1e3a8a;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s ease;
+        }
+        
+        .add-btn:hover {
+            background: #3730a3;
+            transform: translateY(-1px);
+        }
+        
+        .form-mockup {
+            background: #f8fafc;
+            padding: 24px;
+            border-radius: 8px;
+            margin: 24px 0;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .form-field {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        
+        .form-field.full-width {
+            grid-column: 1 / -1;
+        }
+        
+        .form-label {
+            font-weight: 600;
+            color: #1e3a8a;
+            font-size: 14px;
+        }
+        
+        .form-input {
+            padding: 12px 16px;
+            border: 1px solid #cbd5e0;
+            border-radius: 6px;
+            background: white;
+            font-size: 14px;
+            transition: border-color 0.2s ease;
+            color: #374151;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #1e3a8a;
+            box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.1);
+        }
+        
+        .file-upload {
+            border: 2px dashed #94a3b8;
+            border-radius: 8px;
+            padding: 48px 24px;
+            text-align: center;
+            background: #f8fafc;
+            margin-bottom: 24px;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+        
+        .file-upload:hover {
+            border-color: #1e3a8a;
+            background: #eff6ff;
+        }
+        
+        .upload-icon {
+            font-size: 48px;
+            color: #64748b;
+            margin-bottom: 16px;
+        }
+        
+        .upload-text {
+            font-size: 16px;
+            font-weight: 500;
+            color: #1e3a8a;
+            margin-bottom: 8px;
+        }
+        
+        .upload-subtext {
+            color: #64748b;
+            font-size: 14px;
+        }
+        
+        .btn-primary {
+            background: #1e3a8a;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 14px;
+            transition: all 0.2s ease;
+        }
+        
+        .btn-primary:hover {
+            background: #3730a3;
+        }
+        
+        .btn-secondary {
+            background: white;
+            color: #1e3a8a;
+            border: 1px solid #cbd5e0;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 14px;
+            transition: all 0.2s ease;
+            margin-right: 12px;
+        }
+        
+        .btn-secondary:hover {
+            background: #f1f5f9;
+            border-color: #1e3a8a;
+        }
+        
+        .success-message {
+            background: #dcfce7;
+            border: 1px solid #16a34a;
+            color: #15803d;
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin: 16px 0;
+            display: none;
+        }
 
         .calendar-container {
             background: white;
@@ -580,6 +725,77 @@
         <section id="drills" class="mockup-section">
             <div class="section-header">
                 <h2 class="section-title">📋 Drills Management</h2>
+                <button class="add-btn" onclick="toggleDrillForm()">
+                    <span>+</span> Add New Drill
+                </button>
+            </div>
+            
+            <div id="drill-success" class="success-message">
+                Drill added successfully!
+            </div>
+            
+            <!-- Upload Section (Initially Hidden) -->
+            <div id="drill-form" style="display: none;">
+                <div class="file-upload" onclick="handleFileUpload()">
+                    <div class="upload-icon">📄</div>
+                    <div class="upload-text">Upload Drill Document</div>
+                    <div class="upload-subtext">Drop your PowerPoint, Word, or PDF document here, or click to browse</div>
+                    <div class="upload-subtext" style="margin-top: 8px;">Supported formats: .pptx, .docx, .pdf (Max 10MB)</div>
+                </div>
+                
+                <div class="form-mockup">
+                    <h3 style="margin-bottom: 24px; color: #1e3a8a; font-weight: 600;">Drill Information</h3>
+                    
+                    <div class="form-grid">
+                        <div class="form-field">
+                            <label class="form-label">Drill Name *</label>
+                            <input type="text" id="drill-name" class="form-input" placeholder="Enter drill name..." value="">
+                        </div>
+                        
+                        <div class="form-field">
+                            <label class="form-label">Skill Category *</label>
+                            <select id="drill-skill" class="form-input">
+                                <option value="">Select skill...</option>
+                                <option>Passing</option>
+                                <option>Awareness</option>
+                                <option>Defense</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-field">
+                            <label class="form-label">Duration *</label>
+                            <select id="drill-duration" class="form-input">
+                                <option value="">Select duration...</option>
+                                <option>15 minutes</option>
+                                <option>30 minutes</option>
+                                <option>45 minutes</option>
+                                <option>60 minutes</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-field">
+                            <label class="form-label">Rating</label>
+                            <select id="drill-rating" class="form-input">
+                                <option>Select rating...</option>
+                                <option>⭐ 1 Star</option>
+                                <option>⭐⭐ 2 Stars</option>
+                                <option>⭐⭐⭐ 3 Stars</option>
+                                <option>⭐⭐⭐⭐ 4 Stars</option>
+                                <option>⭐⭐⭐⭐⭐ 5 Stars</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-field full-width">
+                            <label class="form-label">Description *</label>
+                            <textarea id="drill-description" class="form-input" rows="4" placeholder="Describe the drill objectives, setup, and key coaching points..."></textarea>
+                        </div>
+                    </div>
+                    
+                    <div style="display: flex; gap: 12px; justify-content: flex-end; margin-top: 24px;">
+                        <button class="btn-secondary" onclick="toggleDrillForm()">Cancel</button>
+                        <button class="btn-primary" onclick="addDrillToRepository()">Save Drill</button>
+                    </div>
+                </div>
             </div>
             
             <h3 style="margin: 32px 0 24px 0; color: #1e3a8a; font-weight: 600; font-size: 1.5rem;">📊 Drill Repository</h3>
@@ -813,6 +1029,141 @@
         
         function rateDrill(drillId) {
             alert(`Rating drill: ${drillId}`);
+        }
+        
+        // Drill form functions
+        function toggleDrillForm() {
+            const form = document.getElementById('drill-form');
+            const isVisible = form.style.display !== 'none';
+            
+            if (isVisible) {
+                form.style.display = 'none';
+                clearDrillForm();
+            } else {
+                form.style.display = 'block';
+            }
+        }
+        
+        function clearDrillForm() {
+            document.getElementById('drill-name').value = '';
+            document.getElementById('drill-skill').value = '';
+            document.getElementById('drill-duration').value = '';
+            document.getElementById('drill-rating').value = 'Select rating...';
+            document.getElementById('drill-description').value = '';
+        }
+        
+        function handleFileUpload() {
+            // Create file input element
+            const fileInput = document.createElement('input');
+            fileInput.type = 'file';
+            fileInput.accept = '.pptx,.docx,.pdf';
+            fileInput.style.display = 'none';
+            
+            fileInput.onchange = function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    // Update upload text to show selected file
+                    document.querySelector('.upload-text').textContent = `Selected: ${file.name}`;
+                    document.querySelector('.upload-subtext').textContent = `File size: ${(file.size / 1024 / 1024).toFixed(2)} MB`;
+                    
+                    // Auto-populate drill name from filename if empty
+                    const drillNameInput = document.getElementById('drill-name');
+                    if (!drillNameInput.value) {
+                        const nameWithoutExt = file.name.replace(/\.[^/.]+$/, "");
+                        drillNameInput.value = nameWithoutExt;
+                    }
+                }
+            };
+            
+            document.body.appendChild(fileInput);
+            fileInput.click();
+            document.body.removeChild(fileInput);
+        }
+        
+        function addDrillToRepository() {
+            try {
+                const name = document.getElementById('drill-name').value.trim();
+                const skill = document.getElementById('drill-skill').value;
+                const duration = document.getElementById('drill-duration').value;
+                const rating = document.getElementById('drill-rating').value;
+                const description = document.getElementById('drill-description').value.trim();
+                
+                // Debug: Check if elements exist
+                console.log('Form elements found:', {
+                    name: !!document.getElementById('drill-name'),
+                    skill: !!document.getElementById('drill-skill'),
+                    duration: !!document.getElementById('drill-duration'),
+                    rating: !!document.getElementById('drill-rating'),
+                    description: !!document.getElementById('drill-description')
+                });
+                
+                // Validate required fields
+                if (!name || !skill || !duration || !description) {
+                    alert('Please fill in all required fields (marked with *)');
+                    return;
+                }
+                
+                // Create skill badge class
+                const skillClass = skill.toLowerCase() === 'passing' ? 'skill-passing' : 
+                                  skill.toLowerCase() === 'awareness' ? 'skill-awareness' : 'skill-defense';
+                
+                // Create star rating display
+                let stars = '★☆☆☆☆';
+                if (rating && rating !== 'Select rating...') {
+                    if (rating.includes('1')) stars = '★☆☆☆☆';
+                    else if (rating.includes('2')) stars = '★★☆☆☆';
+                    else if (rating.includes('3')) stars = '★★★☆☆';
+                    else if (rating.includes('4')) stars = '★★★★☆';
+                    else if (rating.includes('5')) stars = '★★★★★';
+                }
+                
+                // Create new drill row
+                const newRow = document.createElement('div');
+                newRow.className = 'table-row';
+                newRow.setAttribute('data-skill', skill);
+                newRow.setAttribute('data-duration', duration);
+                
+                const drillId = name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+                const durationShort = duration.replace(' minutes', ' min');
+                
+                newRow.innerHTML = `
+                    <div>
+                        <div class="drill-name">${name}</div>
+                        <div class="drill-description">${description}</div>
+                    </div>
+                    <div><span class="skill-badge ${skillClass}">${skill}</span></div>
+                    <div><span class="duration-badge">${durationShort}</span></div>
+                    <div><span class="star-rating">${stars}</span></div>
+                    <div><button class="rate-btn" onclick="rateDrill('${drillId}')">Rate</button></div>
+                `;
+                
+                // Add to table
+                const tableBody = document.getElementById('drills-table-body');
+                if (tableBody) {
+                    tableBody.appendChild(newRow);
+                } else {
+                    console.error('Table body not found');
+                    return;
+                }
+                
+                // Show success message
+                const successMsg = document.getElementById('drill-success');
+                if (successMsg) {
+                    successMsg.style.display = 'block';
+                    setTimeout(() => {
+                        successMsg.style.display = 'none';
+                    }, 3000);
+                }
+                
+                // Hide form and clear it
+                toggleDrillForm();
+                
+                console.log(`New drill added: ${name}`);
+                
+            } catch (error) {
+                console.error('Error adding drill:', error);
+                alert('Error adding drill: ' + error.message);
+            }
         }
     </script>
 </body>
