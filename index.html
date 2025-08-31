@@ -1,123 +1,839 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <title>BRFC U8</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <style>
-    body{font-family:system-ui,Arial,sans-serif;margin:0;padding:24px;line-height:1.45}
-    header{margin-bottom:16px}
-    nav a{margin-right:12px}
-    table{border-collapse:collapse;width:100%;margin:12px 0}
-    th,td{border:1px solid #ddd;padding:8px;text-align:left}
-    th{background:#f5f5f5}
-    .card{border:1px solid #e5e5e5;border-radius:10px;padding:16px;margin:16px 0}
-    textarea{width:100%;min-height:120px}
-    .row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-    @media (max-width:800px){.row{grid-template-columns:1fr}}
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Barnes Rugby - Coaching Management Platform</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            color: #0f172a;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 24px;
+            background: transparent;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #0f172a, #1e293b);
+            color: white;
+            padding: 32px;
+            border-radius: 12px;
+            margin-bottom: 32px;
+            box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.4), 0 10px 10px -5px rgba(15, 23, 42, 0.06);
+        }
+        
+        .header h1 {
+            font-size: 2.25rem;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 8px;
+        }
+        
+        .header p {
+            text-align: center;
+            font-size: 1.125rem;
+            font-weight: 500;
+            opacity: 0.9;
+        }
+        
+        .mockup-nav {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 32px;
+            flex-wrap: wrap;
+            background: white;
+            padding: 8px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(15, 23, 42, 0.2);
+            border: 1px solid #334155;
+        }
+        
+        .mockup-btn {
+            background: transparent;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            color: #64748b;
+            transition: all 0.2s ease;
+            font-size: 14px;
+        }
+        
+        .mockup-btn:hover {
+            background: #f1f5f9;
+            color: #1e3a8a;
+        }
+        
+        .mockup-btn.active {
+            background: #1e3a8a;
+            color: white;
+        }
+        
+        .mockup-section {
+            display: none;
+            background: white;
+            border-radius: 12px;
+            padding: 32px;
+            box-shadow: 0 4px 6px -1px rgba(30, 58, 138, 0.1), 0 2px 4px -1px rgba(30, 58, 138, 0.06);
+            border: 1px solid #e2e8f0;
+        }
+        
+        .mockup-section.active {
+            display: block;
+            animation: fadeIn 0.3s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 32px;
+            padding-bottom: 16px;
+            border-bottom: 2px solid #e2e8f0;
+        }
+        
+        .section-title {
+            color: #1e3a8a;
+            font-size: 1.875rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .add-btn {
+            background: #1e3a8a;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s ease;
+        }
+        
+        .add-btn:hover {
+            background: #3730a3;
+            transform: translateY(-1px);
+        }
+        
+        .form-mockup {
+            background: #f8fafc;
+            padding: 24px;
+            border-radius: 8px;
+            margin: 24px 0;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .form-field {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        
+        .form-field.full-width {
+            grid-column: 1 / -1;
+        }
+        
+        .form-label {
+            font-weight: 600;
+            color: #1e3a8a;
+            font-size: 14px;
+        }
+        
+        .form-input {
+            padding: 12px 16px;
+            border: 1px solid #cbd5e0;
+            border-radius: 6px;
+            background: white;
+            font-size: 14px;
+            transition: border-color 0.2s ease;
+            color: #374151;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #1e3a8a;
+            box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.1);
+        }
+        
+        .file-upload {
+            border: 2px dashed #94a3b8;
+            border-radius: 8px;
+            padding: 48px 24px;
+            text-align: center;
+            background: #f8fafc;
+            margin-bottom: 24px;
+            transition: all 0.2s ease;
+        }
+        
+        .file-upload:hover {
+            border-color: #1e3a8a;
+            background: #eff6ff;
+        }
+        
+        .upload-icon {
+            font-size: 48px;
+            color: #64748b;
+            margin-bottom: 16px;
+        }
+        
+        .upload-text {
+            font-size: 16px;
+            font-weight: 500;
+            color: #1e3a8a;
+            margin-bottom: 8px;
+        }
+        
+        .upload-subtext {
+            color: #64748b;
+            font-size: 14px;
+        }
+        
+        .table-container {
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px -1px rgba(30, 58, 138, 0.1);
+            margin: 24px 0;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .table-header {
+            background: #1e3a8a;
+            color: white;
+            padding: 16px 20px;
+            display: grid;
+            grid-template-columns: 3fr 1fr 1fr 1fr 1fr;
+            gap: 20px;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        
+        .table-row {
+            padding: 16px 20px;
+            display: grid;
+            grid-template-columns: 3fr 1fr 1fr 1fr 1fr;
+            gap: 20px;
+            border-bottom: 1px solid #f1f5f9;
+            align-items: center;
+            transition: background-color 0.2s ease;
+        }
+        
+        .table-row:hover {
+            background: #f8fafc;
+        }
+        
+        .table-row:last-child {
+            border-bottom: none;
+        }
+        
+        .drill-name {
+            color: #1e3a8a;
+            text-decoration: none;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 15px;
+        }
+        
+        .drill-name:hover {
+            text-decoration: underline;
+            color: #3730a3;
+        }
+        
+        .drill-description {
+            font-size: 13px;
+            color: #64748b;
+            margin-top: 4px;
+            line-height: 1.4;
+        }
+        
+        .skill-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            text-align: center;
+        }
+        
+        .skill-passing { background: #dbeafe; color: #1e40af; }
+        .skill-awareness { background: #e0f2fe; color: #0369a1; }
+        .skill-defense { background: #f0f9ff; color: #0c4a6e; }
+        
+        .duration-badge {
+            background: #e0f2fe;
+            color: #0369a1;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            text-align: center;
+        }
+        
+        .star-rating {
+            color: #fbbf24;
+            font-size: 16px;
+        }
+        
+        .rate-btn {
+            background: #64748b;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 500;
+            transition: background-color 0.2s ease;
+        }
+        
+        .rate-btn:hover {
+            background: #1e3a8a;
+        }
+        
+        .calendar-container {
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px -1px rgba(30, 58, 138, 0.1);
+            border: 1px solid #e2e8f0;
+        }
+        
+        .calendar-header {
+            background: #1e3a8a;
+            color: white;
+            padding: 20px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .calendar-title {
+            font-size: 20px;
+            font-weight: 600;
+        }
+        
+        .calendar-nav {
+            display: flex;
+            gap: 12px;
+        }
+        
+        .calendar-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+        
+        .calendar-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+        
+        .calendar-btn.active {
+            background: white;
+            color: #1e3a8a;
+            border-color: white;
+        }
+        
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+        }
+        
+        .calendar-day-header {
+            background: #f1f5f9;
+            padding: 12px;
+            text-align: center;
+            font-weight: 600;
+            color: #1e3a8a;
+            font-size: 14px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        .calendar-day {
+            min-height: 120px;
+            padding: 8px;
+            border-bottom: 1px solid #f1f5f9;
+            border-right: 1px solid #f1f5f9;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+        
+        .calendar-day:nth-child(7n) {
+            border-right: none;
+        }
+        
+        .calendar-day:hover {
+            background: #f8fafc;
+        }
+        
+        .day-number {
+            font-weight: 600;
+            color: #1e3a8a;
+            margin-bottom: 4px;
+            font-size: 14px;
+        }
+        
+        .event {
+            background: #1e3a8a;
+            color: white;
+            padding: 3px 6px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 500;
+            margin-bottom: 2px;
+            cursor: pointer;
+            line-height: 1.3;
+        }
+        
+        .event.practice {
+            background: #0369a1;
+        }
+        
+        .event.festival {
+            background: #0c4a6e;
+        }
+        
+        .event.vacation {
+            background: #64748b;
+        }
+        
+        .filters {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+        
+        .filter-btn {
+            background: white;
+            border: 1px solid #cbd5e0;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 14px;
+            font-weight: 500;
+            color: #1e3a8a;
+        }
+        
+        .filter-btn:hover {
+            background: #f1f5f9;
+            border-color: #1e3a8a;
+        }
+        
+        .filter-btn.active {
+            background: #1e3a8a;
+            color: white;
+            border-color: #1e3a8a;
+        }
+        
+        .search-box {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid #cbd5e0;
+            border-radius: 8px;
+            font-size: 16px;
+            margin-bottom: 24px;
+            background: white;
+            color: #374151;
+        }
+        
+        .search-box:focus {
+            outline: none;
+            border-color: #1e3a8a;
+            box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.1);
+        }
+        
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 24px;
+            margin-top: 32px;
+        }
+        
+        .feature-card {
+            background: white;
+            padding: 24px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px -1px rgba(30, 58, 138, 0.1);
+            border: 1px solid #e2e8f0;
+            border-left: 4px solid #1e3a8a;
+        }
+        
+        .feature-card h3 {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: #1e3a8a;
+        }
+        
+        .feature-card p {
+            color: #64748b;
+            line-height: 1.6;
+        }
+        
+        .btn-primary {
+            background: #1e3a8a;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 14px;
+            transition: all 0.2s ease;
+        }
+        
+        .btn-primary:hover {
+            background: #3730a3;
+        }
+        
+        .btn-secondary {
+            background: white;
+            color: #1e3a8a;
+            border: 1px solid #cbd5e0;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 14px;
+            transition: all 0.2s ease;
+            margin-right: 12px;
+        }
+        
+        .btn-secondary:hover {
+            background: #f1f5f9;
+            border-color: #1e3a8a;
+        }
+        
+        .google-sheets-info {
+            background: #eff6ff;
+            border: 1px solid #93c5fd;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 24px;
+        }
+        
+        .google-sheets-info h4 {
+            color: #1e3a8a;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        
+        .google-sheets-info p {
+            color: #3730a3;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        
+        @media (max-width: 768px) {
+            .table-header, .table-row {
+                grid-template-columns: 1fr;
+                gap: 8px;
+            }
+            
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .calendar-nav {
+                flex-wrap: wrap;
+                gap: 8px;
+            }
+        }
+    </style>
 </head>
 <body>
-  <header>
-    <h1>BRFC U8</h1>
-    <nav>
-      <a href="#festivals">Festivals</a>
-      <a href="#notes">Coach Notes</a>
-    </nav>
-  </header>
-
-  <section id="festivals" class="card">
-    <h2>Festivals</h2>
-    <table>
-      <thead>
-        <tr>
-          <th>Nr</th>
-          <th>Festival</th>
-          <th>Club</th>
-          <th>Location</th>
-          <th>2025-26 Date</th>
-          <th>Info</th>
-          <th>Tournify</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr id="esher">
-          <td>1</td>
-          <td>Esher Autumn Festival</td>
-          <td>Esher RFC</td>
-          <td>Esher RFC, Hersham</td>
-          <td>19/10/2025</td>
-          <td><a href="https://www.esherrugby.com" target="_blank" rel="noopener">Club site</a></td>
-          <td><a href="https://tournifyapp.com" target="_blank" rel="noopener">Tournify</a></td>
-        </tr>
-      </tbody>
-    </table>
-  </section>
-
-  <section id="notes" class="card">
-    <h2>Coach Notes (in-memory only)</h2>
-    <div class="row">
-      <div>
-        <textarea id="notesText" placeholder="Write notes here…"></textarea>
-        <div style="margin-top:8px">
-          <button id="clearBtn">Clear</button>
-        </div>
-      </div>
-      <div>
-        <textarea id="linksJson" placeholder='[{"label":"Esher Info","url":"https://www.esherrugby.com"}]'></textarea>
-        <div style="margin-top:8px">
-          <button id="applyLinksBtn">Apply Links</button>
-        </div>
-        <ul id="quickLinks" style="margin-top:8px"></ul>
-      </div>
-    </div>
-  </section>
-
-  <script>
-    // In-memory variables
-    let notesMemory = "";
-    let linksMemory = [];
-
-    const notesEl = document.getElementById("notesText");
-    const linksJsonEl = document.getElementById("linksJson");
-    const quickLinksEl = document.getElementById("quickLinks");
-
-    // Notes
-    notesEl.addEventListener("input", () => {
-      notesMemory = notesEl.value;
-    });
-
-    document.getElementById("clearBtn").addEventListener("click", () => {
-      notesMemory = "";
-      notesEl.value = "";
-    });
-
-    // Links
-    function renderLinks(arr){
-      quickLinksEl.innerHTML = "";
-      arr.forEach(item => {
-        if (!item || !item.url) return;
-        let url = item.url.trim();
-        if (!/^https?:\/\//i.test(url)) url = "https://" + url.replace(/^\/+/, "");
-        const li = document.createElement("li");
-        const a = document.createElement("a");
-        a.href = url;
-        a.target = "_blank";
-        a.rel = "noopener";
-        a.textContent = item.label || url;
-        li.appendChild(a);
-        quickLinksEl.appendChild(li);
-      });
-    }
-
-    document.getElementById("applyLinksBtn").addEventListener("click", () => {
-      try {
-        linksMemory = JSON.parse(linksJsonEl.value || "[]");
-        renderLinks(linksMemory);
-      } catch {
-        alert("Invalid JSON");
-      }
-    });
-  </script>
-</body>
-</html>
+    <div class="container">
+        <header class="header">
+            <h1>Barnes Rugby - Coaching Platform</h1>
+            <p>Professional drill management and practice calendar system</p>
+        </header>
+        
+        <nav class="mockup-nav">
+            <button class="mockup-btn active" onclick="showMockup('drills')">Drills</button>
+            <button class="mockup-btn" onclick="showMockup('calendar')">Practice Calendar</button>
+            <button class="mockup-btn" onclick="showMockup('overview')">System Overview</button>
+        </nav>
+        
+        <!-- Drills Section -->
+        <section id="drills" class="mockup-section active">
+            <div class="section-header">
+                <h2 class="section-title">📋 Drills Management</h2>
+                <button class="add-btn" onclick="toggleDrillForm()">
+                    <span>+</span> Add New Drill
+                </button>
+            </div>
+            
+            <!-- Upload Section (Initially Hidden) -->
+            <div id="drill-form" style="display: none;">
+                <div class="file-upload">
+                    <div class="upload-icon">📄</div>
+                    <div class="upload-text">Upload Drill Document</div>
+                    <div class="upload-subtext">Drop your PowerPoint, Word, or PDF document here, or click to browse</div>
+                    <div class="upload-subtext" style="margin-top: 8px;">Supported formats: .pptx, .docx, .pdf (Max 10MB)</div>
+                </div>
+                
+                <div class="form-mockup">
+                    <h3 style="margin-bottom: 24px; color: #1e3a8a; font-weight: 600;">Drill Information</h3>
+                    
+                    <div class="form-grid">
+                        <div class="form-field">
+                            <label class="form-label">Drill Name *</label>
+                            <input type="text" class="form-input" placeholder="Enter drill name..." value="">
+                        </div>
+                        
+                        <div class="form-field">
+                            <label class="form-label">Skill Category *</label>
+                            <select class="form-input">
+                                <option value="">Select skill...</option>
+                                <option>Passing</option>
+                                <option>Awareness</option>
+                                <option>Defense</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-field">
+                            <label class="form-label">Duration *</label>
+                            <select class="form-input">
+                                <option value="">Select duration...</option>
+                                <option>15 minutes</option>
+                                <option>30 minutes</option>
+                                <option>45 minutes</option>
+                                <option>60 minutes</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-field">
+                            <label class="form-label">Rating</label>
+                            <select class="form-input">
+                                <option>Select rating...</option>
+                                <option>⭐ 1 Star</option>
+                                <option>⭐⭐ 2 Stars</option>
+                                <option>⭐⭐⭐ 3 Stars</option>
+                                <option>⭐⭐⭐⭐ 4 Stars</option>
+                                <option>⭐⭐⭐⭐⭐ 5 Stars</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-field full-width">
+                            <label class="form-label">Description *</label>
+                            <textarea class="form-input" rows="4" placeholder="Describe the drill objectives, setup, and key coaching points..."></textarea>
+                        </div>
+                    </div>
+                    
+                    <div style="display: flex; gap: 12px; justify-content: flex-end; margin-top: 24px;">
+                        <button class="btn-secondary" onclick="toggleDrillForm()">Cancel</button>
+                        <button class="btn-primary" onclick="addDrillToRepository()">Save Drill</button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Repository Section -->
+            <div id="drill-repository-section">
+                <h3 style="margin: 32px 0 24px 0; color: #1e3a8a; font-weight: 600; font-size: 1.5rem;">📊 Drill Repository</h3>
+                
+                <input type="text" class="search-box" placeholder="🔍 Search drills by name, skill, or description...">
+                
+                <div class="filters">
+                    <button class="filter-btn active">All Skills</button>
+                    <button class="filter-btn">Passing</button>
+                    <button class="filter-btn">Awareness</button>
+                    <button class="filter-btn">Defense</button>
+                </div>
+                
+                <div class="filters">
+                    <button class="filter-btn active">All Durations</button>
+                    <button class="filter-btn">15 min</button>
+                    <button class="filter-btn">30 min</button>
+                    <button class="filter-btn">45 min</button>
+                    <button class="filter-btn">60 min</button>
+                </div>
+                
+                <div class="table-container">
+                    <div class="table-header">
+                        <div>Drill Name & Description</div>
+                        <div>Skill</div>
+                        <div>Duration</div>
+                        <div>Rating</div>
+                        <div>Actions</div>
+                    </div>
+                    
+                    <div class="table-row">
+                        <div>
+                            <div class="drill-name">Passing Triangle Drill</div>
+                            <div class="drill-description">A fundamental passing drill focusing on accuracy and quick decision-making in a triangular formation.</div>
+                        </div>
+                        <div><span class="skill-badge skill-passing">Passing</span></div>
+                        <div><span class="duration-badge">30 min</span></div>
+                        <div><span class="star-rating">★★★★★</span></div>
+                        <div><button class="rate-btn">Rate</button></div>
+                    </div>
+                    
+                    <div class="table-row">
+                        <div>
+                            <div class="drill-name">Defensive Positioning</div>
+                            <div class="drill-description">Training defensive awareness and positioning in small-sided games.</div>
+                        </div>
+                        <div><span class="skill-badge skill-defense">Defense</span></div>
+                        <div><span class="duration-badge">45 min</span></div>
+                        <div><span class="star-rating">★★★★☆</span></div>
+                        <div><button class="rate-btn">Rate</button></div>
+                    </div>
+                    
+                    <div class="table-row">
+                        <div>
+                            <div class="drill-name">Situational Awareness</div>
+                            <div class="drill-description">Developing quick decision-making skills under pressure situations.</div>
+                        </div>
+                        <div><span class="skill-badge skill-awareness">Awareness</span></div>
+                        <div><span class="duration-badge">15 min</span></div>
+                        <div><span class="star-rating">★★★☆☆</span></div>
+                        <div><button class="rate-btn">Rate</button></div>
+                    </div>
+                    
+                    <div class="table-row">
+                        <div>
+                            <div class="drill-name">Advanced Passing Patterns</div>
+                            <div class="drill-description">Complex passing sequences with multiple players and timing elements.</div>
+                        </div>
+                        <div><span class="skill-badge skill-passing">Passing</span></div>
+                        <div><span class="duration-badge">60 min</span></div>
+                        <div><span class="star-rating">★★★★★</span></div>
+                        <div><button class="rate-btn">Rate</button></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Calendar Mockup -->
+        <section id="calendar" class="mockup-section">
+            <div class="section-header">
+                <h2 class="section-title">📅 Practice Calendar</h2>
+                <button class="add-btn" onclick="toggleEventForm()">
+                    <span>+</span> Add Event
+                </button>
+            </div>
+            
+            <div class="google-sheets-info">
+                <h4>🔗 Google Sheets Integration</h4>
+                <p>Festival data is automatically synced from Google Sheets. The system includes 8 rugby festivals with dates, locations, and tournament links from Surrey Rugby competitions.</p>
+            </div>
+            
+            <!-- Add Event Form (Initially Hidden) -->
+            <div id="event-form" style="display: none;">
+                <div class="form-mockup">
+                    <h3 style="margin-bottom: 24px; color: #1e3a8a; font-weight: 600;">Add New Event</h3>
+                    
+                    <div class="form-grid">
+                        <div class="form-field">
+                            <label class="form-label">Event Name *</label>
+                            <input type="text" class="form-input" placeholder="Enter event name...">
+                        </div>
+                        
+                        <div class="form-field">
+                            <label class="form-label">Event Type *</label>
+                            <select class="form-input">
+                                <option value="">Select type...</option>
+                                <option>Practice</option>
+                                <option>Festival</option>
+                                <option>Match</option>
+                                <option>Vacation</option>
+                                <option>Meeting</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-field">
+                            <label class="form-label">Date *</label>
+                            <input type="date" class="form-input">
+                        </div>
+                        
+                        <div class="form-field">
+                            <label class="form-label">Time</label>
+                            <input type="time" class="form-input">
+                        </div>
+                        
+                        <div class="form-field">
+                            <label class="form-label">Location</label>
+                            <input type="text" class="form-input" placeholder="Enter location...">
+                        </div>
+                        
+                        <div class="form-field">
+                            <label class="form-label">Duration</label>
+                            <select class="form-input">
+                                <option value="">Select duration...</option>
+                                <option>1 hour</option>
+                                <option>2 hours</option>
+                                <option>3 hours</option>
+                                <option>All day</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-field full-width">
+                            <label class="form-label">Notes</label>
+                            <textarea class="form-input" rows="3" placeholder="Additional notes or details..."></textarea>
+                        </div>
+                    </div>
+                    
+                    <div style="display: flex; gap: 12px; justify-content: flex-end; margin-top: 24px;">
+                        <button class="btn-secondary" onclick="toggleEventForm()">Cancel</button>
+                        <button class="btn-primary" onclick="addEventToCalendar()">Save Event</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="filters">
+                <button class="filter-btn active">All Events</button>
+                <button class="filter-btn">Practices</button>
+                <button class="filter-btn">Festivals</button>
+                <button class="filter-btn">Vacations</button>
+            </div>
+            
+            <div class="calendar-container">
+                <div class="calendar-header">
+                    <div class="calendar-title">March 2025</div>
+                    <div class="calendar-nav">
+                        <button class="calendar-btn">← Prev</button>
+                        <button class="calendar-btn">Today</button>
+                        <button class="calendar-btn">Next →</button>
+                        <button class="calendar-btn active">Month</button>
+                        <button class="calendar-btn">Week</button>
+                        <button class="calendar-btn">List</button>
+                
