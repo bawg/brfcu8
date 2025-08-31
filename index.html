@@ -232,6 +232,165 @@
         .event.vacation {
             background: #64748b;
         }
+        
+        .filters {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+        
+        .filter-btn {
+            background: white;
+            border: 1px solid #cbd5e0;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 14px;
+            font-weight: 500;
+            color: #1e3a8a;
+        }
+        
+        .filter-btn:hover {
+            background: #f1f5f9;
+            border-color: #1e3a8a;
+        }
+        
+        .filter-btn.active {
+            background: #1e3a8a;
+            color: white;
+            border-color: #1e3a8a;
+        }
+        
+        .search-box {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid #cbd5e0;
+            border-radius: 8px;
+            font-size: 16px;
+            margin-bottom: 24px;
+            background: white;
+            color: #374151;
+        }
+        
+        .search-box:focus {
+            outline: none;
+            border-color: #1e3a8a;
+            box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.1);
+        }
+        
+        .table-container {
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px -1px rgba(30, 58, 138, 0.1);
+            margin: 24px 0;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .table-header {
+            background: #1e3a8a;
+            color: white;
+            padding: 16px 20px;
+            display: grid;
+            grid-template-columns: 3fr 1fr 1fr 1fr 1fr;
+            gap: 20px;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        
+        .table-row {
+            padding: 16px 20px;
+            display: grid;
+            grid-template-columns: 3fr 1fr 1fr 1fr 1fr;
+            gap: 20px;
+            border-bottom: 1px solid #f1f5f9;
+            align-items: center;
+            transition: background-color 0.2s ease;
+        }
+        
+        .table-row:hover {
+            background: #f8fafc;
+        }
+        
+        .table-row:last-child {
+            border-bottom: none;
+        }
+        
+        .drill-name {
+            color: #1e3a8a;
+            text-decoration: none;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 15px;
+        }
+        
+        .drill-name:hover {
+            text-decoration: underline;
+            color: #3730a3;
+        }
+        
+        .drill-description {
+            font-size: 13px;
+            color: #64748b;
+            margin-top: 4px;
+            line-height: 1.4;
+        }
+        
+        .skill-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            text-align: center;
+        }
+        
+        .skill-passing { 
+            background: #dbeafe; 
+            color: #1e40af; 
+        }
+        
+        .skill-awareness { 
+            background: #e0f2fe; 
+            color: #0369a1; 
+        }
+        
+        .skill-defense { 
+            background: #f0f9ff; 
+            color: #0c4a6e; 
+        }
+        
+        .duration-badge {
+            background: #e0f2fe;
+            color: #0369a1;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            text-align: center;
+        }
+        
+        .star-rating {
+            color: #fbbf24;
+            font-size: 16px;
+        }
+        
+        .rate-btn {
+            background: #64748b;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 500;
+            transition: background-color 0.2s ease;
+        }
+        
+        .rate-btn:hover {
+            background: #1e3a8a;
+        }
     </style>
 </head>
 <body>
@@ -422,7 +581,103 @@
             <div class="section-header">
                 <h2 class="section-title">📋 Drills Management</h2>
             </div>
-            <p>Drills section content would go here...</p>
+            
+            <h3 style="margin: 32px 0 24px 0; color: #1e3a8a; font-weight: 600; font-size: 1.5rem;">📊 Drill Repository</h3>
+            
+            <input type="text" class="search-box" placeholder="🔍 Search drills by name, skill, or description..." oninput="filterDrills()">
+            
+            <div class="filters">
+                <button class="filter-btn active" onclick="filterBySkill('all')">All Skills</button>
+                <button class="filter-btn" onclick="filterBySkill('Passing')">Passing</button>
+                <button class="filter-btn" onclick="filterBySkill('Awareness')">Awareness</button>
+                <button class="filter-btn" onclick="filterBySkill('Defense')">Defense</button>
+            </div>
+            
+            <div class="filters">
+                <button class="filter-btn active" onclick="filterByDuration('all')">All Durations</button>
+                <button class="filter-btn" onclick="filterByDuration('15 minutes')">15 min</button>
+                <button class="filter-btn" onclick="filterByDuration('30 minutes')">30 min</button>
+                <button class="filter-btn" onclick="filterByDuration('45 minutes')">45 min</button>
+                <button class="filter-btn" onclick="filterByDuration('60 minutes')">60 min</button>
+            </div>
+            
+            <div class="table-container">
+                <div class="table-header">
+                    <div>Drill Name & Description</div>
+                    <div>Skill</div>
+                    <div>Duration</div>
+                    <div>Rating</div>
+                    <div>Actions</div>
+                </div>
+                
+                <div id="drills-table-body">
+                    <div class="table-row" data-skill="Passing" data-duration="30 minutes">
+                        <div>
+                            <div class="drill-name">Passing Triangle Drill</div>
+                            <div class="drill-description">A fundamental passing drill focusing on accuracy and quick decision-making in a triangular formation.</div>
+                        </div>
+                        <div><span class="skill-badge skill-passing">Passing</span></div>
+                        <div><span class="duration-badge">30 min</span></div>
+                        <div><span class="star-rating">★★★★★</span></div>
+                        <div><button class="rate-btn" onclick="rateDrill('passing-triangle')">Rate</button></div>
+                    </div>
+                    
+                    <div class="table-row" data-skill="Defense" data-duration="45 minutes">
+                        <div>
+                            <div class="drill-name">Defensive Positioning</div>
+                            <div class="drill-description">Training defensive awareness and positioning in small-sided games.</div>
+                        </div>
+                        <div><span class="skill-badge skill-defense">Defense</span></div>
+                        <div><span class="duration-badge">45 min</span></div>
+                        <div><span class="star-rating">★★★★☆</span></div>
+                        <div><button class="rate-btn" onclick="rateDrill('defensive-positioning')">Rate</button></div>
+                    </div>
+                    
+                    <div class="table-row" data-skill="Awareness" data-duration="15 minutes">
+                        <div>
+                            <div class="drill-name">Situational Awareness</div>
+                            <div class="drill-description">Developing quick decision-making skills under pressure situations.</div>
+                        </div>
+                        <div><span class="skill-badge skill-awareness">Awareness</span></div>
+                        <div><span class="duration-badge">15 min</span></div>
+                        <div><span class="star-rating">★★★☆☆</span></div>
+                        <div><button class="rate-btn" onclick="rateDrill('situational-awareness')">Rate</button></div>
+                    </div>
+                    
+                    <div class="table-row" data-skill="Passing" data-duration="60 minutes">
+                        <div>
+                            <div class="drill-name">Advanced Passing Patterns</div>
+                            <div class="drill-description">Complex passing sequences with multiple players and timing elements.</div>
+                        </div>
+                        <div><span class="skill-badge skill-passing">Passing</span></div>
+                        <div><span class="duration-badge">60 min</span></div>
+                        <div><span class="star-rating">★★★★★</span></div>
+                        <div><button class="rate-btn" onclick="rateDrill('advanced-passing')">Rate</button></div>
+                    </div>
+                    
+                    <div class="table-row" data-skill="Defense" data-duration="30 minutes">
+                        <div>
+                            <div class="drill-name">Tackle Technique</div>
+                            <div class="drill-description">Perfect your tackling form with progressive exercises for safe and effective contact.</div>
+                        </div>
+                        <div><span class="skill-badge skill-defense">Defense</span></div>
+                        <div><span class="duration-badge">30 min</span></div>
+                        <div><span class="star-rating">★★★★☆</span></div>
+                        <div><button class="rate-btn" onclick="rateDrill('tackle-technique')">Rate</button></div>
+                    </div>
+                    
+                    <div class="table-row" data-skill="Awareness" data-duration="45 minutes">
+                        <div>
+                            <div class="drill-name">Game Scanning</div>
+                            <div class="drill-description">Improve field awareness through visual scanning drills and decision-making under pressure.</div>
+                        </div>
+                        <div><span class="skill-badge skill-awareness">Awareness</span></div>
+                        <div><span class="duration-badge">45 min</span></div>
+                        <div><span class="star-rating">★★★★★</span></div>
+                        <div><button class="rate-btn" onclick="rateDrill('game-scanning')">Rate</button></div>
+                    </div>
+                </div>
+            </div>
         </section>
         
         <!-- Overview Section -->
@@ -492,6 +747,72 @@
                 `${monthNames[currentMonth]} ${currentYear}`;
             
             console.log('Calendar reset to current month');
+        }
+        
+        // Drill filtering functions
+        let currentSkillFilter = 'all';
+        let currentDurationFilter = 'all';
+        
+        function filterBySkill(skill) {
+            currentSkillFilter = skill;
+            
+            // Update active button
+            document.querySelectorAll('.filters:first-of-type .filter-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            applyFilters();
+        }
+        
+        function filterByDuration(duration) {
+            currentDurationFilter = duration;
+            
+            // Update active button  
+            document.querySelectorAll('.filters:last-of-type .filter-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            applyFilters();
+        }
+        
+        function filterDrills() {
+            applyFilters();
+        }
+        
+        function applyFilters() {
+            const searchTerm = document.querySelector('.search-box').value.toLowerCase();
+            const rows = document.querySelectorAll('#drills-table-body .table-row');
+            
+            rows.forEach(row => {
+                const skill = row.getAttribute('data-skill');
+                const duration = row.getAttribute('data-duration');
+                const drillName = row.querySelector('.drill-name').textContent.toLowerCase();
+                const drillDescription = row.querySelector('.drill-description').textContent.toLowerCase();
+                
+                // Check skill filter
+                const skillMatch = currentSkillFilter === 'all' || skill === currentSkillFilter;
+                
+                // Check duration filter
+                const durationMatch = currentDurationFilter === 'all' || duration === currentDurationFilter;
+                
+                // Check search term
+                const searchMatch = searchTerm === '' || 
+                    drillName.includes(searchTerm) || 
+                    drillDescription.includes(searchTerm);
+                
+                // Show/hide row based on all filters
+                if (skillMatch && durationMatch && searchMatch) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        }
+        
+        function rateDrill(drillId) {
+            alert(`Rating drill: ${drillId}`);
         }
     </script>
 </body>
