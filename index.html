@@ -347,11 +347,33 @@
             background: #f8fafc;
         }
         
+        .calendar-day.today {
+            background: #eff6ff;
+            border: 2px solid #1e3a8a;
+        }
+        
+        .calendar-day.other-month {
+            opacity: 0.4;
+        }
+        
         .day-number {
             font-weight: 600;
             color: #1e3a8a;
             margin-bottom: 4px;
             font-size: 14px;
+        }
+        
+        .day-number.today {
+            background: #1e3a8a;
+            color: white;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 700;
         }
         
         .event {
@@ -364,6 +386,12 @@
             margin-bottom: 2px;
             cursor: pointer;
             line-height: 1.3;
+            transition: all 0.2s ease;
+        }
+        
+        .event:hover {
+            opacity: 0.8;
+            transform: translateY(-1px);
         }
         
         .event.practice {
@@ -371,11 +399,53 @@
         }
         
         .event.festival {
-            background: #0c4a6e;
+            background: #dc2626;
+        }
+        
+        .event.match {
+            background: #059669;
         }
         
         .event.vacation {
             background: #64748b;
+        }
+        
+        .events-list-container {
+            margin-top: 32px;
+        }
+        
+        .event-title {
+            font-weight: 600;
+            color: #1e3a8a;
+            font-size: 15px;
+        }
+        
+        .event-type-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            text-align: center;
+        }
+        
+        .event-type-badge.practice {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+        
+        .event-type-badge.festival {
+            background: #fecaca;
+            color: #dc2626;
+        }
+        
+        .event-type-badge.match {
+            background: #d1fae5;
+            color: #059669;
+        }
+        
+        .event-type-badge.vacation {
+            background: #f1f5f9;
+            color: #64748b;
         }
         
         .filters {
@@ -559,7 +629,7 @@
             
             <div class="calendar-container">
                 <div class="calendar-header">
-                    <div class="calendar-title" id="calendar-title">March 2025</div>
+                    <div class="calendar-title" id="calendar-title">January 2025</div>
                     <div class="calendar-nav">
                         <button class="calendar-btn" onclick="changeMonth(-1)">← Prev</button>
                         <button class="calendar-btn" onclick="goToToday()">Today</button>
@@ -577,29 +647,19 @@
                     <div class="calendar-day-header">Fri</div>
                     <div class="calendar-day-header">Sat</div>
                     
-                    <!-- March 2025 Calendar Days -->
+                    <!-- January 2025 Calendar Days -->
                     <div class="calendar-day">
-                        <div class="day-number">23</div>
+                        <div class="day-number">29</div>
                     </div>
                     <div class="calendar-day">
-                        <div class="day-number">24</div>
+                        <div class="day-number">30</div>
                     </div>
                     <div class="calendar-day">
-                        <div class="day-number">25</div>
+                        <div class="day-number">31</div>
                     </div>
-                    <div class="calendar-day">
-                        <div class="day-number">26</div>
+                    <div class="calendar-day today">
+                        <div class="day-number today">1</div>
                     </div>
-                    <div class="calendar-day">
-                        <div class="day-number">27</div>
-                    </div>
-                    <div class="calendar-day">
-                        <div class="day-number">28</div>
-                    </div>
-                    <div class="calendar-day">
-                        <div class="day-number">1</div>
-                    </div>
-                    
                     <div class="calendar-day">
                         <div class="day-number">2</div>
                         <div class="event practice">Practice</div>
@@ -610,6 +670,7 @@
                     <div class="calendar-day">
                         <div class="day-number">4</div>
                     </div>
+                    
                     <div class="calendar-day">
                         <div class="day-number">5</div>
                         <div class="event practice">Training</div>
@@ -624,55 +685,54 @@
                         <div class="day-number">8</div>
                         <div class="event festival">Festival</div>
                     </div>
-                    
                     <div class="calendar-day">
                         <div class="day-number">9</div>
                     </div>
                     <div class="calendar-day">
                         <div class="day-number">10</div>
-                        <div class="event practice">Practice</div>
                     </div>
                     <div class="calendar-day">
                         <div class="day-number">11</div>
                     </div>
+                    
                     <div class="calendar-day">
                         <div class="day-number">12</div>
                     </div>
                     <div class="calendar-day">
                         <div class="day-number">13</div>
+                        <div class="event practice">Practice</div>
                     </div>
                     <div class="calendar-day">
                         <div class="day-number">14</div>
                     </div>
                     <div class="calendar-day">
                         <div class="day-number">15</div>
-                        <div class="event festival">Surrey Cup</div>
+                        <div class="event match">Championship</div>
                     </div>
-                    
                     <div class="calendar-day">
                         <div class="day-number">16</div>
                     </div>
                     <div class="calendar-day">
                         <div class="day-number">17</div>
-                        <div class="event practice">Training</div>
                     </div>
                     <div class="calendar-day">
                         <div class="day-number">18</div>
                     </div>
+                    
                     <div class="calendar-day">
                         <div class="day-number">19</div>
                     </div>
                     <div class="calendar-day">
                         <div class="day-number">20</div>
+                        <div class="event practice">Training</div>
                     </div>
                     <div class="calendar-day">
                         <div class="day-number">21</div>
                     </div>
                     <div class="calendar-day">
                         <div class="day-number">22</div>
-                        <div class="event practice">Match Day</div>
+                        <div class="event festival">Surrey Cup</div>
                     </div>
-                    
                     <div class="calendar-day">
                         <div class="day-number">23</div>
                     </div>
@@ -682,11 +742,13 @@
                     <div class="calendar-day">
                         <div class="day-number">25</div>
                     </div>
+                    
                     <div class="calendar-day">
                         <div class="day-number">26</div>
                     </div>
                     <div class="calendar-day">
                         <div class="day-number">27</div>
+                        <div class="event practice">Match Day</div>
                     </div>
                     <div class="calendar-day">
                         <div class="day-number">28</div>
@@ -695,7 +757,6 @@
                         <div class="day-number">29</div>
                         <div class="event festival">Spring Festival</div>
                     </div>
-                    
                     <div class="calendar-day">
                         <div class="day-number">30</div>
                     </div>
@@ -705,17 +766,90 @@
                     <div class="calendar-day">
                         <div class="day-number">1</div>
                     </div>
-                    <div class="calendar-day">
-                        <div class="day-number">2</div>
+                </div>
+            </div>
+            
+            <!-- Events Table -->
+            <div class="events-list-container">
+                <h3 style="color: #1e3a8a; font-weight: 600; font-size: 1.25rem; margin: 32px 0 16px 0;">📋 Upcoming Events</h3>
+                <div class="table-container">
+                    <div class="table-header">
+                        <div>Event Name</div>
+                        <div>Date</div>
+                        <div>Time</div>
+                        <div>Type</div>
                     </div>
-                    <div class="calendar-day">
-                        <div class="day-number">3</div>
+                    
+                    <div class="table-row">
+                        <div>
+                            <div class="event-title">New Year Practice</div>
+                        </div>
+                        <div>Jan 2, 2025</div>
+                        <div>6:00 PM - 8:00 PM</div>
+                        <div><span class="event-type-badge practice">Practice</span></div>
                     </div>
-                    <div class="calendar-day">
-                        <div class="day-number">4</div>
+                    
+                    <div class="table-row">
+                        <div>
+                            <div class="event-title">Skills Training</div>
+                        </div>
+                        <div>Jan 5, 2025</div>
+                        <div>7:00 PM - 9:00 PM</div>
+                        <div><span class="event-type-badge practice">Practice</span></div>
                     </div>
-                    <div class="calendar-day">
-                        <div class="day-number">5</div>
+                    
+                    <div class="table-row">
+                        <div>
+                            <div class="event-title">Rugby Festival</div>
+                        </div>
+                        <div>Jan 8, 2025</div>
+                        <div>9:00 AM - 4:00 PM</div>
+                        <div><span class="event-type-badge festival">Festival</span></div>
+                    </div>
+                    
+                    <div class="table-row">
+                        <div>
+                            <div class="event-title">Team Practice</div>
+                        </div>
+                        <div>Jan 13, 2025</div>
+                        <div>6:30 PM - 8:30 PM</div>
+                        <div><span class="event-type-badge practice">Practice</span></div>
+                    </div>
+                    
+                    <div class="table-row">
+                        <div>
+                            <div class="event-title">Championship Match</div>
+                        </div>
+                        <div>Jan 15, 2025</div>
+                        <div>2:00 PM - 4:00 PM</div>
+                        <div><span class="event-type-badge match">Match</span></div>
+                    </div>
+                    
+                    <div class="table-row">
+                        <div>
+                            <div class="event-title">Training Session</div>
+                        </div>
+                        <div>Jan 20, 2025</div>
+                        <div>7:00 PM - 9:00 PM</div>
+                        <div><span class="event-type-badge practice">Practice</span></div>
+                    </div>
+                    
+                    <div class="table-row">
+                        <div>
+                            <div class="event-title">Surrey Cup Final</div>
+                        </div>
+                        <div>Jan 22, 2025</div>
+                        <div>1:00 PM - 5:00 PM</div>
+                        <div><span class="event-type-badge festival">Festival</span></div>
+                    </div>
+                    
+                    <div class="table-row">
+                        <div>
+                            <div class="event-title">League Match</div>
+                        </div>
+                        <div>Jan 27, 2025</div>
+                        <div>3:00 PM - 5:00 PM</div>
+                        <div><span class="event-type-badge match">Match</span></div>
                     </div>
                 </div>
             </div>
@@ -910,13 +1044,24 @@
 
     <script>
         // Store calendar state in variables (memory in HTML)
-        let currentMonth = 2; // March (0-indexed)
-        let currentYear = 2025;
+        const today = new Date();
+        let currentMonth = today.getMonth(); // Default to current month (0-11)
+        let currentYear = today.getFullYear(); // Default to current year
         
         const monthNames = [
             'January', 'February', 'March', 'April', 'May', 'June',
             'July', 'August', 'September', 'October', 'November', 'December'
         ];
+        
+        // Initialize calendar on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            updateCalendarTitle();
+        });
+        
+        function updateCalendarTitle() {
+            document.getElementById('calendar-title').textContent = 
+                `${monthNames[currentMonth]} ${currentYear}`;
+        }
         
         // Function to show different sections
         function showSection(sectionName) {
@@ -949,22 +1094,16 @@
                 currentYear--;
             }
             
-            // Update calendar title
-            document.getElementById('calendar-title').textContent = 
-                `${monthNames[currentMonth]} ${currentYear}`;
-            
+            updateCalendarTitle();
             console.log(`Calendar changed to ${monthNames[currentMonth]} ${currentYear}`);
         }
         
         // Function to go to today
         function goToToday() {
-            const today = new Date();
             currentMonth = today.getMonth();
             currentYear = today.getFullYear();
             
-            document.getElementById('calendar-title').textContent = 
-                `${monthNames[currentMonth]} ${currentYear}`;
-            
+            updateCalendarTitle();
             console.log('Calendar reset to current month');
         }
         
