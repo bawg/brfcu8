@@ -196,6 +196,7 @@
             background: #f8fafc;
             margin-bottom: 24px;
             transition: all 0.2s ease;
+            cursor: pointer;
         }
         
         .file-upload:hover {
@@ -578,6 +579,16 @@
                 gap: 8px;
             }
         }
+
+        .success-message {
+            background: #dcfce7;
+            border: 1px solid #16a34a;
+            color: #15803d;
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin: 16px 0;
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -602,9 +613,13 @@
                 </button>
             </div>
             
+            <div id="drill-success" class="success-message">
+                Drill added successfully!
+            </div>
+            
             <!-- Upload Section (Initially Hidden) -->
             <div id="drill-form" style="display: none;">
-                <div class="file-upload">
+                <div class="file-upload" onclick="handleFileUpload()">
                     <div class="upload-icon">📄</div>
                     <div class="upload-text">Upload Drill Document</div>
                     <div class="upload-subtext">Drop your PowerPoint, Word, or PDF document here, or click to browse</div>
@@ -617,12 +632,12 @@
                     <div class="form-grid">
                         <div class="form-field">
                             <label class="form-label">Drill Name *</label>
-                            <input type="text" class="form-input" placeholder="Enter drill name..." value="">
+                            <input type="text" id="drill-name" class="form-input" placeholder="Enter drill name..." value="">
                         </div>
                         
                         <div class="form-field">
                             <label class="form-label">Skill Category *</label>
-                            <select class="form-input">
+                            <select id="drill-skill" class="form-input">
                                 <option value="">Select skill...</option>
                                 <option>Passing</option>
                                 <option>Awareness</option>
@@ -632,7 +647,7 @@
                         
                         <div class="form-field">
                             <label class="form-label">Duration *</label>
-                            <select class="form-input">
+                            <select id="drill-duration" class="form-input">
                                 <option value="">Select duration...</option>
                                 <option>15 minutes</option>
                                 <option>30 minutes</option>
@@ -643,7 +658,7 @@
                         
                         <div class="form-field">
                             <label class="form-label">Rating</label>
-                            <select class="form-input">
+                            <select id="drill-rating" class="form-input">
                                 <option>Select rating...</option>
                                 <option>⭐ 1 Star</option>
                                 <option>⭐⭐ 2 Stars</option>
@@ -655,7 +670,7 @@
                         
                         <div class="form-field full-width">
                             <label class="form-label">Description *</label>
-                            <textarea class="form-input" rows="4" placeholder="Describe the drill objectives, setup, and key coaching points..."></textarea>
+                            <textarea id="drill-description" class="form-input" rows="4" placeholder="Describe the drill objectives, setup, and key coaching points..."></textarea>
                         </div>
                     </div>
                     
@@ -670,21 +685,21 @@
             <div id="drill-repository-section">
                 <h3 style="margin: 32px 0 24px 0; color: #1e3a8a; font-weight: 600; font-size: 1.5rem;">📊 Drill Repository</h3>
                 
-                <input type="text" class="search-box" placeholder="🔍 Search drills by name, skill, or description...">
+                <input type="text" class="search-box" placeholder="🔍 Search drills by name, skill, or description..." oninput="filterDrills()">
                 
                 <div class="filters">
-                    <button class="filter-btn active">All Skills</button>
-                    <button class="filter-btn">Passing</button>
-                    <button class="filter-btn">Awareness</button>
-                    <button class="filter-btn">Defense</button>
+                    <button class="filter-btn active" onclick="filterBySkill('all')">All Skills</button>
+                    <button class="filter-btn" onclick="filterBySkill('Passing')">Passing</button>
+                    <button class="filter-btn" onclick="filterBySkill('Awareness')">Awareness</button>
+                    <button class="filter-btn" onclick="filterBySkill('Defense')">Defense</button>
                 </div>
                 
                 <div class="filters">
-                    <button class="filter-btn active">All Durations</button>
-                    <button class="filter-btn">15 min</button>
-                    <button class="filter-btn">30 min</button>
-                    <button class="filter-btn">45 min</button>
-                    <button class="filter-btn">60 min</button>
+                    <button class="filter-btn active" onclick="filterByDuration('all')">All Durations</button>
+                    <button class="filter-btn" onclick="filterByDuration('15 minutes')">15 min</button>
+                    <button class="filter-btn" onclick="filterByDuration('30 minutes')">30 min</button>
+                    <button class="filter-btn" onclick="filterByDuration('45 minutes')">45 min</button>
+                    <button class="filter-btn" onclick="filterByDuration('60 minutes')">60 min</button>
                 </div>
                 
                 <div class="table-container">
@@ -696,54 +711,56 @@
                         <div>Actions</div>
                     </div>
                     
-                    <div class="table-row">
-                        <div>
-                            <div class="drill-name">Passing Triangle Drill</div>
-                            <div class="drill-description">A fundamental passing drill focusing on accuracy and quick decision-making in a triangular formation.</div>
+                    <div id="drills-table-body">
+                        <div class="table-row" data-skill="Passing" data-duration="30 minutes">
+                            <div>
+                                <div class="drill-name" onclick="viewDrillDetails('passing-triangle')">Passing Triangle Drill</div>
+                                <div class="drill-description">A fundamental passing drill focusing on accuracy and quick decision-making in a triangular formation.</div>
+                            </div>
+                            <div><span class="skill-badge skill-passing">Passing</span></div>
+                            <div><span class="duration-badge">30 min</span></div>
+                            <div><span class="star-rating">★★★★★</span></div>
+                            <div><button class="rate-btn" onclick="rateDrill('passing-triangle')">Rate</button></div>
                         </div>
-                        <div><span class="skill-badge skill-passing">Passing</span></div>
-                        <div><span class="duration-badge">30 min</span></div>
-                        <div><span class="star-rating">★★★★★</span></div>
-                        <div><button class="rate-btn">Rate</button></div>
-                    </div>
-                    
-                    <div class="table-row">
-                        <div>
-                            <div class="drill-name">Defensive Positioning</div>
-                            <div class="drill-description">Training defensive awareness and positioning in small-sided games.</div>
+                        
+                        <div class="table-row" data-skill="Defense" data-duration="45 minutes">
+                            <div>
+                                <div class="drill-name" onclick="viewDrillDetails('defensive-positioning')">Defensive Positioning</div>
+                                <div class="drill-description">Training defensive awareness and positioning in small-sided games.</div>
+                            </div>
+                            <div><span class="skill-badge skill-defense">Defense</span></div>
+                            <div><span class="duration-badge">45 min</span></div>
+                            <div><span class="star-rating">★★★★☆</span></div>
+                            <div><button class="rate-btn" onclick="rateDrill('defensive-positioning')">Rate</button></div>
                         </div>
-                        <div><span class="skill-badge skill-defense">Defense</span></div>
-                        <div><span class="duration-badge">45 min</span></div>
-                        <div><span class="star-rating">★★★★☆</span></div>
-                        <div><button class="rate-btn">Rate</button></div>
-                    </div>
-                    
-                    <div class="table-row">
-                        <div>
-                            <div class="drill-name">Situational Awareness</div>
-                            <div class="drill-description">Developing quick decision-making skills under pressure situations.</div>
+                        
+                        <div class="table-row" data-skill="Awareness" data-duration="15 minutes">
+                            <div>
+                                <div class="drill-name" onclick="viewDrillDetails('situational-awareness')">Situational Awareness</div>
+                                <div class="drill-description">Developing quick decision-making skills under pressure situations.</div>
+                            </div>
+                            <div><span class="skill-badge skill-awareness">Awareness</span></div>
+                            <div><span class="duration-badge">15 min</span></div>
+                            <div><span class="star-rating">★★★☆☆</span></div>
+                            <div><button class="rate-btn" onclick="rateDrill('situational-awareness')">Rate</button></div>
                         </div>
-                        <div><span class="skill-badge skill-awareness">Awareness</span></div>
-                        <div><span class="duration-badge">15 min</span></div>
-                        <div><span class="star-rating">★★★☆☆</span></div>
-                        <div><button class="rate-btn">Rate</button></div>
-                    </div>
-                    
-                    <div class="table-row">
-                        <div>
-                            <div class="drill-name">Advanced Passing Patterns</div>
-                            <div class="drill-description">Complex passing sequences with multiple players and timing elements.</div>
+                        
+                        <div class="table-row" data-skill="Passing" data-duration="60 minutes">
+                            <div>
+                                <div class="drill-name" onclick="viewDrillDetails('advanced-passing')">Advanced Passing Patterns</div>
+                                <div class="drill-description">Complex passing sequences with multiple players and timing elements.</div>
+                            </div>
+                            <div><span class="skill-badge skill-passing">Passing</span></div>
+                            <div><span class="duration-badge">60 min</span></div>
+                            <div><span class="star-rating">★★★★★</span></div>
+                            <div><button class="rate-btn" onclick="rateDrill('advanced-passing')">Rate</button></div>
                         </div>
-                        <div><span class="skill-badge skill-passing">Passing</span></div>
-                        <div><span class="duration-badge">60 min</span></div>
-                        <div><span class="star-rating">★★★★★</span></div>
-                        <div><button class="rate-btn">Rate</button></div>
                     </div>
                 </div>
             </div>
         </section>
         
-        <!-- Calendar Mockup -->
+        <!-- Calendar Section -->
         <section id="calendar" class="mockup-section">
             <div class="section-header">
                 <h2 class="section-title">📅 Practice Calendar</h2>
@@ -757,6 +774,10 @@
                 <p>Festival data is automatically synced from Google Sheets. The system includes 8 rugby festivals with dates, locations, and tournament links from Surrey Rugby competitions.</p>
             </div>
             
+            <div id="event-success" class="success-message">
+                Event added successfully!
+            </div>
+            
             <!-- Add Event Form (Initially Hidden) -->
             <div id="event-form" style="display: none;">
                 <div class="form-mockup">
@@ -765,12 +786,12 @@
                     <div class="form-grid">
                         <div class="form-field">
                             <label class="form-label">Event Name *</label>
-                            <input type="text" class="form-input" placeholder="Enter event name...">
+                            <input type="text" id="event-name" class="form-input" placeholder="Enter event name...">
                         </div>
                         
                         <div class="form-field">
                             <label class="form-label">Event Type *</label>
-                            <select class="form-input">
+                            <select id="event-type" class="form-input">
                                 <option value="">Select type...</option>
                                 <option>Practice</option>
                                 <option>Festival</option>
@@ -780,60 +801,4 @@
                             </select>
                         </div>
                         
-                        <div class="form-field">
-                            <label class="form-label">Date *</label>
-                            <input type="date" class="form-input">
-                        </div>
-                        
-                        <div class="form-field">
-                            <label class="form-label">Time</label>
-                            <input type="time" class="form-input">
-                        </div>
-                        
-                        <div class="form-field">
-                            <label class="form-label">Location</label>
-                            <input type="text" class="form-input" placeholder="Enter location...">
-                        </div>
-                        
-                        <div class="form-field">
-                            <label class="form-label">Duration</label>
-                            <select class="form-input">
-                                <option value="">Select duration...</option>
-                                <option>1 hour</option>
-                                <option>2 hours</option>
-                                <option>3 hours</option>
-                                <option>All day</option>
-                            </select>
-                        </div>
-                        
-                        <div class="form-field full-width">
-                            <label class="form-label">Notes</label>
-                            <textarea class="form-input" rows="3" placeholder="Additional notes or details..."></textarea>
-                        </div>
-                    </div>
-                    
-                    <div style="display: flex; gap: 12px; justify-content: flex-end; margin-top: 24px;">
-                        <button class="btn-secondary" onclick="toggleEventForm()">Cancel</button>
-                        <button class="btn-primary" onclick="addEventToCalendar()">Save Event</button>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="filters">
-                <button class="filter-btn active">All Events</button>
-                <button class="filter-btn">Practices</button>
-                <button class="filter-btn">Festivals</button>
-                <button class="filter-btn">Vacations</button>
-            </div>
-            
-            <div class="calendar-container">
-                <div class="calendar-header">
-                    <div class="calendar-title">March 2025</div>
-                    <div class="calendar-nav">
-                        <button class="calendar-btn">← Prev</button>
-                        <button class="calendar-btn">Today</button>
-                        <button class="calendar-btn">Next →</button>
-                        <button class="calendar-btn active">Month</button>
-                        <button class="calendar-btn">Week</button>
-                        <button class="calendar-btn">List</button>
-                
+                        <div class="
