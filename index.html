@@ -736,13 +736,6 @@
             
             <!-- Upload Section (Initially Hidden) -->
             <div id="drill-form" style="display: none;">
-                <div class="file-upload" onclick="handleFileUpload()">
-                    <div class="upload-icon">📄</div>
-                    <div class="upload-text">Upload Drill Document</div>
-                    <div class="upload-subtext">Drop your PowerPoint, Word, or PDF document here, or click to browse</div>
-                    <div class="upload-subtext" style="margin-top: 8px;">Supported formats: .pptx, .docx, .pdf (Max 10MB)</div>
-                </div>
-                
                 <div class="form-mockup">
                     <h3 style="margin-bottom: 24px; color: #1e3a8a; font-weight: 600;">Drill Information</h3>
                     
@@ -788,6 +781,16 @@
                         <div class="form-field full-width">
                             <label class="form-label">Description *</label>
                             <textarea id="drill-description" class="form-input" rows="4" placeholder="Describe the drill objectives, setup, and key coaching points..."></textarea>
+                        </div>
+                    </div>
+                    
+                    <div style="margin: 24px 0;">
+                        <label class="form-label" style="margin-bottom: 12px; display: block;">Upload Supporting Document (Optional)</label>
+                        <div class="file-upload" onclick="handleFileUpload()">
+                            <div class="upload-icon">📄</div>
+                            <div class="upload-text">Upload Drill Document</div>
+                            <div class="upload-subtext">Drop your PowerPoint, Word, or PDF document here, or click to browse</div>
+                            <div class="upload-subtext" style="margin-top: 8px;">Supported formats: .pptx, .docx, .pdf (Max 10MB)</div>
                         </div>
                     </div>
                     
@@ -966,29 +969,89 @@
         }
         
         // Drill filtering functions
-        let currentSkillFilter = 'all';
-        let currentDurationFilter = 'all';
+        let selectedSkills = ['all'];
+        let selectedDurations = ['all'];
         
         function filterBySkill(skill) {
-            currentSkillFilter = skill;
+            const button = event.target;
             
-            // Update active button
-            document.querySelectorAll('.filters:first-of-type .filter-btn').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            event.target.classList.add('active');
+            if (skill === 'all') {
+                // Reset to "All Skills" only
+                selectedSkills = ['all'];
+                // Update all skill buttons
+                const skillFilters = document.querySelectorAll('.filters')[0];
+                skillFilters.querySelectorAll('.filter-btn').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                button.classList.add('active');
+            } else {
+                // If "All Skills" was selected, remove it when selecting specific skills
+                if (selectedSkills.includes('all')) {
+                    selectedSkills = [];
+                    const allButton = document.querySelectorAll('.filters')[0].querySelector('.filter-btn');
+                    allButton.classList.remove('active');
+                }
+                
+                // Toggle the clicked skill
+                if (selectedSkills.includes(skill)) {
+                    // Remove skill if already selected
+                    selectedSkills = selectedSkills.filter(s => s !== skill);
+                    button.classList.remove('active');
+                    
+                    // If no skills selected, go back to "All Skills"
+                    if (selectedSkills.length === 0) {
+                        selectedSkills = ['all'];
+                        const allButton = document.querySelectorAll('.filters')[0].querySelector('.filter-btn');
+                        allButton.classList.add('active');
+                    }
+                } else {
+                    // Add skill to selection
+                    selectedSkills.push(skill);
+                    button.classList.add('active');
+                }
+            }
             
             applyFilters();
         }
         
         function filterByDuration(duration) {
-            currentDurationFilter = duration;
+            const button = event.target;
             
-            // Update active button  
-            document.querySelectorAll('.filters:last-of-type .filter-btn').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            event.target.classList.add('active');
+            if (duration === 'all') {
+                // Reset to "All Durations" only
+                selectedDurations = ['all'];
+                // Update all duration buttons
+                const durationFilters = document.querySelectorAll('.filters')[1];
+                durationFilters.querySelectorAll('.filter-btn').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                button.classList.add('active');
+            } else {
+                // If "All Durations" was selected, remove it when selecting specific durations
+                if (selectedDurations.includes('all')) {
+                    selectedDurations = [];
+                    const allButton = document.querySelectorAll('.filters')[1].querySelector('.filter-btn');
+                    allButton.classList.remove('active');
+                }
+                
+                // Toggle the clicked duration
+                if (selectedDurations.includes(duration)) {
+                    // Remove duration if already selected
+                    selectedDurations = selectedDurations.filter(d => d !== duration);
+                    button.classList.remove('active');
+                    
+                    // If no durations selected, go back to "All Durations"
+                    if (selectedDurations.length === 0) {
+                        selectedDurations = ['all'];
+                        const allButton = document.querySelectorAll('.filters')[1].querySelector('.filter-btn');
+                        allButton.classList.add('active');
+                    }
+                } else {
+                    // Add duration to selection
+                    selectedDurations.push(duration);
+                    button.classList.add('active');
+                }
+            }
             
             applyFilters();
         }
@@ -1007,11 +1070,11 @@
                 const drillName = row.querySelector('.drill-name').textContent.toLowerCase();
                 const drillDescription = row.querySelector('.drill-description').textContent.toLowerCase();
                 
-                // Check skill filter
-                const skillMatch = currentSkillFilter === 'all' || skill === currentSkillFilter;
+                // Check skill filter - match if "all" is selected OR skill is in selected skills
+                const skillMatch = selectedSkills.includes('all') || selectedSkills.includes(skill);
                 
-                // Check duration filter
-                const durationMatch = currentDurationFilter === 'all' || duration === currentDurationFilter;
+                // Check duration filter - match if "all" is selected OR duration is in selected durations
+                const durationMatch = selectedDurations.includes('all') || selectedDurations.includes(duration);
                 
                 // Check search term
                 const searchMatch = searchTerm === '' || 
@@ -1025,6 +1088,9 @@
                     row.style.display = 'none';
                 }
             });
+            
+            // Update filter count display (optional visual feedback)
+            console.log(`Filters applied: Skills(${selectedSkills.join(', ')}), Durations(${selectedDurations.join(', ')})`);
         }
         
         function rateDrill(drillId) {
