@@ -22,8 +22,8 @@
 
         .player {
             position: absolute;
-            width: 12px;
-            height: 12px;
+            width: 14px;    /* was 12px */
+            height: 14px;   /* was 12px */
             border-radius: 50%;
             display: flex;
             align-items: center;
@@ -74,6 +74,31 @@
             background: white;
             border-radius: 50%;
             z-index: 8;
+        }
+
+
+        
+        .waypoint-marker {
+            position: absolute;
+            width: 13px;    /* was 16px */
+            height: 13px;   /* was 16px */
+            background: #2196F3;
+            border: 2px solid white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-weight: bold;
+            color: white;
+            cursor: pointer;
+            z-index: 15;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .waypoint-marker:hover {
+            background: #1976D2;
+            transform: scale(1.1);
         }
 
         .setup-controls {
@@ -194,6 +219,27 @@
             background: #fff3cd;
             border-color: #ffc107;
         }
+
+        .creating-path {
+            background: #fff3e0;
+            border-color: #ff9800;
+        }
+
+        .code-marker {
+            position: absolute;
+            width: 14px;
+            height: 14px;
+            background: #2196F3;
+            border: 2px solid white;
+            border-radius: 50%;
+            z-index: 20;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            cursor: pointer;
+        }
+        .code-marker:hover {
+            background: #1976D2;
+            transform: scale(1.1);
+        }
     </style>
 </head>
 <body>
@@ -213,11 +259,16 @@
             <div class="setup-group" id="drillSettings">
                 <label>Players:</label>
                 <select id="playerCount" onchange="rugbyDesigner.updatePlayerCount()">
+                    <option value="1">1 Player</option>
+                    <option value="2">2 Players</option>
                     <option value="3">3 Players</option>
+                    <option value="4">4 Players</option>
                     <option value="5" selected>5 Players</option>
+                    <option value="6">6 Players</option>
                     <option value="7">7 Players</option>
+                    <option value="8">8 Players</option>
+                    <option value="9">9 Players</option>
                     <option value="10">10 Players</option>
-                    <option value="15">15 Players</option>
                 </select>
             </div>
 
@@ -256,6 +307,9 @@
         <button class="control-btn" onclick="rugbyDesigner.resetMovement()">Reset</button>
         <button class="control-btn" onclick="rugbyDesigner.clearAll()">Clear All</button>
         <button class="control-btn" onclick="rugbyDesigner.loadSample()">Load Sample</button>
+        <button class="control-btn" id="finishPathBtn" onclick="rugbyDesigner.finishPath()" style="display: none; background: #27ae60;">Finish Path</button>
+        <button class="control-btn" id="addCodeBtn" onclick="rugbyDesigner.toggleAddCodeMode()" style="background: #2196F3; display: none;">Add Cones</button>
+        <button class="control-btn" id="hideWaypointBtn" onclick="rugbyDesigner.toggleWaypoints()" style="background: #888; display: inline-block;">Hide Waypoints</button>
     </div>
 
     <script>
@@ -269,6 +323,7 @@
                 
                 this.players = [];
                 this.startPositions = [];
+                this.waypointMarkers = [];
                 this.connections = [];
                 this.currentDrill = null;
                 this.isPlaying = false;
@@ -282,6 +337,9 @@
                 this.playerCount = 5;
                 this.teamACount = 15;
                 this.teamBCount = 15;
+                this.codes = [];
+                this.isAddCodeMode = false;
+                this.waypointsHidden = false;
                 
                 this.bindEvents();
                 this.initPlayers();
@@ -289,6 +347,10 @@
 
             bindEvents() {
                 this.pitch.addEventListener('click', (e) => this.handlePitchClick(e));
+                this.pitch.addEventListener('contextmenu', (e) => this.handleRightClick(e));
+                this.pitch.addEventListener('dblclick', (e) => this.handleDoubleClick(e));
+                this.pitch.addEventListener('click', (e) => this.handleCodeClick(e));
+                this.pitch.addEventListener('dblclick', (e) => this.handleCodeDoubleClick(e));
             }
 
             setMode(mode) {
@@ -320,13 +382,17 @@
             clearAllPlayers() {
                 this.players.forEach(player => player.remove());
                 this.startPositions.forEach(pos => pos.remove());
+                this.waypointMarkers.forEach(marker => marker.remove());
                 this.connections.forEach(line => line.remove());
                 this.players = [];
                 this.startPositions = [];
+                this.waypointMarkers = [];
                 this.connections = [];
                 this.selectedPlayer = null;
                 this.settingEndPosition = false;
                 this.pathsSvg.innerHTML = '';
+                this.codes.forEach(code => code.remove());
+                this.codes = [];
             }
 
             initPlayers() {
@@ -392,7 +458,8 @@
                 const modeText = this.mode === 'drill' 
                     ? `DRILL MODE (${this.playerCount} players)` 
                     : `MATCH MODE (Team A: ${this.teamACount}, Team B: ${this.teamBCount})`;
-                this.updateModeIndicator(modeText + ": Click a player to set their movement");
+                this.modeIndicator.innerHTML = `<strong>${modeText}:</strong> Click on a player to start creating their movement path`;
+                this.modeIndicator.className = 'mode-indicator design-mode';
             }
 
             updateModeIndicator(text) {
@@ -407,20 +474,58 @@
                 const y = e.clientY - rect.top;
                 
                 const clickedPlayer = this.getPlayerAt(x, y);
+                const clickedWaypoint = this.getWaypointAt(x, y);
                 
                 if (clickedPlayer && !this.settingEndPosition) {
+                    // Start creating a path for this player
                     this.selectPlayer(clickedPlayer);
                     this.settingEndPosition = true;
-                    this.updateModeIndicator(`Click where player ${clickedPlayer.dataset.number} (${clickedPlayer.dataset.team === 'team-a' ? 'Red' : 'Blue'}) should move to`);
-                } else if (this.settingEndPosition && this.selectedPlayer) {
-                    this.setPlayerEndPosition(this.selectedPlayer, x, y);
-                    this.settingEndPosition = false;
-                    this.selectedPlayer.classList.remove('selected');
-                    this.selectedPlayer = null;
-                    this.updateModeDisplay();
-                    this.drawConnections();
+                    if (!this.selectedPlayer.waypoints) {
+                        this.selectedPlayer.waypoints = [];
+                    }
+                    this.showPathCreationMode();
+                } else if (this.settingEndPosition && this.selectedPlayer && !clickedPlayer && !clickedWaypoint) {
+                    // Add waypoint (only if we didn't click on a player or existing waypoint)
+                    this.addWaypoint(this.selectedPlayer, x, y);
+                    this.updateWaypointMarkers();
                     this.drawPaths();
                 }
+            }
+
+            handleDoubleClick(e) {
+                if (!this.isDesignMode || this.isPlaying) return;
+                
+                const rect = this.pitch.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                
+                const clickedWaypoint = this.getWaypointAt(x, y);
+                if (clickedWaypoint) {
+                    this.deleteWaypoint(clickedWaypoint);
+                }
+            }
+
+            getWaypointAt(x, y) {
+                return this.waypointMarkers.find(marker => {
+                    const mx = parseInt(marker.style.left);
+                    const my = parseInt(marker.style.top);
+                    const distance = Math.sqrt((x - mx - 8) ** 2 + (y - my - 8) ** 2);
+                    return distance < 12;
+                });
+            }
+
+            showPathCreationMode() {
+                const playerNum = this.selectedPlayer.dataset.number;
+                const teamColor = this.selectedPlayer.dataset.team === 'team-a' ? 'Red' : 'Blue';
+                
+                this.modeIndicator.innerHTML = `
+                    <strong>CREATING PATH for Player ${playerNum} (${teamColor})</strong><br>
+                    Click on the field to add waypoints. Click "Finish Path" button when done.
+                `;
+                this.modeIndicator.className = 'mode-indicator creating-path';
+                
+                // Show the finish path button
+                document.getElementById('finishPathBtn').style.display = 'inline-block';
             }
 
             getPlayerAt(x, y) {
@@ -443,6 +548,118 @@
             setPlayerEndPosition(player, x, y) {
                 player.dataset.endX = x - 6;
                 player.dataset.endY = y - 6;
+            }
+
+            addWaypoint(player, x, y) {
+                if (!player.waypoints) {
+                    player.waypoints = [];
+                }
+                const waypointData = { x: x - 6, y: y - 6, player: player };
+                player.waypoints.push(waypointData);
+                
+                // Update end position to the latest waypoint
+                player.dataset.endX = x - 6;
+                player.dataset.endY = y - 6;
+                
+                const playerNum = player.dataset.number;
+                const teamColor = player.dataset.team === 'team-a' ? 'Red' : 'Blue';
+                
+                this.modeIndicator.innerHTML = `
+                    <strong>CREATING PATH for Player ${playerNum} (${teamColor})</strong><br>
+                    Waypoint ${player.waypoints.length} added! Continue clicking to add more waypoints, or click "Finish Path" when done.<br>
+                    <small>Double-click any blue waypoint to delete it</small>
+                `;
+            }
+
+            updateWaypointMarkers() {
+                // Clear existing waypoint markers
+                this.waypointMarkers.forEach(marker => marker.remove());
+                this.waypointMarkers = [];
+                
+                // Create new waypoint markers for all players
+                this.players.forEach(player => {
+                    if (player.waypoints && player.waypoints.length > 0) {
+                        player.waypoints.forEach((waypoint, index) => {
+                            this.createWaypointMarker(waypoint, index + 1, player);
+                        });
+                    }
+                });
+            }
+
+            createWaypointMarker(waypoint, number, player) {
+                const marker = document.createElement('div');
+                marker.className = 'waypoint-marker';
+                marker.style.left = (waypoint.x + 6 - 8) + 'px'; // Center the marker
+                marker.style.top = (waypoint.y + 6 - 8) + 'px';   // Center the marker
+                marker.textContent = number;
+                marker.dataset.player = player.dataset.number;
+                marker.dataset.team = player.dataset.team;
+                marker.dataset.waypointIndex = number - 1;
+                
+                // Store reference to waypoint data
+                marker.waypointData = waypoint;
+                marker.ownerPlayer = player;
+                
+                this.pitch.appendChild(marker);
+                this.waypointMarkers.push(marker);
+            }
+
+            deleteWaypoint(waypointMarker) {
+                const player = waypointMarker.ownerPlayer;
+                const waypointIndex = parseInt(waypointMarker.dataset.waypointIndex);
+                
+                // Remove waypoint from player's waypoints array
+                player.waypoints.splice(waypointIndex, 1);
+                
+                // Update end position
+                if (player.waypoints.length > 0) {
+                    const lastWaypoint = player.waypoints[player.waypoints.length - 1];
+                    player.dataset.endX = lastWaypoint.x;
+                    player.dataset.endY = lastWaypoint.y;
+                } else {
+                    // No waypoints left, reset to start position
+                    player.dataset.endX = player.dataset.startX;
+                    player.dataset.endY = player.dataset.startY;
+                }
+                
+                // Update display
+                this.updateWaypointMarkers();
+                this.drawPaths();
+                
+                // Update status message if we're currently editing this player
+                if (this.selectedPlayer === player) {
+                    const playerNum = player.dataset.number;
+                    const teamColor = player.dataset.team === 'team-a' ? 'Red' : 'Blue';
+                    this.modeIndicator.innerHTML = `
+                        <strong>CREATING PATH for Player ${playerNum} (${teamColor})</strong><br>
+                        Waypoint deleted! ${player.waypoints.length} waypoints remaining. Continue clicking to add more waypoints.<br>
+                        <small>Double-click any blue waypoint to delete it</small>
+                    `;
+                }
+            }
+
+            handleRightClick(e) {
+                e.preventDefault();
+                if (this.settingEndPosition && this.selectedPlayer) {
+                    this.finishPath();
+                }
+            }
+
+            finishPath() {
+                if (this.selectedPlayer) {
+                    this.settingEndPosition = false;
+                    this.selectedPlayer.classList.remove('selected');
+                    this.selectedPlayer = null;
+                    
+                    // Hide the finish path button
+                    document.getElementById('finishPathBtn').style.display = 'none';
+                    
+                    // Make sure waypoint markers are updated
+                    this.updateWaypointMarkers();
+                    this.updateModeDisplay();
+                    this.drawConnections();
+                    this.drawPaths();
+                }
             }
 
             drawConnections() {
@@ -496,22 +713,83 @@
                 this.players.forEach(player => {
                     const startX = parseInt(player.dataset.startX) + 6;
                     const startY = parseInt(player.dataset.startY) + 6;
-                    const endX = parseInt(player.dataset.endX) + 6;
-                    const endY = parseInt(player.dataset.endY) + 6;
                     
-                    if (startX !== endX || startY !== endY) {
-                        const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-                        path.setAttribute('d', `M ${startX} ${startY} L ${endX} ${endY}`);
-                        path.setAttribute('class', 'movement-path');
-                        
-                        if (this.mode === 'match') {
-                            const color = player.dataset.team === 'team-a' ? 'rgba(231,76,60,0.5)' : 'rgba(52,152,219,0.5)';
-                            path.setAttribute('stroke', color);
+                    // Get all path points
+                    const pathPoints = [{ x: startX, y: startY }];
+                    
+                    if (player.waypoints && player.waypoints.length > 0) {
+                        player.waypoints.forEach(waypoint => {
+                            pathPoints.push({ x: waypoint.x + 6, y: waypoint.y + 6 });
+                        });
+                    } else {
+                        const endX = parseInt(player.dataset.endX) + 6;
+                        const endY = parseInt(player.dataset.endY) + 6;
+                        if (startX !== endX || startY !== endY) {
+                            pathPoints.push({ x: endX, y: endY });
+                        }
+                    }
+                    
+                    // Draw path lines
+                    if (pathPoints.length > 1) {
+                        for (let i = 0; i < pathPoints.length - 1; i++) {
+                            const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                            const d = `M ${pathPoints[i].x} ${pathPoints[i].y} L ${pathPoints[i + 1].x} ${pathPoints[i + 1].y}`;
+                            path.setAttribute('d', d);
+                            path.setAttribute('class', 'movement-path');
+                            
+                            if (this.mode === 'match') {
+                                const color = player.dataset.team === 'team-a' ? 'rgba(231,76,60,0.5)' : 'rgba(52,152,219,0.5)';
+                                path.setAttribute('stroke', color);
+                            }
+                            
+                            this.pathsSvg.appendChild(path);
                         }
                         
-                        this.pathsSvg.appendChild(path);
+                        // Draw direction arrows
+                        for (let i = 0; i < pathPoints.length - 1; i++) {
+                            this.drawArrow(pathPoints[i], pathPoints[i + 1], player.dataset.team);
+                        }
                     }
                 });
+            }
+
+            drawArrow(startPoint, endPoint, team) {
+                const dx = endPoint.x - startPoint.x;
+                const dy = endPoint.y - startPoint.y;
+                const length = Math.sqrt(dx * dx + dy * dy);
+                
+                if (length < 20) return; // Skip arrows for very short segments
+                
+                // Calculate arrow position (midpoint of segment)
+                const arrowX = startPoint.x + dx * 0.6;
+                const arrowY = startPoint.y + dy * 0.6;
+                
+                // Calculate arrow angle
+                const angle = Math.atan2(dy, dx);
+                
+                // Arrow size
+                const arrowSize = 8;
+                
+                // Calculate arrow points
+                const arrowPoint1X = arrowX - arrowSize * Math.cos(angle - Math.PI / 6);
+                const arrowPoint1Y = arrowY - arrowSize * Math.sin(angle - Math.PI / 6);
+                const arrowPoint2X = arrowX - arrowSize * Math.cos(angle + Math.PI / 6);
+                const arrowPoint2Y = arrowY - arrowSize * Math.sin(angle + Math.PI / 6);
+                
+                // Create arrow
+                const arrow = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+                const points = `${arrowX},${arrowY} ${arrowPoint1X},${arrowPoint1Y} ${arrowPoint2X},${arrowPoint2Y}`;
+                arrow.setAttribute('points', points);
+                
+                const color = this.mode === 'match' 
+                    ? (team === 'team-a' ? '#e74c3c' : '#3498db')
+                    : '#333';
+                
+                arrow.setAttribute('fill', color);
+                arrow.setAttribute('stroke', 'white');
+                arrow.setAttribute('stroke-width', '0.5');
+                
+                this.pathsSvg.appendChild(arrow);
             }
 
             enterDesignMode() {
@@ -521,6 +799,9 @@
                 this.pitch.classList.remove('playing');
                 this.updateModeDisplay();
                 document.getElementById('designBtn').classList.add('active');
+                document.getElementById('addCodeBtn').style.display = 'inline-block';
+                document.getElementById('hideWaypointBtn').style.display = 'inline-block';
+                this.setWaypointsVisible(!this.waypointsHidden);
             }
 
             playMovement() {
@@ -544,16 +825,46 @@
                 this.pitch.classList.add('playing');
                 this.generateCurrentDrill();
                 document.getElementById('designBtn').classList.remove('active');
+                document.getElementById('addCodeBtn').style.display = 'none'; // Hide Add Cones button
+                document.getElementById('hideWaypointBtn').style.display = 'none';
                 this.updateModeIndicator(this.mode === 'drill' ? 'PLAYING DRILL' : 'PLAYING MATCH');
             }
 
             generateCurrentDrill() {
-                const movements = this.players.map(player => ({
-                    startX: parseInt(player.dataset.startX),
-                    startY: parseInt(player.dataset.startY),
-                    endX: parseInt(player.dataset.endX),
-                    endY: parseInt(player.dataset.endY)
-                }));
+                const movements = this.players.map(player => {
+                    const startX = parseInt(player.dataset.startX);
+                    const startY = parseInt(player.dataset.startY);
+                    
+                    // Build complete path including waypoints
+                    const pathPoints = [{ x: startX, y: startY }];
+                    
+                    if (player.waypoints && player.waypoints.length > 0) {
+                        player.waypoints.forEach(waypoint => {
+                            pathPoints.push({ x: waypoint.x, y: waypoint.y });
+                        });
+                    } else {
+                        const endX = parseInt(player.dataset.endX);
+                        const endY = parseInt(player.dataset.endY);
+                        if (startX !== endX || startY !== endY) {
+                            pathPoints.push({ x: endX, y: endY });
+                        }
+                    }
+                    
+                    // Calculate total distance for constant speed
+                    let totalDistance = 0;
+                    for (let i = 0; i < pathPoints.length - 1; i++) {
+                        const dx = pathPoints[i + 1].x - pathPoints[i].x;
+                        const dy = pathPoints[i + 1].y - pathPoints[i].y;
+                        totalDistance += Math.sqrt(dx * dx + dy * dy);
+                    }
+                    
+                    return {
+                        pathPoints,
+                        totalDistance,
+                        startX,
+                        startY
+                    };
+                });
 
                 this.currentDrill = { movements, totalTime: this.totalTime };
             }
@@ -568,11 +879,10 @@
                     
                     this.players.forEach((player, index) => {
                         const movement = this.currentDrill.movements[index];
-                        const currentX = movement.startX + (movement.endX - movement.startX) * progress;
-                        const currentY = movement.startY + (movement.endY - movement.startY) * progress;
+                        const position = this.getPositionAlongPath(movement, progress);
                         
-                        player.style.left = currentX + 'px';
-                        player.style.top = currentY + 'px';
+                        player.style.left = position.x + 'px';
+                        player.style.top = position.y + 'px';
                     });
                     
                     this.timelineMarker.style.left = (progress * (this.timeline.offsetWidth - 2)) + 'px';
@@ -585,6 +895,40 @@
                 };
                 
                 animate();
+            }
+
+            getPositionAlongPath(movement, progress) {
+                const { pathPoints, totalDistance } = movement;
+                
+                if (pathPoints.length <= 1) {
+                    return { x: pathPoints[0].x, y: pathPoints[0].y };
+                }
+                
+                // Calculate target distance along path
+                const targetDistance = totalDistance * progress;
+                
+                // Find which segment we're on
+                let currentDistance = 0;
+                for (let i = 0; i < pathPoints.length - 1; i++) {
+                    const dx = pathPoints[i + 1].x - pathPoints[i].x;
+                    const dy = pathPoints[i + 1].y - pathPoints[i].y;
+                    const segmentDistance = Math.sqrt(dx * dx + dy * dy);
+                    
+                    if (currentDistance + segmentDistance >= targetDistance) {
+                        // We're on this segment
+                        const segmentProgress = (targetDistance - currentDistance) / segmentDistance;
+                        
+                        return {
+                            x: pathPoints[i].x + dx * segmentProgress,
+                            y: pathPoints[i].y + dy * segmentProgress
+                        };
+                    }
+                    
+                    currentDistance += segmentDistance;
+                }
+                
+                // If we're past the end, return the last point
+                return { x: pathPoints[pathPoints.length - 1].x, y: pathPoints[pathPoints.length - 1].y };
             }
 
             pauseMovement() {
@@ -612,38 +956,148 @@
                 this.players.forEach(player => {
                     player.dataset.endX = player.dataset.startX;
                     player.dataset.endY = player.dataset.startY;
+                    player.waypoints = [];
                 });
+                this.updateWaypointMarkers();
                 this.drawPaths();
                 this.enterDesignMode();
+                this.codes.forEach(code => code.remove());
+                this.codes = [];
             }
 
             loadSample() {
                 this.clearAll();
                 
-                // Create a sample movement pattern
+                // Create a sample movement pattern with waypoints
                 this.players.forEach((player, index) => {
                     const baseX = parseInt(player.dataset.startX);
                     const baseY = parseInt(player.dataset.startY);
                     
-                    // Create different movement patterns
+                    // Initialize waypoints array
+                    player.waypoints = [];
+                    
+                    // Create different movement patterns with multiple waypoints
                     if (this.mode === 'drill') {
-                        // Simple forward and spread pattern
-                        player.dataset.endX = baseX + (index % 2 === 0 ? 100 : -50);
-                        player.dataset.endY = baseY + (index * 20 - 40);
-                    } else {
-                        // Match scenario movements
-                        if (player.dataset.team === 'team-a') {
-                            player.dataset.endX = parseInt(player.dataset.startX) + 200;
-                            player.dataset.endY = parseInt(player.dataset.startY) + (index % 3 - 1) * 30;
+                        // Create zigzag patterns, cutting moves, and loops
+                        if (index % 3 === 0) {
+                            // Zigzag pattern
+                            player.waypoints.push({ x: baseX + 80, y: baseY - 40 });
+                            player.waypoints.push({ x: baseX + 120, y: baseY + 40 });
+                            player.waypoints.push({ x: baseX + 180, y: baseY - 20 });
+                        } else if (index % 3 === 1) {
+                            // Sharp cutting move
+                            player.waypoints.push({ x: baseX + 100, y: baseY });
+                            player.waypoints.push({ x: baseX + 120, y: baseY - 60 });
+                            player.waypoints.push({ x: baseX + 200, y: baseY - 80 });
                         } else {
-                            player.dataset.endX = parseInt(player.dataset.startX) - 150;
-                            player.dataset.endY = parseInt(player.dataset.startY) + (index % 3 - 1) * 40;
+                            // Loop back pattern
+                            player.waypoints.push({ x: baseX + 60, y: baseY + 50 });
+                            player.waypoints.push({ x: baseX + 140, y: baseY + 60 });
+                            player.waypoints.push({ x: baseX + 160, y: baseY - 30 });
+                            player.waypoints.push({ x: baseX + 120, y: baseY - 50 });
                         }
+                    } else {
+                        // Match scenario movements with tactical patterns
+                        if (player.dataset.team === 'team-a') {
+                            if (index % 2 === 0) {
+                                // Attacking line with dummy and cut
+                                player.waypoints.push({ x: baseX + 80, y: baseY + 20 });
+                                player.waypoints.push({ x: baseX + 120, y: baseY - 30 });
+                                player.waypoints.push({ x: baseX + 200, y: baseY - 40 });
+                            } else {
+                                // Support run with loop
+                                player.waypoints.push({ x: baseX + 60, y: baseY - 40 });
+                                player.waypoints.push({ x: baseX + 140, y: baseY - 20 });
+                                player.waypoints.push({ x: baseX + 180, y: baseY + 30 });
+                            }
+                        } else {
+                            if (index % 2 === 0) {
+                                // Defensive drift
+                                player.waypoints.push({ x: baseX - 60, y: baseY - 20 });
+                                player.waypoints.push({ x: baseX - 120, y: baseY - 40 });
+                                player.waypoints.push({ x: baseX - 160, y: baseY - 30 });
+                            } else {
+                                // Counter-attack run
+                                player.waypoints.push({ x: baseX - 80, y: baseY + 30 });
+                                player.waypoints.push({ x: baseX - 40, y: baseY + 60 });
+                                player.waypoints.push({ x: baseX + 40, y: baseY + 40 });
+                            }
+                        }
+                    }
+                    
+                    // Set end position to last waypoint
+                    if (player.waypoints.length > 0) {
+                        const lastWaypoint = player.waypoints[player.waypoints.length - 1];
+                        player.dataset.endX = lastWaypoint.x;
+                        player.dataset.endY = lastWaypoint.y;
                     }
                 });
                 
                 this.drawPaths();
-                this.updateModeIndicator('Sample loaded! Click Play to see the movement');
+                this.updateModeIndicator('Sample loaded with complex movement patterns! Click Play to see the movements');
+            }
+
+            toggleAddCodeMode() {
+                this.isAddCodeMode = !this.isAddCodeMode;
+                document.getElementById('addCodeBtn').classList.toggle('active', this.isAddCodeMode);
+                this.updateModeIndicator(this.isAddCodeMode ? 'Add Code mode: Click on the pitch to add a code. Double-click a code to remove.' : 'Design Mode');
+            }
+
+            handleCodeClick(e) {
+                if (!this.isAddCodeMode || this.isPlaying || this.mode !== 'drill') return;
+                const rect = this.pitch.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                // Prevent adding code if clicking on a player or waypoint
+                if (this.getPlayerAt(x, y) || this.getWaypointAt(x, y)) return;
+                if (this.getCodeAt(x, y)) return;
+                this.addCode(x, y);
+            }
+
+            handleCodeDoubleClick(e) {
+                if (!this.isAddCodeMode || this.isPlaying || this.mode !== 'drill') return;
+                const rect = this.pitch.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                const code = this.getCodeAt(x, y);
+                if (code) {
+                    this.removeCode(code);
+                }
+            }
+
+            addCode(x, y) {
+                const code = document.createElement('div');
+                code.className = 'code-marker';
+                code.style.left = (x - 7) + 'px';
+                code.style.top = (y - 7) + 'px';
+                this.pitch.appendChild(code);
+                this.codes.push(code);
+            }
+
+            getCodeAt(x, y) {
+                return this.codes.find(code => {
+                    const cx = parseInt(code.style.left);
+                    const cy = parseInt(code.style.top);
+                    const distance = Math.sqrt((x - cx - 7) ** 2 + (y - cy - 7) ** 2);
+                    return distance < 10;
+                });
+            }
+
+            removeCode(code) {
+                code.remove();
+                this.codes = this.codes.filter(c => c !== code);
+            }
+
+            toggleWaypoints() {
+                this.waypointsHidden = !this.waypointsHidden;
+                this.setWaypointsVisible(!this.waypointsHidden);
+                document.getElementById('hideWaypointBtn').textContent = this.waypointsHidden ? 'Show Waypoints' : 'Hide Waypoints';
+            }
+
+            setWaypointsVisible(visible) {
+                this.waypointMarkers.forEach(marker => {
+                    marker.style.display = visible ? 'flex' : 'none';
+                });
             }
         }
 
