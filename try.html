@@ -323,6 +323,9 @@
         <button class="control-btn" id="addCodeBtn" onclick="rugbyDesigner.toggleAddCodeMode()" style="background: #2196F3; display: none;">Add Cones</button>
         <button class="control-btn" id="hideWaypointBtn" onclick="rugbyDesigner.toggleWaypoints()" style="background: #888; display: inline-block;">Hide Waypoints</button>
         <button class="control-btn" id="lassoBtn" onclick="rugbyDesigner.toggleLassoMode()" style="background: #6c757d; display: inline-block;">Move</button>
+        <button class="control-btn" id="saveBtn">Save Drill</button>
+        <input type="file" id="uploadInput" style="display:none" accept=".json">
+        <button class="control-btn" id="uploadBtn">Upload Drill</button>
     </div>
 
     <script>
@@ -359,6 +362,7 @@
                 
                 this.bindEvents();
                 this.initPlayers();
+                this.setupSaveUpload();
             }
 
             toggleLassoMode() {
@@ -850,9 +854,6 @@
                     this.selectedPlayer = null;
                 }
                 this.pitch.classList.add('playing');
-                this.generateCurrentDrill();
-                document.getElementById('designBtn').classList.remove('active');
-                document.getElementById('addCodeBtn').style.display = 'none'; // Hide Add Cones button
                 document.getElementById('hideWaypointBtn').style.display = 'none';
                 document.getElementById('lassoBtn').style.display = 'none';
                 this.updateModeIndicator(this.mode === 'drill' ? 'PLAYING DRILL' : 'PLAYING MATCH');
@@ -1208,6 +1209,105 @@
             handleLassoUp(e) {
                 if (!this.lassoMode) return;
                 this.draggedObject = null;
+            }
+
+            setupSaveUpload() {
+                document.getElementById('saveBtn').onclick = () => this.saveDrill();
+                document.getElementById('uploadBtn').onclick = () => document.getElementById('uploadInput').click();
+                document.getElementById('uploadInput').onchange = (e) => this.uploadDrill(e);
+            }
+
+            saveDrill() {
+                const drillName = prompt("Enter a name for this drill:");
+                if (!drillName) return;
+
+                // Gather drill data
+                const data = {
+                    name: drillName,
+                    mode: this.mode,
+                    playerCount: this.playerCount,
+                    teamACount: this.teamACount,
+                    teamBCount: this.teamBCount,
+                    players: this.players.map((player, i) => ({
+                        team: player.dataset.team,
+                        number: player.dataset.number,
+                        startX: player.dataset.startX,
+                        startY: player.dataset.startY,
+                        endX: player.dataset.endX,
+                        endY: player.dataset.endY,
+                        waypoints: player.waypoints ? player.waypoints.map(wp => ({ x: wp.x, y: wp.y })) : []
+                    })),
+                    codes: this.codes.map(code => ({
+                        left: code.style.left,
+                        top: code.style.top
+                    }))
+                };
+
+                const json = JSON.stringify(data, null, 2);
+                const blob = new Blob([json], { type: "application/json" });
+                const url = URL.createObjectURL(blob);
+
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `${drillName.replace(/\s+/g, '_')}.json`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            }
+
+            uploadDrill(e) {
+                const file = e.target.files[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = (evt) => {
+                    try {
+                        const data = JSON.parse(evt.target.result);
+                        this.loadDrillData(data);
+                    } catch (err) {
+                        alert("Invalid drill file.");
+                    }
+                };
+                reader.readAsText(file);
+            }
+
+            loadDrillData(data) {
+                // Set mode and player counts
+                this.setMode(data.mode || 'drill');
+                if (data.mode === 'drill') {
+                    this.playerCount = data.playerCount || 5;
+                    document.getElementById('playerCount').value = this.playerCount;
+                } else {
+                    this.teamACount = data.teamACount || 15;
+                    this.teamBCount = data.teamBCount || 15;
+                    document.getElementById('teamACount').value = this.teamACount;
+                    document.getElementById('teamBCount').value = this.teamBCount;
+                }
+                this.clearAllPlayers();
+
+                // Recreate players
+                (data.players || []).forEach((pdata, i) => {
+                    this.createPlayer(
+                        parseInt(pdata.startX),
+                        parseInt(pdata.startY),
+                        pdata.team,
+                        pdata.number
+                    );
+                    const player = this.players[this.players.length - 1];
+                    player.dataset.endX = pdata.endX;
+                    player.dataset.endY = pdata.endY;
+                    player.waypoints = (pdata.waypoints || []).map(wp => ({ x: wp.x, y: wp.y, player }));
+                });
+
+                // Recreate codes
+                (data.codes || []).forEach(cdata => {
+                    this.addCode(parseInt(cdata.left) + 7, parseInt(cdata.top) + 7);
+                });
+
+                this.updateWaypointMarkers();
+                this.drawConnections();
+                this.drawPaths();
+                this.updateModeIndicator(`Loaded drill: ${data.name || 'Unnamed'}`);
             }
         }
 
