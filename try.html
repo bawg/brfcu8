@@ -313,7 +313,7 @@
     </div>
 
     <div class="controls">
-        <button class="control-btn active" id="designBtn" onclick="rugbyDesigner.enterDesignMode()">Design Mode</button>
+        <button class="control-btn" id="designBtn" onclick="rugbyDesigner.enterDesignMode()">Design Mode</button>
         <button class="control-btn" onclick="rugbyDesigner.playMovement()">Play</button>
         <button class="control-btn" onclick="rugbyDesigner.pauseMovement()">Pause</button>
         <button class="control-btn" onclick="rugbyDesigner.resetMovement()">Reset</button>
@@ -321,8 +321,8 @@
         <button class="control-btn" onclick="rugbyDesigner.loadSample()">Load Sample</button>
         <button class="control-btn" id="finishPathBtn" onclick="rugbyDesigner.finishPath()" style="display: none; background: #27ae60;">Finish Path</button>
         <button class="control-btn" id="addCodeBtn" onclick="rugbyDesigner.toggleAddCodeMode()" style="background: #2196F3; display: none;">Add Cones</button>
-        <button class="control-btn" id="hideWaypointBtn" onclick="rugbyDesigner.toggleWaypoints()" style="background: #888; display: inline-block;">Hide Waypoints</button>
-        <button class="control-btn" id="lassoBtn" onclick="rugbyDesigner.toggleLassoMode()" style="background: #6c757d; display: inline-block;">Move</button>
+        <button class="control-btn" id="hideWaypointBtn" onclick="rugbyDesigner.toggleWaypoints()" style="background: #888; display: none;">Hide Waypoints</button>
+        <button class="control-btn" id="lassoBtn" onclick="rugbyDesigner.toggleLassoMode()" style="background: #6c757d; display: none;">Move</button>
         <button class="control-btn" id="saveBtn">Save Drill</button>
         <input type="file" id="uploadInput" style="display:none" accept=".json">
         <button class="control-btn" id="uploadBtn">Upload Drill</button>
@@ -823,16 +823,34 @@
             }
 
             enterDesignMode() {
-                this.isDesignMode = true;
-                this.pauseMovement();
-                this.resetMovement();
-                this.pitch.classList.remove('playing');
-                this.updateModeDisplay();
-                document.getElementById('designBtn').classList.add('active');
-                document.getElementById('addCodeBtn').style.display = 'inline-block';
-                document.getElementById('hideWaypointBtn').style.display = 'inline-block';
-                document.getElementById('lassoBtn').style.display = 'inline-block';
-                this.setWaypointsVisible(!this.waypointsHidden);
+                // Toggle design mode state
+                this.isDesignMode = !this.isDesignMode;
+
+                if (this.isDesignMode) {
+                    // Enter design mode
+                    this.pauseMovement();
+                    this.resetMovement();
+                    this.pitch.classList.remove('playing');
+                    this.updateModeDisplay();
+                    document.getElementById('designBtn').classList.add('active');
+                    document.getElementById('addCodeBtn').style.display = 'inline-block';
+                    document.getElementById('hideWaypointBtn').style.display = 'inline-block';
+                    document.getElementById('lassoBtn').style.display = 'inline-block';
+                    this.setWaypointsVisible(!this.waypointsHidden);
+                } else {
+                    // Enter play mode
+                    this.settingEndPosition = false;
+                    if (this.selectedPlayer) {
+                        this.selectedPlayer.classList.remove('selected');
+                        this.selectedPlayer = null;
+                    }
+                    this.pitch.classList.add('playing');
+                    document.getElementById('designBtn').classList.remove('active');
+                    document.getElementById('addCodeBtn').style.display = 'none';
+                    document.getElementById('hideWaypointBtn').style.display = 'none';
+                    document.getElementById('lassoBtn').style.display = 'none';
+                    this.updateModeIndicator(this.mode === 'drill' ? 'PLAYING DRILL' : 'PLAYING MATCH');
+                }
             }
 
             playMovement() {
