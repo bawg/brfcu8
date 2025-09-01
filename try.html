@@ -206,13 +206,13 @@
         <div class="setup-row">
             <div class="setup-group">
                 <label>Mode:</label>
-                <button class="setup-btn active" id="drillModeBtn" onclick="setMode('drill')">Drill</button>
-                <button class="setup-btn" id="matchModeBtn" onclick="setMode('match')">Match</button>
+                <button class="setup-btn active" id="drillModeBtn" onclick="rugbyDesigner.setMode('drill')">Drill</button>
+                <button class="setup-btn" id="matchModeBtn" onclick="rugbyDesigner.setMode('match')">Match</button>
             </div>
             
             <div class="setup-group" id="drillSettings">
                 <label>Players:</label>
-                <select id="playerCount" onchange="updatePlayerCount()">
+                <select id="playerCount" onchange="rugbyDesigner.updatePlayerCount()">
                     <option value="3">3 Players</option>
                     <option value="5" selected>5 Players</option>
                     <option value="7">7 Players</option>
@@ -223,12 +223,12 @@
 
             <div class="setup-group" id="matchSettings" style="display: none;">
                 <label>Team A:</label>
-                <select id="teamACount" onchange="updateTeamCounts()">
+                <select id="teamACount" onchange="rugbyDesigner.updateTeamCounts()">
                     <option value="7">7 Players</option>
                     <option value="15" selected>15 Players</option>
                 </select>
                 <label>Team B:</label>
-                <select id="teamBCount" onchange="updateTeamCounts()">
+                <select id="teamBCount" onchange="rugbyDesigner.updateTeamCounts()">
                     <option value="7">7 Players</option>
                     <option value="15" selected>15 Players</option>
                 </select>
@@ -250,12 +250,12 @@
     </div>
 
     <div class="controls">
-        <button class="control-btn active" id="designBtn" onclick="enterDesignMode()">Design Mode</button>
-        <button class="control-btn" onclick="playMovement()">Play</button>
-        <button class="control-btn" onclick="pauseMovement()">Pause</button>
-        <button class="control-btn" onclick="resetMovement()">Reset</button>
-        <button class="control-btn" onclick="clearAll()">Clear All</button>
-        <button class="control-btn" onclick="loadSample()">Load Sample</button>
+        <button class="control-btn active" id="designBtn" onclick="rugbyDesigner.enterDesignMode()">Design Mode</button>
+        <button class="control-btn" onclick="rugbyDesigner.playMovement()">Play</button>
+        <button class="control-btn" onclick="rugbyDesigner.pauseMovement()">Pause</button>
+        <button class="control-btn" onclick="rugbyDesigner.resetMovement()">Reset</button>
+        <button class="control-btn" onclick="rugbyDesigner.clearAll()">Clear All</button>
+        <button class="control-btn" onclick="rugbyDesigner.loadSample()">Load Sample</button>
     </div>
 
     <script>
@@ -278,7 +278,7 @@
                 this.animationFrame = null;
                 this.selectedPlayer = null;
                 this.settingEndPosition = false;
-                this.mode = 'drill'; // 'drill' or 'match'
+                this.mode = 'drill';
                 this.playerCount = 5;
                 this.teamACount = 15;
                 this.teamBCount = 15;
@@ -349,7 +349,6 @@
             }
 
             initMatchPlayers() {
-                // Team A formation
                 const teamASpacing = Math.min(40, 350 / this.teamACount);
                 const teamAStartY = 200 - (this.teamACount - 1) * teamASpacing / 2;
                 
@@ -357,7 +356,6 @@
                     this.createPlayer(150, teamAStartY + i * teamASpacing, 'team-a', i + 1);
                 }
                 
-                // Team B formation
                 const teamBSpacing = Math.min(40, 350 / this.teamBCount);
                 const teamBStartY = 200 - (this.teamBCount - 1) * teamBSpacing / 2;
                 
@@ -382,7 +380,6 @@
                 this.pitch.appendChild(player);
                 this.players.push(player);
                 
-                // Create start position marker
                 const startPos = document.createElement('div');
                 startPos.className = 'start-position';
                 startPos.style.left = (x + 2) + 'px';
@@ -396,6 +393,10 @@
                     ? `DRILL MODE (${this.playerCount} players)` 
                     : `MATCH MODE (Team A: ${this.teamACount}, Team B: ${this.teamBCount})`;
                 this.updateModeIndicator(modeText + ": Click a player to set their movement");
+            }
+
+            updateModeIndicator(text) {
+                this.modeIndicator.innerHTML = `<strong>${text}</strong>`;
             }
 
             handlePitchClick(e) {
@@ -449,23 +450,19 @@
                 this.connections = [];
 
                 if (this.mode === 'drill') {
-                    // Connect all players in sequence for drills
                     for (let i = 0; i < this.players.length - 1; i++) {
                         const player1 = this.players[i];
                         const player2 = this.players[i + 1];
                         this.createConnection(player1, player2);
                     }
                 } else {
-                    // Connect teammates for matches
                     const teamAPlayers = this.players.filter(p => p.dataset.team === 'team-a');
                     const teamBPlayers = this.players.filter(p => p.dataset.team === 'team-b');
                     
-                    // Connect Team A players
                     for (let i = 0; i < teamAPlayers.length - 1; i++) {
                         this.createConnection(teamAPlayers[i], teamAPlayers[i + 1]);
                     }
                     
-                    // Connect Team B players
                     for (let i = 0; i < teamBPlayers.length - 1; i++) {
                         this.createConnection(teamBPlayers[i], teamBPlayers[i + 1]);
                     }
@@ -507,7 +504,6 @@
                         path.setAttribute('d', `M ${startX} ${startY} L ${endX} ${endY}`);
                         path.setAttribute('class', 'movement-path');
                         
-                        // Different colors for different teams in match mode
                         if (this.mode === 'match') {
                             const color = player.dataset.team === 'team-a' ? 'rgba(231,76,60,0.5)' : 'rgba(52,152,219,0.5)';
                             path.setAttribute('stroke', color);
@@ -527,6 +523,17 @@
                 document.getElementById('designBtn').classList.add('active');
             }
 
+            playMovement() {
+                if (!this.isDesignMode) {
+                    if (this.isPlaying) return;
+                    this.isPlaying = true;
+                    this.animateMovement();
+                } else {
+                    this.enterPlayMode();
+                    setTimeout(() => this.playMovement(), 100);
+                }
+            }
+
             enterPlayMode() {
                 this.isDesignMode = false;
                 this.settingEndPosition = false;
@@ -537,6 +544,7 @@
                 this.pitch.classList.add('playing');
                 this.generateCurrentDrill();
                 document.getElementById('designBtn').classList.remove('active');
+                this.updateModeIndicator(this.mode === 'drill' ? 'PLAYING DRILL' : 'PLAYING MATCH');
             }
 
             generateCurrentDrill() {
@@ -547,4 +555,103 @@
                     endY: parseInt(player.dataset.endY)
                 }));
 
-                this.curren
+                this.currentDrill = { movements, totalTime: this.totalTime };
+            }
+
+            animateMovement() {
+                const startTime = Date.now();
+                const animate = () => {
+                    if (!this.isPlaying) return;
+                    
+                    const elapsed = Date.now() - startTime;
+                    const progress = Math.min(elapsed / this.totalTime, 1);
+                    
+                    this.players.forEach((player, index) => {
+                        const movement = this.currentDrill.movements[index];
+                        const currentX = movement.startX + (movement.endX - movement.startX) * progress;
+                        const currentY = movement.startY + (movement.endY - movement.startY) * progress;
+                        
+                        player.style.left = currentX + 'px';
+                        player.style.top = currentY + 'px';
+                    });
+                    
+                    this.timelineMarker.style.left = (progress * (this.timeline.offsetWidth - 2)) + 'px';
+                    
+                    if (progress < 1) {
+                        this.animationFrame = requestAnimationFrame(animate);
+                    } else {
+                        this.isPlaying = false;
+                    }
+                };
+                
+                animate();
+            }
+
+            pauseMovement() {
+                this.isPlaying = false;
+                if (this.animationFrame) {
+                    cancelAnimationFrame(this.animationFrame);
+                    this.animationFrame = null;
+                }
+            }
+
+            resetMovement() {
+                this.pauseMovement();
+                this.currentTime = 0;
+                this.timelineMarker.style.left = '0px';
+                
+                this.players.forEach(player => {
+                    player.style.left = player.dataset.startX + 'px';
+                    player.style.top = player.dataset.startY + 'px';
+                });
+            }
+
+            clearAll() {
+                this.pauseMovement();
+                this.resetMovement();
+                this.players.forEach(player => {
+                    player.dataset.endX = player.dataset.startX;
+                    player.dataset.endY = player.dataset.startY;
+                });
+                this.drawPaths();
+                this.enterDesignMode();
+            }
+
+            loadSample() {
+                this.clearAll();
+                
+                // Create a sample movement pattern
+                this.players.forEach((player, index) => {
+                    const baseX = parseInt(player.dataset.startX);
+                    const baseY = parseInt(player.dataset.startY);
+                    
+                    // Create different movement patterns
+                    if (this.mode === 'drill') {
+                        // Simple forward and spread pattern
+                        player.dataset.endX = baseX + (index % 2 === 0 ? 100 : -50);
+                        player.dataset.endY = baseY + (index * 20 - 40);
+                    } else {
+                        // Match scenario movements
+                        if (player.dataset.team === 'team-a') {
+                            player.dataset.endX = parseInt(player.dataset.startX) + 200;
+                            player.dataset.endY = parseInt(player.dataset.startY) + (index % 3 - 1) * 30;
+                        } else {
+                            player.dataset.endX = parseInt(player.dataset.startX) - 150;
+                            player.dataset.endY = parseInt(player.dataset.startY) + (index % 3 - 1) * 40;
+                        }
+                    }
+                });
+                
+                this.drawPaths();
+                this.updateModeIndicator('Sample loaded! Click Play to see the movement');
+            }
+        }
+
+        // Initialize the app
+        let rugbyDesigner;
+        document.addEventListener('DOMContentLoaded', () => {
+            rugbyDesigner = new RugbyDesigner();
+        });
+    </script>
+</body>
+</html>
