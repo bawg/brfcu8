@@ -299,9 +299,7 @@
         </div>
     </div>
 
-    <div class="mode-indicator" id="modeIndicator">
-        <strong>DRILL MODE:</strong> Click a player to set their movement
-    </div>
+    <div class="mode-indicator" id="modeIndicator"></div>
     
     <div class="rugby-widget" id="rugbyPitch">
         <svg class="movement-paths" style="position: absolute; width: 100%; height: 100%; pointer-events: none;">
@@ -345,7 +343,7 @@
                 this.connections = [];
                 this.currentDrill = null;
                 this.isPlaying = false;
-                this.isDesignMode = true;
+                this.isDesignMode = false; // Start in play mode
                 this.currentTime = 0;
                 this.totalTime = 3000;
                 this.animationFrame = null;
@@ -365,6 +363,9 @@
                 this.bindEvents();
                 this.initPlayers();
                 this.setupSaveUpload();
+
+                // Set initial mode indicator to blank
+                this.modeIndicator.innerHTML = '';
             }
 
             toggleLassoMode() {
@@ -487,11 +488,17 @@
             }
 
             updateModeDisplay() {
-                const modeText = this.mode === 'drill' 
-                    ? `DRILL MODE (${this.playerCount} players)` 
-                    : `MATCH MODE (Team A: ${this.teamACount}, Team B: ${this.teamBCount})`;
-                this.modeIndicator.innerHTML = `<strong>${modeText}:</strong> Click on a player to start creating their movement path`;
-                this.modeIndicator.className = 'mode-indicator design-mode';
+                if (this.isDesignMode) {
+                    const modeText = this.mode === 'drill'
+                        ? `DESIGN MODE (${this.playerCount} players): Click on a player to start creating their movement path`
+                        : `DESIGN MODE (Team A: ${this.teamACount}, Team B: ${this.teamBCount}): Click on a player to start creating their movement path`;
+                    this.modeIndicator.innerHTML = `<strong>${modeText}</strong>`;
+                    this.modeIndicator.className = 'mode-indicator design-mode';
+                } else {
+                    // Blank in play mode
+                    this.modeIndicator.innerHTML = '';
+                    this.modeIndicator.className = 'mode-indicator play-mode';
+                }
             }
 
             updateModeIndicator(text) {
@@ -833,7 +840,6 @@
                     this.pauseMovement();
                     this.resetMovement();
                     this.pitch.classList.remove('playing');
-                    this.updateModeDisplay();
                     document.getElementById('designBtn').classList.add('active');
                     document.getElementById('addCodeBtn').style.display = 'inline-block';
                     document.getElementById('hideWaypointBtn').style.display = 'inline-block';
@@ -854,6 +860,8 @@
                     document.getElementById('hideWaypointBtn').style.color = '#333';
                     document.getElementById('lassoBtn').style.background = '#e0e0e0';
                     document.getElementById('lassoBtn').style.color = '#333';
+
+                    this.updateModeDisplay(); // <-- Always call this here
                 } else {
                     // Enter play mode
                     this.settingEndPosition = false;
@@ -866,7 +874,8 @@
                     document.getElementById('addCodeBtn').style.display = 'none';
                     document.getElementById('hideWaypointBtn').style.display = 'none';
                     document.getElementById('lassoBtn').style.display = 'none';
-                    this.updateModeIndicator(this.mode === 'drill' ? 'PLAYING DRILL' : 'PLAYING MATCH');
+
+                    this.updateModeDisplay(); // <-- Always call this here
                 }
             }
 
