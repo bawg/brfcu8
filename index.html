@@ -572,7 +572,7 @@
             color: white;
             padding: 16px 20px;
             display: grid;
-            grid-template-columns: 3fr 1fr 1fr 1fr 1fr;
+            grid-template-columns: 2fr 2fr 1fr 1fr 1fr 2fr; /* 6 columns, adjust widths as needed */
             gap: 20px;
             font-weight: 600;
             font-size: 14px;
@@ -581,7 +581,7 @@
         .table-row {
             padding: 16px 20px;
             display: grid;
-            grid-template-columns: 3fr 1fr 1fr 1fr 1fr;
+            grid-template-columns: 2fr 2fr 1fr 1fr 1fr 2fr; /* 6 columns, match header */
             gap: 20px;
             border-bottom: 1px solid #f1f5f9;
             align-items: center;
@@ -668,6 +668,87 @@
         
         .rate-btn:hover {
             background: #1e3a8a;
+        }
+
+        /* Modal Styles */
+        #eventModal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(30, 58, 138, 0.15);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        #eventModal .modal-content {
+            background: white;
+            border-radius: 12px;
+            max-width: 400px;
+            margin: auto;
+            padding: 32px;
+            box-shadow: 0 8px 32px rgba(30, 58, 138, 0.2);
+            position: relative;
+        }
+        
+        #eventModal .close-btn {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: #eee;
+            border: none;
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            font-size: 18px;
+            cursor: pointer;
+        }
+        
+        #eventModalContent {
+            margin-top: 16px;
+        }
+
+        #availabilityModal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(30, 58, 138, 0.15);
+            z-index: 1001;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        #availabilityModal .modal-content {
+            background: white;
+            border-radius: 12px;
+            max-width: 350px;
+            margin: auto;
+            padding: 24px;
+            box-shadow: 0 8px 32px rgba(30, 58, 138, 0.2);
+            position: relative;
+        }
+        
+        #availabilityModal .close-btn {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: #eee;
+            border: none;
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            font-size: 18px;
+            cursor: pointer;
+        }
+        
+        #availabilityModalContent {
+            margin-top: 16px;
         }
     </style>
 </head>
@@ -832,88 +913,56 @@
                 </div>
             </div>
             
+            <!-- Add Event Button and Attendee Filter -->
+            <div style="display:flex; align-items:center; gap:16px; margin-bottom:16px;">
+                <button class="btn-primary" onclick="openAddEventModal()">+ Add Event</button>
+                <label for="attendeeFilter" style="font-weight:500; color:#1e3a8a;">Show Availability for:</label>
+                <select id="attendeeFilter" onchange="renderEventsTable()" style="padding:6px 12px; border-radius:6px;">
+                    <option value="">All</option>
+                    <option value="manus">Manus</option>
+                    <option value="andy">Andy</option>
+                    <option value="james">James</option>
+                </select>
+            </div>
+
+            <!-- Add this above the events table, after the attendee filter -->
+            <div style="display:flex; align-items:center; gap:16px; margin-bottom:16px;">
+                <button class="btn-primary" id="toggleAvailabilityBtn" onclick="toggleAvailabilityEdit()">+ Add Availability</button>
+                <label for="availabilityUser" id="availabilityUserLabel" style="font-weight:500; color:#1e3a8a; display:none;">Set Availability as:</label>
+                <select id="availabilityUser" style="padding:6px 12px; border-radius:6px; display:none;">
+                    <option value="manus">Manus</option>
+                    <option value="andy">Andy</option>
+                    <option value="james">James</option>
+                </select>
+            </div>
+            
+            <!-- Column Filter Buttons and Pagination -->
+            <div style="display:flex; flex-wrap:wrap; gap:12px; margin-bottom:16px;">
+                <button class="filter-btn" onclick="filterColumn('name')">Filter Event Name</button>
+                <button class="filter-btn" onclick="filterColumn('location')">Filter Location</button>
+                <button class="filter-btn" onclick="filterColumn('date')">Filter Date</button>
+                <button class="filter-btn" onclick="filterColumn('time')">Filter Time</button>
+                <button class="filter-btn" onclick="filterColumn('type')">Filter Type</button>
+                <button class="filter-btn" onclick="filterColumn('availability')">Filter Availability</button>
+                <span style="margin-left:24px; font-weight:500; color:#1e3a8a;">Show:</span>
+                <button class="filter-btn" onclick="setEventsPageSize(10)">10</button>
+                <button class="filter-btn" onclick="setEventsPageSize(20)">20</button>
+                <button class="filter-btn" onclick="setEventsPageSize(30)">30</button>
+            </div>
+            
             <!-- Events Table -->
             <div class="events-list-container">
                 <h3 style="color: #1e3a8a; font-weight: 600; font-size: 1.25rem; margin: 32px 0 16px 0;">📋 Upcoming Events</h3>
-                <div class="table-container">
+                <div class="table-container" style="max-height:400px; overflow-y:auto;">
                     <div class="table-header">
                         <div>Event Name</div>
+                        <div>Location</div>
                         <div>Date</div>
                         <div>Time</div>
                         <div>Type</div>
+                        <div>Availability</div>
                     </div>
-                    
-                    <div class="table-row">
-                        <div>
-                            <div class="event-title">New Year Practice</div>
-                        </div>
-                        <div>Jan 2, 2025</div>
-                        <div>6:00 PM - 8:00 PM</div>
-                        <div><span class="event-type-badge practice">Practice</span></div>
-                    </div>
-                    
-                    <div class="table-row">
-                        <div>
-                            <div class="event-title">Skills Training</div>
-                        </div>
-                        <div>Jan 5, 2025</div>
-                        <div>7:00 PM - 9:00 PM</div>
-                        <div><span class="event-type-badge practice">Practice</span></div>
-                    </div>
-                    
-                    <div class="table-row">
-                        <div>
-                            <div class="event-title">Rugby Festival</div>
-                        </div>
-                        <div>Jan 8, 2025</div>
-                        <div>9:00 AM - 4:00 PM</div>
-                        <div><span class="event-type-badge festival">Festival</span></div>
-                    </div>
-                    
-                    <div class="table-row">
-                        <div>
-                            <div class="event-title">Team Practice</div>
-                        </div>
-                        <div>Jan 13, 2025</div>
-                        <div>6:30 PM - 8:30 PM</div>
-                        <div><span class="event-type-badge practice">Practice</span></div>
-                    </div>
-                    
-                    <div class="table-row">
-                        <div>
-                            <div class="event-title">Championship Match</div>
-                        </div>
-                        <div>Jan 15, 2025</div>
-                        <div>2:00 PM - 4:00 PM</div>
-                        <div><span class="event-type-badge match">Match</span></div>
-                    </div>
-                    
-                    <div class="table-row">
-                        <div>
-                            <div class="event-title">Training Session</div>
-                        </div>
-                        <div>Jan 20, 2025</div>
-                        <div>7:00 PM - 9:00 PM</div>
-                        <div><span class="event-type-badge practice">Practice</span></div>
-                    </div>
-                    
-                    <div class="table-row">
-                        <div>
-                            <div class="event-title">Surrey Cup Final</div>
-                        </div>
-                        <div>Jan 22, 2025</div>
-                        <div>1:00 PM - 5:00 PM</div>
-                        <div><span class="event-type-badge festival">Festival</span></div>
-                    </div>
-                    
-                    <div class="table-row">
-                        <div>
-                            <div class="event-title">League Match</div>
-                        </div>
-                        <div>Jan 27, 2025</div>
-                        <div>3:00 PM - 5:00 PM</div>
-                        <div><span class="event-type-badge match">Match</span></div>
-                    </div>
+                    <div id="events-table-body"></div>
                 </div>
             </div>
         </section>
@@ -1105,334 +1154,450 @@
         </section>
     </div>
 
+    <!-- Event Modal -->
+    <div id="eventModal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(30,58,138,0.15); z-index:1000; align-items:center; justify-content:center;">
+        <div style="background:white; border-radius:12px; max-width:400px; margin:auto; padding:32px; box-shadow:0 8px 32px rgba(30,58,138,0.2); position:relative;">
+            <button onclick="closeEventModal()" style="position:absolute; top:12px; right:12px; background:#eee; border:none; border-radius:50%; width:32px; height:32px; font-size:18px; cursor:pointer;">×</button>
+            <div id="eventModalContent"></div>
+        </div>
+    </div>
+
+    <!-- Availability Modal -->
+    <div id="availabilityModal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(30,58,138,0.15); z-index:1001; align-items:center; justify-content:center;">
+        <div style="background:white; border-radius:12px; max-width:350px; margin:auto; padding:24px; box-shadow:0 8px 32px rgba(30,58,138,0.2); position:relative;">
+            <button onclick="closeAvailabilityModal()" style="position:absolute; top:12px; right:12px; background:#eee; border:none; border-radius:50%; width:32px; height:32px; font-size:18px; cursor:pointer;">×</button>
+            <div id="availabilityModalContent"></div>
+        </div>
+    </div>
+
     <script>
         // Store calendar state in variables (memory in HTML)
         const today = new Date();
-        let currentMonth = today.getMonth(); // Default to current month (0-11)
-        let currentYear = today.getFullYear(); // Default to current year
-        
+        let currentMonth = today.getMonth();
+        let currentYear = today.getFullYear();
+
         const monthNames = [
             'January', 'February', 'March', 'April', 'May', 'June',
             'July', 'August', 'September', 'October', 'November', 'December'
         ];
         
-        // Initialize calendar on page load
-        document.addEventListener('DOMContentLoaded', function() {
-            updateCalendarTitle();
+        // Example events data (now with details, location, attendees)
+        const calendarEvents = [
+            { date: '2025-01-02', time: '6:00 PM - 8:00 PM', type: 'practice', name: 'Practice', location: 'Barnes Rugby Field', details: 'First practice of the year. Focus on passing drills.', attendees: ['Alice', 'Bob', 'Charlie'] },
+            { date: '2025-01-05', time: '7:00 PM - 9:00 PM', type: 'practice', name: 'Training', location: 'Barnes Rugby Field', details: 'Skills training session.', attendees: ['Alice', 'David', 'Eve'] },
+            { date: '2025-01-08', time: '9:00 AM - 4:00 PM', type: 'festival', name: 'Festival', location: 'Surrey Sports Park', details: 'Annual rugby festival.', attendees: ['Team Barnes', 'Team Surrey'] },
+            { date: '2025-01-13', time: '6:30 PM - 8:30 PM', type: 'practice', name: 'Practice', location: 'Barnes Rugby Field', details: 'Defensive drills and positioning.', attendees: ['Bob', 'Charlie', 'Eve'] },
+            { date: '2025-01-15', time: '2:00 PM - 4:00 PM', type: 'match', name: 'Championship', location: 'Twickenham Stadium', details: 'Championship match vs Team Richmond.', attendees: ['Full Squad'] },
+            { date: '2025-01-20', time: '7:00 PM - 9:00 PM', type: 'practice', name: 'Training', location: 'Barnes Rugby Field', details: 'Tactical training session.', attendees: ['Alice', 'Bob', 'Charlie', 'David', 'Eve'] },
+            { date: '2025-01-22', time: '1:00 PM - 5:00 PM', type: 'festival', name: 'Surrey Cup', location: 'Surrey Sports Park', details: 'Surrey Cup Final.', attendees: ['Team Barnes', 'Team Surrey'] },
+            { date: '2025-01-27', time: '3:00 PM - 5:00 PM', type: 'practice', name: 'Match Day', location: 'Barnes Rugby Field', details: 'Friendly match.', attendees: ['Full Squad'] },
+            { date: '2025-01-29', time: '10:00 AM - 4:00 PM', type: 'festival', name: 'Spring Festival', location: 'Barnes Rugby Field', details: 'Spring rugby festival.', attendees: ['All Teams'] }
+        ];
+        
+        // Static attendee options
+        const attendeeOptions = ['manus', 'andy', 'james'];
+
+        // Add this line to fix the error:
+        let isEditingAvailability = false;
+
+        // Add availability to each event (initialize as empty object if not present)
+        calendarEvents.forEach(ev => {
+            if (!ev.availability) {
+                ev.availability = { manus: '', andy: '', james: '' };
+            }
         });
         
+        // Initialize calendar on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            currentMonth = 0; // January (0-indexed)
+            currentYear = 2025;
+            updateCalendarTitle();
+            renderCalendar();
+            renderEventsTable();
+            document.getElementById('availabilityUser').style.display = 'none';
+            document.getElementById('availabilityUserLabel').style.display = 'none';
+            document.getElementById('toggleAvailabilityBtn').textContent = '+ Add Availability';
+            isEditingAvailability = false;
+        });
+        
+        function renderCalendar() {
+            const calendarGrid = document.querySelector('.calendar-grid');
+            // Remove all day headers and days
+            calendarGrid.innerHTML = '';
+            // Add day headers
+            ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].forEach(day => {
+                const header = document.createElement('div');
+                header.className = 'calendar-day-header';
+                header.textContent = day;
+                calendarGrid.appendChild(header);
+            });
+
+            // Get first day of month and number of days
+            const firstDay = new Date(currentYear, currentMonth, 1);
+            const startDay = firstDay.getDay();
+            const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+
+            // Previous month's last few days (optional, for full grid)
+            const prevMonthDays = startDay;
+            const prevMonth = currentMonth === 0 ? 11 : currentMonth - 1;
+            const prevMonthYear = currentMonth === 0 ? currentYear - 1 : currentYear;
+            const prevMonthLastDay = new Date(prevMonthYear, prevMonth + 1, 0).getDate();
+
+            for (let i = prevMonthLastDay - prevMonthDays + 1; i <= prevMonthLastDay; i++) {
+                const dayDiv = document.createElement('div');
+                dayDiv.className = 'calendar-day other-month';
+                dayDiv.innerHTML = `<div class="day-number">${i}</div>`;
+                calendarGrid.appendChild(dayDiv);
+            }
+
+            // Current month days
+            for (let d = 1; d <= daysInMonth; d++) {
+                const dayDiv = document.createElement('div');
+                dayDiv.className = 'calendar-day';
+                const dateStr = `${currentYear}-${String(currentMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+                // Highlight today
+                if (
+                    d === today.getDate() &&
+                    currentMonth === today.getMonth() &&
+                    currentYear === today.getFullYear()
+                ) {
+                    dayDiv.classList.add('today');
+                }
+                dayDiv.innerHTML = `<div class="day-number${dayDiv.classList.contains('today') ? ' today' : ''}">${d}</div>`;
+
+                // Add events for this day
+                const eventList = calendarEvents.filter(ev => ev.date === `${currentYear}-${String(currentMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`);
+                eventList.forEach(ev => {
+                    const eventDiv = document.createElement('div');
+                    eventDiv.className = `event ${ev.type}`;
+                    eventDiv.innerHTML = `${ev.name}`;
+                    // Add click event to open details (stubbed for now)
+                    eventDiv.onclick = function() {
+                        openEventDetails(ev);
+                    };
+                    dayDiv.appendChild(eventDiv);
+                });
+
+                calendarGrid.appendChild(dayDiv);
+            }
+        }
+        
         function updateCalendarTitle() {
-            document.getElementById('calendar-title').textContent = 
-                `${monthNames[currentMonth]} ${currentYear}`;
+            const title = document.getElementById('calendar-title');
+            title.innerHTML = `${monthNames[currentMonth]} ${currentYear}`;
         }
         
-        // Function to show different sections
-        function showSection(sectionName) {
-            // Hide all sections
-            document.querySelectorAll('.mockup-section').forEach(section => {
-                section.classList.remove('active');
-            });
-            
-            // Remove active class from all nav buttons
-            document.querySelectorAll('.mockup-btn').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            
-            // Show selected section
-            document.getElementById(sectionName).classList.add('active');
-            
-            // Add active class to clicked button
-            event.target.classList.add('active');
-        }
-        
-        // Function to change month
-        function changeMonth(direction) {
-            currentMonth += direction;
-            
-            if (currentMonth > 11) {
-                currentMonth = 0;
-                currentYear++;
-            } else if (currentMonth < 0) {
+        function changeMonth(delta) {
+            currentMonth += delta;
+            if (currentMonth < 0) {
                 currentMonth = 11;
                 currentYear--;
+            } else if (currentMonth > 11) {
+                currentMonth = 0;
+                currentYear++;
             }
-            
             updateCalendarTitle();
-            console.log(`Calendar changed to ${monthNames[currentMonth]} ${currentYear}`);
+            renderCalendar();
         }
         
-        // Function to go to today
         function goToToday() {
             currentMonth = today.getMonth();
             currentYear = today.getFullYear();
-            
             updateCalendarTitle();
-            console.log('Calendar reset to current month');
+            renderCalendar();
         }
         
-        // Drill filtering functions
-        let selectedSkills = ['all'];
-        let selectedDurations = ['all'];
-        
-        function filterBySkill(skill) {
-            const button = event.target;
-            
-            if (skill === 'all') {
-                // Reset to "All Skills" only
-                selectedSkills = ['all'];
-                // Update all skill buttons
-                const skillFilters = document.querySelectorAll('.filters')[0];
-                skillFilters.querySelectorAll('.filter-btn').forEach(btn => {
-                    btn.classList.remove('active');
-                });
-                button.classList.add('active');
-            } else {
-                // If "All Skills" was selected, remove it when selecting specific skills
-                if (selectedSkills.includes('all')) {
-                    selectedSkills = [];
-                    const allButton = document.querySelectorAll('.filters')[0].querySelector('.filter-btn');
-                    allButton.classList.remove('active');
-                }
-                
-                // Toggle the clicked skill
-                if (selectedSkills.includes(skill)) {
-                    // Remove skill if already selected
-                    selectedSkills = selectedSkills.filter(s => s !== skill);
-                    button.classList.remove('active');
-                    
-                    // If no skills selected, go back to "All Skills"
-                    if (selectedSkills.length === 0) {
-                        selectedSkills = ['all'];
-                        const allButton = document.querySelectorAll('.filters')[0].querySelector('.filter-btn');
-                        allButton.classList.add('active');
-                    }
-                } else {
-                    // Add skill to selection
-                    selectedSkills.push(skill);
-                    button.classList.add('active');
-                }
-            }
-            
-            applyFilters();
+        function showSection(section) {
+            // Hide all sections
+            document.querySelectorAll('.mockup-section').forEach(sec => {
+                sec.classList.remove('active');
+            });
+            // Remove active class from all buttons
+            document.querySelectorAll('.mockup-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            // Show the selected section
+            document.getElementById(section).classList.add('active');
+            // Add active class to the corresponding button
+            document.querySelector(`.mockup-btn[onclick="showSection('${section}')"]`).classList.add('active');
         }
         
-        function filterByDuration(duration) {
-            const button = event.target;
-            
-            if (duration === 'all') {
-                // Reset to "All Durations" only
-                selectedDurations = ['all'];
-                // Update all duration buttons
-                const durationFilters = document.querySelectorAll('.filters')[1];
-                durationFilters.querySelectorAll('.filter-btn').forEach(btn => {
-                    btn.classList.remove('active');
-                });
-                button.classList.add('active');
+        function openAddEventModal() {
+            // Simple modal for demonstration; you can expand with a form as needed
+            const modal = document.getElementById('eventModal');
+            const content = document.getElementById('eventModalContent');
+            content.innerHTML = `
+                <h3 style="color:#1e3a8a;">Add New Event</h3>
+                <form id="addEventForm">
+                    <label>Name: <input type="text" name="name" required></label><br><br>
+                    <label>Date: <input type="date" name="date" required></label><br><br>
+                    <label>Time: <input type="text" name="time" placeholder="e.g. 6:00 PM - 8:00 PM"></label><br><br>
+                    <label>Type: 
+                        <select name="type">
+                            <option value="practice">Practice</option>
+                            <option value="festival">Festival</option>
+                            <option value="match">Match</option>
+                        </select>
+                    </label><br><br>
+                    <label>Location: <input type="text" name="location"></label><br><br>
+                    <label>Details: <textarea name="details"></textarea></label><br><br>
+                    <button type="submit" class="btn-primary">Save Event</button>
+                </form>
+            `;
+            modal.style.display = 'flex';
+
+            document.getElementById('addEventForm').onsubmit = function(e) {
+                e.preventDefault();
+                // Get form data
+                const form = e.target;
+                const newEvent = {
+                    name: form.name.value,
+                    date: form.date.value,
+                    time: form.time.value,
+                    type: form.type.value,
+                    location: form.location.value,
+                    details: form.details.value,
+                    attendees: [],
+                    availability: { manus: '', andy: '', james: '' }
+                };
+                calendarEvents.push(newEvent);
+                closeEventModal();
+                renderEventsTable();
+                renderCalendar();
+            };
+        }
+
+        function closeEventModal() {
+            document.getElementById('eventModal').style.display = 'none';
+        }
+
+        function openEventDetails(eventData) {
+            // For now, just log the event data
+            console.log('Event details:', eventData);
+            // You can expand this to show a detailed view in a modal or new section
+        }
+
+        function openEventDetailsByIndex(idx) {
+            openEventDetails(calendarEvents[idx]);
+        }
+        
+        function toggleAvailabilityEdit() {
+            isEditingAvailability = !isEditingAvailability;
+            const selector = document.getElementById('availabilityUser');
+            const label = document.getElementById('availabilityUserLabel');
+            const btn = document.getElementById('toggleAvailabilityBtn');
+            if (isEditingAvailability) {
+                selector.style.display = '';
+                label.style.display = '';
+                btn.textContent = 'Save Availability';
             } else {
-                // If "All Durations" was selected, remove it when selecting specific durations
-                if (selectedDurations.includes('all')) {
-                    selectedDurations = [];
-                    const allButton = document.querySelectorAll('.filters')[1].querySelector('.filter-btn');
-                    allButton.classList.remove('active');
-                }
-                
-                // Toggle the clicked duration
-                if (selectedDurations.includes(duration)) {
-                    // Remove duration if already selected
-                    selectedDurations = selectedDurations.filter(d => d !== duration);
-                    button.classList.remove('active');
-                    
-                    // If no durations selected, go back to "All Durations"
-                    if (selectedDurations.length === 0) {
-                        selectedDurations = ['all'];
-                        const allButton = document.querySelectorAll('.filters')[1].querySelector('.filter-btn');
-                        allButton.classList.add('active');
+                selector.style.display = 'none';
+                label.style.display = 'none';
+                btn.textContent = '+ Add Availability';
+            }
+            renderEventsTable();
+        }
+
+        let eventsPageSize = 10;
+        let eventsPage = 1;
+        let columnFilter = { key: '', value: '' };
+
+        function setEventsPageSize(size) {
+            eventsPageSize = size;
+            eventsPage = 1;
+            renderEventsTable();
+        }
+
+        function filterColumn(key) {
+            const value = prompt(`Enter filter for ${key}:`);
+            if (value !== null) {
+                columnFilter = { key, value: value.trim().toLowerCase() };
+                eventsPage = 1;
+                renderEventsTable();
+            }
+        }
+
+        function clearColumnFilter() {
+            columnFilter = { key: '', value: '' };
+            renderEventsTable();
+        }
+
+        function renderEventsTable() {
+            const tableBody = document.getElementById('events-table-body');
+            tableBody.innerHTML = '';
+
+            let filteredEvents = calendarEvents;
+
+            // Apply column filter if set
+            if (columnFilter.key && columnFilter.value) {
+                filteredEvents = filteredEvents.filter(ev => {
+                    let val = '';
+                    switch (columnFilter.key) {
+                        case 'name': val = ev.name; break;
+                        case 'location': val = ev.location; break;
+                        case 'date': val = ev.date; break;
+                        case 'time': val = ev.time; break;
+                        case 'type': val = ev.type; break;
+                        case 'availability':
+                            val = Object.entries(ev.availability)
+                                .filter(([user, v]) => v === 'yes')
+                                .map(([user]) => user)
+                                .join(', ');
+                            break;
                     }
-                } else {
-                    // Add duration to selection
-                    selectedDurations.push(duration);
-                    button.classList.add('active');
-                }
+                    return val && val.toLowerCase().includes(columnFilter.value);
+                });
+            }
+
+            // Pagination
+            const startIdx = (eventsPage - 1) * eventsPageSize;
+            const endIdx = startIdx + eventsPageSize;
+            const pagedEvents = filteredEvents.slice(startIdx, endIdx);
+
+            pagedEvents.forEach((ev, idx) => {
+                const attending = Object.entries(ev.availability)
+                    .filter(([user, val]) => val === 'yes')
+                    .map(([user]) => user.charAt(0).toUpperCase() + user.slice(1));
+                const availabilityCell = attending.length ? attending.join(', ') : '<span style="color:#64748b;">No one attending</span>';
+
+                const row = document.createElement('div');
+                row.className = 'table-row';
+                row.innerHTML = `
+                    <div>
+                        <div class="event-title">${ev.name}</div>
+                    </div>
+                    <div>${ev.location || ''}</div>
+                    <div>${new Date(ev.date).toLocaleDateString()}</div>
+                    <div>${ev.time}</div>
+                    <div><span class="event-type-badge ${ev.type}">${ev.type.charAt(0).toUpperCase() + ev.type.slice(1)}</span></div>
+                    <div>${availabilityCell}</div>
+                `;
+                tableBody.appendChild(row);
+            });
+
+            // Add pagination controls if needed
+            const totalPages = Math.ceil(filteredEvents.length / eventsPageSize);
+            if (totalPages > 1) {
+                const paginationDiv = document.createElement('div');
+                paginationDiv.style = 'display:flex; gap:8px; justify-content:center; align-items:center; margin:12px 0;';
+                paginationDiv.innerHTML = `
+                    <button class="filter-btn" ${eventsPage === 1 ? 'disabled' : ''} onclick="eventsPage--; renderEventsTable();">Prev</button>
+                    <span style="font-weight:500;">Page ${eventsPage} of ${totalPages}</span>
+                    <button class="filter-btn" ${eventsPage === totalPages ? 'disabled' : ''} onclick="eventsPage++; renderEventsTable();">Next</button>
+                    <button class="filter-btn" onclick="clearColumnFilter()">Clear Filter</button>
+                `;
+                tableBody.appendChild(paginationDiv);
+            }
+        }
+        
+        function toggleAvailability(eventIdx, user, checked) {
+            calendarEvents[eventIdx].availability[user] = checked ? 'yes' : '';
+            renderEventsTable();
+            renderCalendar();
+        }
+
+        function toggleDrillForm() {
+            const form = document.getElementById('drill-form');
+            if (form.style.display === 'none' || form.style.display === '') {
+                form.style.display = 'block';
+            } else {
+                form.style.display = 'none';
+            }
+        }
+        
+        function addDrillToRepository() {
+            // Get form values
+            const name = document.getElementById('drill-name').value;
+            const skill = document.getElementById('drill-skill').value;
+            const duration = document.getElementById('drill-duration').value;
+            const rating = document.getElementById('drill-rating').value;
+            const description = document.getElementById('drill-description').value;
+            
+            // Basic validation
+            if (!name || !skill || !duration || !description) {
+                alert('Please fill in all required fields.');
+                return;
             }
             
-            applyFilters();
+            // Create new drill object
+            const newDrill = {
+                name,
+                skill,
+                duration,
+                rating,
+                description,
+                id: Date.now() // Simple unique id
+            };
+            
+            // Add to drills array (replace this with your actual data handling)
+            drills.push(newDrill);
+            
+            // Show success message
+            const successMessage = document.getElementById('drill-success');
+            successMessage.style.display = 'block';
+            setTimeout(() => {
+                successMessage.style.display = 'none';
+            }, 3000);
+            
+            // Reset form
+            document.getElementById('drill-name').value = '';
+            document.getElementById('drill-skill').value = '';
+            document.getElementById('drill-duration').value = '';
+            document.getElementById('drill-rating').value = '';
+            document.getElementById('drill-description').value = '';
+            
+            // Re-render drills table (replace this with your actual render function)
+            renderDrillsTable();
         }
         
         function filterDrills() {
-            applyFilters();
-        }
-        
-        function applyFilters() {
-            const searchTerm = document.querySelector('.search-box').value.toLowerCase();
-            const rows = document.querySelectorAll('#drills-table-body .table-row');
-            
+            const query = document.querySelector('.search-box').value.toLowerCase();
+            const rows = document.querySelectorAll('.table-row');
             rows.forEach(row => {
-                const skill = row.getAttribute('data-skill');
-                const duration = row.getAttribute('data-duration');
-                const drillName = row.querySelector('.drill-name').textContent.toLowerCase();
-                const drillDescription = row.querySelector('.drill-description').textContent.toLowerCase();
-                
-                // Check skill filter - match if "all" is selected OR skill is in selected skills
-                const skillMatch = selectedSkills.includes('all') || selectedSkills.includes(skill);
-                
-                // Check duration filter - match if "all" is selected OR duration is in selected durations
-                const durationMatch = selectedDurations.includes('all') || selectedDurations.includes(duration);
-                
-                // Check search term
-                const searchMatch = searchTerm === '' || 
-                    drillName.includes(searchTerm) || 
-                    drillDescription.includes(searchTerm);
-                
-                // Show/hide row based on all filters
-                if (skillMatch && durationMatch && searchMatch) {
+                const name = row.querySelector('.drill-name').innerText.toLowerCase();
+                const description = row.querySelector('.drill-description').innerText.toLowerCase();
+                if (name.includes(query) || description.includes(query)) {
                     row.style.display = '';
                 } else {
                     row.style.display = 'none';
                 }
             });
-            
-            // Update filter count display (optional visual feedback)
-            console.log(`Filters applied: Skills(${selectedSkills.join(', ')}), Durations(${selectedDurations.join(', ')})`);
         }
         
-        function rateDrill(drillId) {
-            alert(`Rating drill: ${drillId}`);
-        }
-        
-        // Drill form functions
-        function toggleDrillForm() {
-            const form = document.getElementById('drill-form');
-            const isVisible = form.style.display !== 'none';
-            
-            if (isVisible) {
-                form.style.display = 'none';
-                clearDrillForm();
-            } else {
-                form.style.display = 'block';
-            }
-        }
-        
-        function clearDrillForm() {
-            document.getElementById('drill-name').value = '';
-            document.getElementById('drill-skill').value = '';
-            document.getElementById('drill-duration').value = '';
-            document.getElementById('drill-rating').value = 'Select rating...';
-            document.getElementById('drill-description').value = '';
-        }
-        
-        function handleFileUpload() {
-            // Create file input element
-            const fileInput = document.createElement('input');
-            fileInput.type = 'file';
-            fileInput.accept = '.pptx,.docx,.pdf';
-            fileInput.style.display = 'none';
-            
-            fileInput.onchange = function(e) {
-                const file = e.target.files[0];
-                if (file) {
-                    // Update upload text to show selected file
-                    document.querySelector('.upload-text').textContent = `Selected: ${file.name}`;
-                    document.querySelector('.upload-subtext').textContent = `File size: ${(file.size / 1024 / 1024).toFixed(2)} MB`;
-                    
-                    // Auto-populate drill name from filename if empty
-                    const drillNameInput = document.getElementById('drill-name');
-                    if (!drillNameInput.value) {
-                        const nameWithoutExt = file.name.replace(/\.[^/.]+$/, "");
-                        drillNameInput.value = nameWithoutExt;
+        function filterBySkill(skill) {
+            const rows = document.querySelectorAll('.table-row');
+            rows.forEach(row => {
+                if (skill === 'all') {
+                    row.style.display = '';
+                } else {
+                    const rowSkill = row.getAttribute('data-skill');
+                    if (rowSkill === skill) {
+                        row.style.display = '';
+                    } else {
+                        row.style.display = 'none';
                     }
                 }
-            };
-            
-            document.body.appendChild(fileInput);
-            fileInput.click();
-            document.body.removeChild(fileInput);
+            });
         }
         
-        function addDrillToRepository() {
-            try {
-                const name = document.getElementById('drill-name').value.trim();
-                const skill = document.getElementById('drill-skill').value;
-                const duration = document.getElementById('drill-duration').value;
-                const rating = document.getElementById('drill-rating').value;
-                const description = document.getElementById('drill-description').value.trim();
-                
-                // Debug: Check if elements exist
-                console.log('Form elements found:', {
-                    name: !!document.getElementById('drill-name'),
-                    skill: !!document.getElementById('drill-skill'),
-                    duration: !!document.getElementById('drill-duration'),
-                    rating: !!document.getElementById('drill-rating'),
-                    description: !!document.getElementById('drill-description')
-                });
-                
-                // Validate required fields
-                if (!name || !skill || !duration || !description) {
-                    alert('Please fill in all required fields (marked with *)');
-                    return;
-                }
-                
-                // Create skill badge class
-                const skillClass = skill.toLowerCase() === 'passing' ? 'skill-passing' : 
-                                  skill.toLowerCase() === 'awareness' ? 'skill-awareness' : 'skill-defense';
-                
-                // Create star rating display
-                let stars = '★☆☆☆☆';
-                if (rating && rating !== 'Select rating...') {
-                    if (rating.includes('1')) stars = '★☆☆☆☆';
-                    else if (rating.includes('2')) stars = '★★☆☆☆';
-                    else if (rating.includes('3')) stars = '★★★☆☆';
-                    else if (rating.includes('4')) stars = '★★★★☆';
-                    else if (rating.includes('5')) stars = '★★★★★';
-                }
-                
-                // Create new drill row
-                const newRow = document.createElement('div');
-                newRow.className = 'table-row';
-                newRow.setAttribute('data-skill', skill);
-                newRow.setAttribute('data-duration', duration);
-                
-                const drillId = name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
-                const durationShort = duration.replace(' minutes', ' min');
-                
-                newRow.innerHTML = `
-                    <div>
-                        <div class="drill-name">${name}</div>
-                        <div class="drill-description">${description}</div>
-                    </div>
-                    <div><span class="skill-badge ${skillClass}">${skill}</span></div>
-                    <div><span class="duration-badge">${durationShort}</span></div>
-                    <div><span class="star-rating">${stars}</span></div>
-                    <div><button class="rate-btn" onclick="rateDrill('${drillId}')">Rate</button></div>
-                `;
-                
-                // Add to table
-                const tableBody = document.getElementById('drills-table-body');
-                if (tableBody) {
-                    tableBody.appendChild(newRow);
+        function filterByDuration(duration) {
+            const rows = document.querySelectorAll('.table-row');
+            rows.forEach(row => {
+                if (duration === 'all') {
+                    row.style.display = '';
                 } else {
-                    console.error('Table body not found');
-                    return;
+                    const rowDuration = row.getAttribute('data-duration');
+                    if (rowDuration === duration) {
+                        row.style.display = '';
+                    } else {
+                        row.style.display = 'none';
+                    }
                 }
-                
-                // Show success message
-                const successMsg = document.getElementById('drill-success');
-                if (successMsg) {
-                    successMsg.style.display = 'block';
-                    setTimeout(() => {
-                        successMsg.style.display = 'none';
-                    }, 3000);
-                }
-                
-                // Hide form and clear it
-                toggleDrillForm();
-                
-                console.log(`New drill added: ${name}`);
-                
-            } catch (error) {
-                console.error('Error adding drill:', error);
-                alert('Error adding drill: ' + error.message);
-            }
+            });
         }
+
+        // Re-render table when user changes
+        document.getElementById('availabilityUser').addEventListener('change', renderEventsTable);
     </script>
 </body>
 </html>
