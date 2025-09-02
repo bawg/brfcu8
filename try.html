@@ -264,6 +264,7 @@
             z-index: 25;
             box-shadow: 0 2px 4px rgba(0,0,0,0.3);
             transition: all 0.1s ease;
+            pointer-events: none; /* Prevent ball from intercepting clicks */
         }
 
         /* Pass line CSS */
@@ -924,6 +925,9 @@
                     document.getElementById('hideWaypointBtn').style.display = 'inline-block';
                     document.getElementById('lassoBtn').style.display = 'inline-block';
                     this.setWaypointsVisible(!this.waypointsHidden);
+                    
+                    // Hide ball in design mode
+                    this.ball.style.display = 'none';
 
                     // Set main control buttons to dark grey
                     const mainBtns = document.querySelectorAll('.controls:not(#designControlsRow) .control-btn');
@@ -965,6 +969,13 @@
                 if (!this.isDesignMode) {
                     if (this.isPlaying) return;
                     this.generateCurrentDrill(); // <-- Add this line
+                    
+                    // Show ball in play mode
+                    if (this.players.length > 0) {
+                        this.ballCarrier = this.players[0];
+                        this.updateBallPosition();
+                    }
+                    
                     this.isPlaying = true;
                     this.animateMovement();
                 } else {
@@ -1352,22 +1363,8 @@
                     animate();
                 });
             }
-                // Remove existing pass lines
-                this.pathsSvg.querySelectorAll('.pass-line').forEach(line => line.remove());
-                
-                // Draw pass lines
-                this.passes.forEach(pass => {
-                    const passerX = parseFloat(pass.passer.style.left) + 6;
-                    const passerY = parseFloat(pass.passer.style.top) + 6;
-                    
-                    const line = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-                    const d = `M ${passerX} ${passerY} L ${pass.targetX + 6} ${pass.targetY + 6}`;
-                    line.setAttribute('d', d);
-                    line.setAttribute('class', 'pass-line');
-                    
-                    this.pathsSvg.appendChild(line);
-                });
-            }
+
+            toggleAddCodeMode() {
                 this.isAddCodeMode = !this.isAddCodeMode;
                 document.getElementById('addCodeBtn').classList.toggle('active', this.isAddCodeMode);
                 this.updateModeIndicator(this.isAddCodeMode ? 'Add Code mode: Click on the pitch to add a code. Double-click a code to remove.' : 'Design Mode');
