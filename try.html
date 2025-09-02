@@ -599,20 +599,10 @@
                     return;
                 }
                 
-                // Handle legacy player-to-player pass creation mode (kept for backward compatibility)
-                if (this.isAddPassMode && clickedPlayer && !this.isCreatingWaypointPass) {
-                    if (!this.selectedPasser) {
-                        // Select the passer
-                        this.selectedPasser = clickedPlayer;
-                        this.selectedPasser.classList.add('selected');
-                        this.updateModeIndicator('Pass mode: Passer selected! Now click on another player to select as receiver.');
-                    } else if (clickedPlayer !== this.selectedPasser) {
-                        // Select the receiver and create the pass
-                        this.createPass(this.selectedPasser, clickedPlayer);
-                        this.selectedPasser.classList.remove('selected');
-                        this.selectedPasser = null;
-                        this.updateModeIndicator('Pass created! Pass will go to receiver\'s waypoint. Click more players to create additional passes.');
-                    }
+                // In pass mode, only allow waypoint selection - no player selection
+                if (this.isAddPassMode && clickedPlayer) {
+                    // Inform user they need to use waypoints
+                    this.updateModeIndicator('Pass mode: Please click on waypoints, not players. Create waypoints first by exiting pass mode.');
                     return;
                 }
                 
