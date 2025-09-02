@@ -574,18 +574,24 @@
                 const clickedWaypoint = this.getWaypointAt(x, y);
                 
                 // Handle pass creation mode
-                if (this.isAddPassMode && clickedPlayer) {
-                    if (!this.selectedPasser) {
+                if (this.isAddPassMode) {
+                    if (clickedPlayer && !this.selectedPasser) {
                         // Select the passer
                         this.selectedPasser = clickedPlayer;
                         this.selectedPasser.classList.add('selected');
-                        this.updateModeIndicator('Pass mode: Passer selected! Now click on another player to select as receiver.');
-                    } else if (clickedPlayer !== this.selectedPasser) {
-                        // Select the receiver and create the pass
+                        this.updateModeIndicator('Pass mode: Passer selected! Now click on another player or waypoint marker to select as pass destination.');
+                    } else if (clickedPlayer && clickedPlayer !== this.selectedPasser) {
+                        // Select the receiver player and create the pass
                         this.createPass(this.selectedPasser, clickedPlayer);
                         this.selectedPasser.classList.remove('selected');
                         this.selectedPasser = null;
-                        this.updateModeIndicator('Pass created! Pass will go to receiver\'s waypoint. Click more players to create additional passes.');
+                        this.updateModeIndicator('Pass created! Pass will go to receiver\'s waypoint. Click more players or waypoints to create additional passes.');
+                    } else if (clickedWaypoint && this.selectedPasser) {
+                        // Select the waypoint marker and create pass to waypoint
+                        this.createPassToWaypoint(this.selectedPasser, clickedWaypoint);
+                        this.selectedPasser.classList.remove('selected');
+                        this.selectedPasser = null;
+                        this.updateModeIndicator('Pass created to waypoint! Click more players or waypoints to create additional passes.');
                     }
                     return;
                 }
@@ -1073,7 +1079,7 @@
                             if (passerProgress >= 0.8) {
                                 pass.executed = true;
                                 
-                                // Animate ball to receiver's waypoint
+                                // Animate ball to target (waypoint or receiver position)
                                 const ballX = parseFloat(this.ball.style.left) + 6;
                                 const ballY = parseFloat(this.ball.style.top) + 6;
                                 
@@ -1083,8 +1089,33 @@
                                     880
                                 );
                                 
-                                // Transfer ball to receiver
-                                this.ballCarrier = pass.receiver;
+                                // Transfer ball to receiver if it's a player pass
+                                if (pass.receiver) {
+                                    this.ballCarrier = pass.receiver;
+                                } else if (pass.isWaypointPass) {
+                                    // For waypoint passes, find nearest player to the waypoint
+                                    let nearestPlayer = null;
+                                    let nearestDistance = Infinity;
+                                    
+                                    this.players.forEach(player => {
+                                        const playerX = parseFloat(player.style.left) + 6;
+                                        const playerY = parseFloat(player.style.top) + 6;
+                                        const distance = Math.sqrt(
+                                            Math.pow(playerX - (pass.targetX + 6), 2) + 
+                                            Math.pow(playerY - (pass.targetY + 6), 2)
+                                        );
+                                        
+                                        if (distance < nearestDistance) {
+                                            nearestDistance = distance;
+                                            nearestPlayer = player;
+                                        }
+                                    });
+                                    
+                                    // Only transfer to nearest player if they're reasonably close (within 50px)
+                                    if (nearestPlayer && nearestDistance < 50) {
+                                        this.ballCarrier = nearestPlayer;
+                                    }
+                                }
                             }
                         }
                     });
@@ -1306,15 +1337,35 @@
                 this.drawPasses();
             }
 
+            createPassToWaypoint(passer, waypointMarker) {
+                // Get waypoint marker's position
+                const waypointX = parseInt(waypointMarker.style.left) + 8 - 6; // Center of marker minus player offset
+                const waypointY = parseInt(waypointMarker.style.top) + 8 - 6;
+                
+                const pass = {
+                    passer: passer,
+                    receiver: null, // No specific receiver for waypoint passes
+                    targetX: waypointX,
+                    targetY: waypointY,
+                    isWaypointPass: true,
+                    executed: false
+                };
+                
+                this.passes.push(pass);
+                this.drawPasses();
+            }
+
             drawPasses() {
                 // Remove existing pass lines only
                 this.pathsSvg.querySelectorAll('.pass-line').forEach(line => line.remove());
                 
                 // Draw pass lines
                 this.passes.forEach(pass => {
+                    // Get passer's current position or start position if not animated
                     const passerX = parseFloat(pass.passer.style.left) + 6;
                     const passerY = parseFloat(pass.passer.style.top) + 6;
                     
+                    // Draw direct line from passer to target (waypoint or receiver position)
                     const line = document.createElementNS('http://www.w3.org/2000/svg', 'path');
                     const d = `M ${passerX} ${passerY} L ${pass.targetX + 6} ${pass.targetY + 6}`;
                     line.setAttribute('d', d);
@@ -1382,7 +1433,7 @@
                     
                     this.selectedPasser = null;
                     document.getElementById('addPassBtn').classList.add('active');
-                    this.updateModeIndicator('Add Pass mode: Click on a player to select as passer, then click another player to select as receiver.');
+                    this.updateModeIndicator('Add Pass mode: Click on a player to select as passer, then click another player or waypoint marker to select as pass destination.');
                 } else {
                     this.selectedPasser = null;
                     document.getElementById('addPassBtn').classList.remove('active');
