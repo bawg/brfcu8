@@ -252,6 +252,29 @@
             z-index: 5;
             pointer-events: none;
         }
+
+        /* Ball CSS */
+        .ball {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            background: #8B4513;
+            border: 2px solid #A0522D;
+            border-radius: 50%;
+            z-index: 25;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            transition: all 0.1s ease;
+        }
+
+        /* Pass line CSS */
+        .pass-line {
+            stroke: #FF8C00;
+            stroke-width: 2;
+            stroke-dasharray: 8,4;
+            fill: none;
+            z-index: 3;
+            opacity: 0.8;
+        }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/gif.js.optimized/dist/gif.js"></script>
@@ -325,6 +348,7 @@
     <div class="rugby-widget" id="rugbyPitch">
         <svg class="movement-paths" style="position: absolute; width: 100%; height: 100%; pointer-events: none;">
         </svg>
+        <div class="ball" id="ball" style="left: 50px; top: 200px; display: none;"></div>
     </div>
 
     <div class="timeline" id="timeline">
@@ -347,6 +371,7 @@
     </div>
     <div class="controls" id="designControlsRow">
         <button class="control-btn" id="addCodeBtn" onclick="rugbyDesigner.toggleAddCodeMode()" style="background: #2196F3; display: none;">Add Cones</button>
+        <button class="control-btn" id="addPassBtn" onclick="rugbyDesigner.toggleAddPassMode()" style="background: #FF8C00; display: none;">Add a Pass</button>
         <button class="control-btn" id="hideWaypointBtn" onclick="rugbyDesigner.toggleWaypoints()" style="background: #888; display: none;">Hide Waypoints</button>
         <button class="control-btn" id="lassoBtn" onclick="rugbyDesigner.toggleLassoMode()" style="background: #6c757d; display: none;">Move</button>
     </div>
@@ -359,6 +384,7 @@
                 this.timelineMarker = document.getElementById('timelineMarker');
                 this.modeIndicator = document.getElementById('modeIndicator');
                 this.pathsSvg = this.pitch.querySelector('.movement-paths');
+                this.ball = document.getElementById('ball');
                 
                 this.players = [];
                 this.startPositions = [];
@@ -382,6 +408,13 @@
                 this.lassoMode = false;
                 this.draggedObject = null;
                 this.dragOffset = { x: 0, y: 0 };
+                
+                // Pass-related properties
+                this.passes = [];
+                this.isAddPassMode = false;
+                this.selectedPasser = null;
+                this.ballCarrier = null;
+                this.ballAnimationPromise = null;
                 
                 this.bindEvents();
                 this.initPlayers();
@@ -539,7 +572,25 @@
                 const clickedPlayer = this.getPlayerAt(x, y);
                 const clickedWaypoint = this.getWaypointAt(x, y);
                 
-                if (clickedPlayer && !this.settingEndPosition) {
+                // Handle pass creation mode
+                if (this.isAddPassMode && clickedPlayer) {
+                    if (!this.selectedPasser) {
+                        // Select the passer
+                        this.selectedPasser = clickedPlayer;
+                        this.selectedPasser.classList.add('selected');
+                        this.updateModeIndicator('Pass mode: Passer selected! Now click on another player to select as receiver.');
+                    } else if (clickedPlayer !== this.selectedPasser) {
+                        // Select the receiver and create the pass
+                        this.createPass(this.selectedPasser, clickedPlayer);
+                        this.selectedPasser.classList.remove('selected');
+                        this.selectedPasser = null;
+                        this.updateModeIndicator('Pass created! Pass will go to receiver\'s waypoint. Click more players to create additional passes.');
+                    }
+                    return;
+                }
+                
+                // Handle normal waypoint creation
+                if (clickedPlayer && !this.settingEndPosition && !this.isAddPassMode) {
                     // Start creating a path for this player
                     this.selectPlayer(clickedPlayer);
                     this.settingEndPosition = true;
@@ -814,6 +865,9 @@
                         }
                     }
                 });
+                
+                // Draw passes after drawing movement paths
+                this.drawPasses();
             }
 
             drawArrow(startPoint, endPoint, team) {
@@ -866,6 +920,7 @@
                     this.pitch.classList.remove('playing');
                     document.getElementById('designBtn').classList.add('active');
                     document.getElementById('addCodeBtn').style.display = 'inline-block';
+                    document.getElementById('addPassBtn').style.display = 'inline-block';
                     document.getElementById('hideWaypointBtn').style.display = 'inline-block';
                     document.getElementById('lassoBtn').style.display = 'inline-block';
                     this.setWaypointsVisible(!this.waypointsHidden);
@@ -880,6 +935,8 @@
                     // Set design-only buttons to light grey
                     document.getElementById('addCodeBtn').style.background = '#e0e0e0';
                     document.getElementById('addCodeBtn').style.color = '#333';
+                    document.getElementById('addPassBtn').style.background = '#e0e0e0';
+                    document.getElementById('addPassBtn').style.color = '#333';
                     document.getElementById('hideWaypointBtn').style.background = '#e0e0e0';
                     document.getElementById('hideWaypointBtn').style.color = '#333';
                     document.getElementById('lassoBtn').style.background = '#e0e0e0';
@@ -896,6 +953,7 @@
                     this.pitch.classList.add('playing');
                     document.getElementById('designBtn').classList.remove('active');
                     document.getElementById('addCodeBtn').style.display = 'none';
+                    document.getElementById('addPassBtn').style.display = 'none';
                     document.getElementById('hideWaypointBtn').style.display = 'none';
                     document.getElementById('lassoBtn').style.display = 'none';
 
@@ -969,6 +1027,15 @@
 
             animateMovement() {
                 const startTime = Date.now();
+                
+                // Initialize ball carrier (first player with ball)
+                if (!this.ballCarrier && this.players.length > 0) {
+                    this.ballCarrier = this.players[0];
+                }
+                
+                // Reset pass execution flags
+                this.passes.forEach(pass => pass.executed = false);
+                
                 const animate = () => {
                     if (!this.isPlaying) return;
                     
@@ -983,6 +1050,34 @@
                         player.style.top = position.y + 'px';
                     });
                     
+                    // Update ball position to follow carrier
+                    this.updateBallPosition();
+                    
+                    // Check for pass execution at 80% progress
+                    this.passes.forEach(async (pass) => {
+                        if (!pass.executed && this.ballCarrier === pass.passer) {
+                            const passerMovement = this.currentDrill.movements[this.players.indexOf(pass.passer)];
+                            const passerProgress = this.getMovementProgress(passerMovement, progress);
+                            
+                            if (passerProgress >= 0.8) {
+                                pass.executed = true;
+                                
+                                // Animate ball to receiver's waypoint
+                                const ballX = parseFloat(this.ball.style.left) + 6;
+                                const ballY = parseFloat(this.ball.style.top) + 6;
+                                
+                                await this.animateBallToWaypoint(
+                                    ballX, ballY,
+                                    pass.targetX + 6, pass.targetY + 6,
+                                    800
+                                );
+                                
+                                // Transfer ball to receiver
+                                this.ballCarrier = pass.receiver;
+                            }
+                        }
+                    });
+                    
                     this.timelineMarker.style.left = (progress * (this.timeline.offsetWidth - 2)) + 'px';
                     
                     if (progress < 1) {
@@ -993,6 +1088,33 @@
                 };
                 
                 animate();
+            }
+
+            getMovementProgress(movement, overallProgress) {
+                // Calculate progress along a specific player's movement path
+                const { pathPoints, totalDistance } = movement;
+                
+                if (pathPoints.length <= 1 || totalDistance === 0) {
+                    return overallProgress;
+                }
+                
+                const targetDistance = totalDistance * overallProgress;
+                let currentDistance = 0;
+                
+                for (let i = 0; i < pathPoints.length - 1; i++) {
+                    const dx = pathPoints[i + 1].x - pathPoints[i].x;
+                    const dy = pathPoints[i + 1].y - pathPoints[i].y;
+                    const segmentDistance = Math.sqrt(dx * dx + dy * dy);
+                    
+                    if (currentDistance + segmentDistance >= targetDistance) {
+                        const segmentProgress = (targetDistance - currentDistance) / segmentDistance;
+                        return (i + segmentProgress) / (pathPoints.length - 1);
+                    }
+                    
+                    currentDistance += segmentDistance;
+                }
+                
+                return 1.0;
             }
 
             getPositionAlongPath(movement, progress) {
@@ -1046,6 +1168,13 @@
                     player.style.left = player.dataset.startX + 'px';
                     player.style.top = player.dataset.startY + 'px';
                 });
+                
+                // Reset ball and passes
+                if (this.players.length > 0) {
+                    this.ballCarrier = this.players[0];
+                    this.updateBallPosition();
+                }
+                this.passes.forEach(pass => pass.executed = false);
             }
 
             clearAll() {
@@ -1061,6 +1190,12 @@
                 this.enterDesignMode();
                 this.codes.forEach(code => code.remove());
                 this.codes = [];
+                
+                // Clear passes
+                this.passes = [];
+                this.drawPasses();
+                this.ballCarrier = null;
+                this.ball.style.display = 'none';
             }
 
             loadSample() {
@@ -1130,14 +1265,132 @@
                     }
                 });
                 
+                // Add sample passes to demonstrate pass features
+                if (this.players.length >= 3) {
+                    // Pass from player 1 to player 2's waypoint
+                    this.createPass(this.players[0], this.players[1]);
+                    
+                    // Pass from player 2 to player 3's waypoint  
+                    this.createPass(this.players[1], this.players[2]);
+                }
+                
                 this.drawPaths();
-                this.updateModeIndicator('Sample loaded with complex movement patterns! Click Play to see the movements');
+                this.updateModeIndicator('Sample loaded with movement patterns and passes! Orange dashed lines show passes to waypoints. Click Play to see ball animation.');
             }
 
-            toggleAddCodeMode() {
+            createPass(passer, receiver) {
+                // Get receiver's end position (waypoint or starting position)
+                const receiverEndX = parseFloat(receiver.dataset.endX);
+                const receiverEndY = parseFloat(receiver.dataset.endY);
+                
+                const pass = {
+                    passer: passer,
+                    receiver: receiver,
+                    targetX: receiverEndX,
+                    targetY: receiverEndY,
+                    executed: false
+                };
+                
+                this.passes.push(pass);
+                this.drawPasses();
+            }
+
+            drawPasses() {
+                // Remove existing pass lines only
+                this.pathsSvg.querySelectorAll('.pass-line').forEach(line => line.remove());
+                
+                // Draw pass lines
+                this.passes.forEach(pass => {
+                    const passerX = parseFloat(pass.passer.style.left) + 6;
+                    const passerY = parseFloat(pass.passer.style.top) + 6;
+                    
+                    const line = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                    const d = `M ${passerX} ${passerY} L ${pass.targetX + 6} ${pass.targetY + 6}`;
+                    line.setAttribute('d', d);
+                    line.setAttribute('class', 'pass-line');
+                    
+                    this.pathsSvg.appendChild(line);
+                });
+            }
+
+            updateBallPosition() {
+                if (this.ballCarrier) {
+                    const carrierX = parseFloat(this.ballCarrier.style.left) + 6;
+                    const carrierY = parseFloat(this.ballCarrier.style.top) + 6;
+                    this.ball.style.left = (carrierX - 6) + 'px';
+                    this.ball.style.top = (carrierY - 6) + 'px';
+                    this.ball.style.display = 'block';
+                }
+            }
+
+            animateBallToWaypoint(fromX, fromY, toX, toY, duration = 500) {
+                return new Promise((resolve) => {
+                    const startTime = Date.now();
+                    const initialX = fromX;
+                    const initialY = fromY;
+                    
+                    const animate = () => {
+                        const elapsed = Date.now() - startTime;
+                        const progress = Math.min(elapsed / duration, 1);
+                        
+                        // Smooth easing
+                        const easedProgress = 1 - Math.pow(1 - progress, 3);
+                        
+                        const currentX = initialX + (toX - initialX) * easedProgress;
+                        const currentY = initialY + (toY - initialY) * easedProgress;
+                        
+                        this.ball.style.left = (currentX - 6) + 'px';
+                        this.ball.style.top = (currentY - 6) + 'px';
+                        
+                        if (progress < 1) {
+                            requestAnimationFrame(animate);
+                        } else {
+                            resolve();
+                        }
+                    };
+                    
+                    animate();
+                });
+            }
+                // Remove existing pass lines
+                this.pathsSvg.querySelectorAll('.pass-line').forEach(line => line.remove());
+                
+                // Draw pass lines
+                this.passes.forEach(pass => {
+                    const passerX = parseFloat(pass.passer.style.left) + 6;
+                    const passerY = parseFloat(pass.passer.style.top) + 6;
+                    
+                    const line = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                    const d = `M ${passerX} ${passerY} L ${pass.targetX + 6} ${pass.targetY + 6}`;
+                    line.setAttribute('d', d);
+                    line.setAttribute('class', 'pass-line');
+                    
+                    this.pathsSvg.appendChild(line);
+                });
+            }
                 this.isAddCodeMode = !this.isAddCodeMode;
                 document.getElementById('addCodeBtn').classList.toggle('active', this.isAddCodeMode);
                 this.updateModeIndicator(this.isAddCodeMode ? 'Add Code mode: Click on the pitch to add a code. Double-click a code to remove.' : 'Design Mode');
+            }
+
+            toggleAddPassMode() {
+                this.isAddPassMode = !this.isAddPassMode;
+                if (this.isAddPassMode) {
+                    // Exit other modes
+                    this.isAddCodeMode = false;
+                    this.lassoMode = false;
+                    document.getElementById('addCodeBtn').classList.remove('active');
+                    document.getElementById('lassoBtn').classList.remove('active');
+                    document.getElementById('lassoBtn').textContent = 'Move';
+                    
+                    this.selectedPasser = null;
+                    document.getElementById('addPassBtn').classList.add('active');
+                    this.updateModeIndicator('Add Pass mode: Click on a player to select as passer, then click another player to select as receiver.');
+                } else {
+                    this.selectedPasser = null;
+                    document.getElementById('addPassBtn').classList.remove('active');
+                    this.updateModeIndicator('Design Mode');
+                }
             }
 
             handleCodeClick(e) {
