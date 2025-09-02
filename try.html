@@ -256,11 +256,11 @@
         /* Ball CSS */
         .ball {
             position: absolute;
-            width: 12px;
-            height: 12px;
+            width: 14px;
+            height: 10px;
             background: #8B4513;
             border: 2px solid #A0522D;
-            border-radius: 50%;
+            border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
             z-index: 25;
             box-shadow: 0 2px 4px rgba(0,0,0,0.3);
             transition: all 0.1s ease;
@@ -1080,7 +1080,7 @@
                                 await this.animateBallToWaypoint(
                                     ballX, ballY,
                                     pass.targetX + 6, pass.targetY + 6,
-                                    800
+                                    880
                                 );
                                 
                                 // Transfer ball to receiver
