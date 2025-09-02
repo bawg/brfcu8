@@ -1090,25 +1090,52 @@
                     
                     // Check for pass execution at 80% progress
                     this.passes.forEach(async (pass) => {
-                        if (!pass.executed && this.ballCarrier === pass.passer) {
-                            const passerMovement = this.currentDrill.movements[this.players.indexOf(pass.passer)];
-                            const passerProgress = this.getMovementProgress(passerMovement, progress);
-                            
-                            if (passerProgress >= 0.8) {
-                                pass.executed = true;
-                                
-                                // Animate ball to receiver's waypoint
+                        if (!pass.executed) {
+                            // Handle waypoint-sequence passes
+                            if (pass.type === 'waypoint-sequence' && pass.waypoints && pass.waypoints.length >= 2) {
+                                // For waypoint passes, execute when the ball carrier is close to the first waypoint
+                                const firstWaypoint = pass.waypoints[0];
                                 const ballX = parseFloat(this.ball.style.left) + 6;
                                 const ballY = parseFloat(this.ball.style.top) + 6;
+                                const waypointX = parseInt(firstWaypoint.style.left) + 8;
+                                const waypointY = parseInt(firstWaypoint.style.top) + 8;
+                                const distance = Math.sqrt((ballX - waypointX) ** 2 + (ballY - waypointY) ** 2);
                                 
-                                await this.animateBallToWaypoint(
-                                    ballX, ballY,
-                                    pass.targetX + 6, pass.targetY + 6,
-                                    880
-                                );
+                                if (distance < 25) { // Within 25 pixels of first waypoint
+                                    pass.executed = true;
+                                    
+                                    // Animate ball along the waypoint sequence
+                                    await this.animateBallAlongWaypoints(pass.waypoints, 1800);
+                                    
+                                    // Transfer ball to the player at the final waypoint (if any)
+                                    const finalWaypoint = pass.waypoints[pass.waypoints.length - 1];
+                                    const finalWaypointPlayer = finalWaypoint.ownerPlayer;
+                                    if (finalWaypointPlayer) {
+                                        this.ballCarrier = finalWaypointPlayer;
+                                    }
+                                }
+                            }
+                            // Handle regular passes
+                            else if (this.ballCarrier === pass.passer) {
+                                const passerMovement = this.currentDrill.movements[this.players.indexOf(pass.passer)];
+                                const passerProgress = this.getMovementProgress(passerMovement, progress);
                                 
-                                // Transfer ball to receiver
-                                this.ballCarrier = pass.receiver;
+                                if (passerProgress >= 0.8) {
+                                    pass.executed = true;
+                                    
+                                    // Animate ball to receiver's waypoint
+                                    const ballX = parseFloat(this.ball.style.left) + 6;
+                                    const ballY = parseFloat(this.ball.style.top) + 6;
+                                    
+                                    await this.animateBallToWaypoint(
+                                        ballX, ballY,
+                                        pass.targetX + 6, pass.targetY + 6,
+                                        1200
+                                    );
+                                    
+                                    // Transfer ball to receiver
+                                    this.ballCarrier = pass.receiver;
+                                }
                             }
                         }
                     });
@@ -1229,6 +1256,11 @@
                 // Clear passes
                 this.passes = [];
                 this.drawPasses();
+                
+                // Clear waypoint-based pass lines that are attached to the pitch
+                this.pitch.querySelectorAll('.waypoint-pass-line').forEach(line => line.remove());
+                this.pitch.querySelectorAll('.current-pass-path').forEach(line => line.remove());
+                
                 this.ballCarrier = null;
                 this.ball.style.display = 'none';
             }
@@ -1385,6 +1417,28 @@
                     };
                     
                     animate();
+                });
+            }
+
+            animateBallAlongWaypoints(waypoints, duration = 1500) {
+                return new Promise(async (resolve) => {
+                    if (waypoints.length < 2) {
+                        resolve();
+                        return;
+                    }
+                    
+                    const segmentDuration = duration / (waypoints.length - 1);
+                    
+                    for (let i = 0; i < waypoints.length - 1; i++) {
+                        const fromX = parseInt(waypoints[i].style.left) + 8; // Center of waypoint
+                        const fromY = parseInt(waypoints[i].style.top) + 8;
+                        const toX = parseInt(waypoints[i + 1].style.left) + 8;
+                        const toY = parseInt(waypoints[i + 1].style.top) + 8;
+                        
+                        await this.animateBallToWaypoint(fromX, fromY, toX, toY, segmentDuration);
+                    }
+                    
+                    resolve();
                 });
             }
 
