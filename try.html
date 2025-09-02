@@ -101,6 +101,22 @@
             transform: scale(1.1);
         }
 
+        .waypoint-marker.pass-waypoint-selected {
+            background: #FF8C00;
+            border: 3px solid #FFD700;
+            box-shadow: 0 0 0 2px #FF8C00, 0 4px 8px rgba(255, 140, 0, 0.4);
+        }
+
+        .current-pass-path {
+            opacity: 0.8;
+        }
+
+        .waypoint-pass-line {
+            background: #FF8C00 !important;
+            opacity: 0.6;
+            z-index: 18 !important;
+        }
+
         .setup-controls {
             text-align: center;
             margin: 20px 0;
@@ -417,6 +433,10 @@
                 this.ballCarrier = null;
                 this.ballAnimationPromise = null;
                 
+                // Waypoint-based pass properties
+                this.currentPassWaypoints = [];
+                this.isCreatingWaypointPass = false;
+                
                 this.bindEvents();
                 this.initPlayers();
                 this.setupSaveUpload();
@@ -573,8 +593,14 @@
                 const clickedPlayer = this.getPlayerAt(x, y);
                 const clickedWaypoint = this.getWaypointAt(x, y);
                 
-                // Handle pass creation mode
-                if (this.isAddPassMode && clickedPlayer) {
+                // Handle waypoint-based pass creation mode
+                if (this.isAddPassMode && clickedWaypoint) {
+                    this.addWaypointToPass(clickedWaypoint);
+                    return;
+                }
+                
+                // Handle legacy player-to-player pass creation mode (kept for backward compatibility)
+                if (this.isAddPassMode && clickedPlayer && !this.isCreatingWaypointPass) {
                     if (!this.selectedPasser) {
                         // Select the passer
                         this.selectedPasser = clickedPlayer;
@@ -755,6 +781,14 @@
 
             handleRightClick(e) {
                 e.preventDefault();
+                
+                // Handle finishing waypoint pass creation
+                if (this.isAddPassMode && this.isCreatingWaypointPass && this.currentPassWaypoints.length >= 2) {
+                    this.finishWaypointPass();
+                    return;
+                }
+                
+                // Handle finishing regular path creation
                 if (this.settingEndPosition && this.selectedPlayer) {
                     this.finishPath();
                 }
@@ -1380,13 +1414,117 @@
                     document.getElementById('lassoBtn').classList.remove('active');
                     document.getElementById('lassoBtn').textContent = 'Move';
                     
+                    // Reset pass creation state
                     this.selectedPasser = null;
+                    this.currentPassWaypoints = [];
+                    this.isCreatingWaypointPass = false;
                     document.getElementById('addPassBtn').classList.add('active');
-                    this.updateModeIndicator('Add Pass mode: Click on a player to select as passer, then click another player to select as receiver.');
+                    this.updateModeIndicator('Select the waypoint where the pass originates');
                 } else {
+                    // Reset all pass-related state
                     this.selectedPasser = null;
+                    this.currentPassWaypoints = [];
+                    this.isCreatingWaypointPass = false;
+                    this.clearPassWaypointHighlights();
                     document.getElementById('addPassBtn').classList.remove('active');
                     this.updateModeIndicator('Design Mode');
+                }
+            }
+
+            clearPassWaypointHighlights() {
+                // Remove highlights from all waypoints in the current pass
+                this.currentPassWaypoints.forEach(waypoint => {
+                    if (waypoint && waypoint.classList) {
+                        waypoint.classList.remove('pass-waypoint-selected');
+                    }
+                });
+                
+                // Remove temporary pass path visualization
+                const tempPaths = this.pitch.querySelectorAll('.current-pass-path');
+                tempPaths.forEach(path => path.remove());
+            }
+
+            addWaypointToPass(waypoint) {
+                // Add the waypoint to the current pass sequence
+                this.currentPassWaypoints.push(waypoint);
+                waypoint.classList.add('pass-waypoint-selected');
+                this.isCreatingWaypointPass = true;
+                
+                if (this.currentPassWaypoints.length === 1) {
+                    this.updateModeIndicator('Pass origin selected. Click on additional waypoints to build the pass path. Right-click to finish.');
+                } else {
+                    this.updateModeIndicator(`Pass path: ${this.currentPassWaypoints.length} waypoints selected. Click more waypoints or right-click to finish.`);
+                }
+                
+                // Draw the pass path visualization
+                this.drawCurrentPassPath();
+            }
+
+            drawCurrentPassPath() {
+                // Remove existing pass path visualization
+                const existingPaths = this.pitch.querySelectorAll('.current-pass-path');
+                existingPaths.forEach(path => path.remove());
+                
+                if (this.currentPassWaypoints.length < 2) return;
+                
+                // Draw lines connecting the waypoints in the current pass
+                for (let i = 0; i < this.currentPassWaypoints.length - 1; i++) {
+                    const from = this.currentPassWaypoints[i];
+                    const to = this.currentPassWaypoints[i + 1];
+                    
+                    const fromX = parseInt(from.style.left) + 8; // Center of waypoint
+                    const fromY = parseInt(from.style.top) + 8;
+                    const toX = parseInt(to.style.left) + 8;
+                    const toY = parseInt(to.style.top) + 8;
+                    
+                    const line = document.createElement('div');
+                    line.className = 'current-pass-path';
+                    line.style.position = 'absolute';
+                    line.style.background = '#FF8C00';
+                    line.style.height = '3px';
+                    line.style.zIndex = '20';
+                    line.style.pointerEvents = 'none';
+                    
+                    const length = Math.sqrt((toX - fromX) ** 2 + (toY - fromY) ** 2);
+                    const angle = Math.atan2(toY - fromY, toX - fromX) * 180 / Math.PI;
+                    
+                    line.style.width = length + 'px';
+                    line.style.left = fromX + 'px';
+                    line.style.top = fromY + 'px';
+                    line.style.transform = `rotate(${angle}deg)`;
+                    line.style.transformOrigin = 'left center';
+                    
+                    this.pitch.appendChild(line);
+                }
+            }
+
+            finishWaypointPass() {
+                if (this.currentPassWaypoints.length >= 2) {
+                    // Create a pass object representing the waypoint sequence
+                    const passData = {
+                        type: 'waypoint-sequence',
+                        waypoints: [...this.currentPassWaypoints],
+                        id: Date.now() // Simple ID for tracking
+                    };
+                    
+                    // Add to passes array for potential future use
+                    this.passes.push(passData);
+                    
+                    // Convert current pass path lines to permanent ones
+                    const tempPaths = this.pitch.querySelectorAll('.current-pass-path');
+                    tempPaths.forEach(path => {
+                        path.classList.remove('current-pass-path');
+                        path.classList.add('waypoint-pass-line');
+                    });
+                    
+                    this.updateModeIndicator(`Pass path created with ${this.currentPassWaypoints.length} waypoints! Click on waypoints to create another pass.`);
+                    
+                    // Reset state but keep pass mode active for creating additional passes
+                    this.currentPassWaypoints = [];
+                    this.isCreatingWaypointPass = false;
+                    
+                    // Remove temporary highlights
+                    this.clearPassWaypointHighlights();
                 }
             }
 
