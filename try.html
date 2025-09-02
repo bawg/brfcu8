@@ -253,6 +253,9 @@
             pointer-events: none;
         }
     </style>
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gif.js.optimized/dist/gif.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gif.js.optimized/dist/gif.worker.js"></script>
 </head>
 <body>
     <div class="info">
@@ -339,6 +342,8 @@
         <button class="control-btn" id="saveBtn">Save Drill</button>
         <input type="file" id="uploadInput" style="display:none" accept=".json">
         <button class="control-btn" id="uploadBtn">Upload Drill</button>
+        <button class="control-btn" id="downloadGifBtn">Download GIF</button>
+        <span id="gifProgress" style="font-size:12px; margin-left:10px;"></span>
     </div>
     <div class="controls" id="designControlsRow">
         <button class="control-btn" id="addCodeBtn" onclick="rugbyDesigner.toggleAddCodeMode()" style="background: #2196F3; display: none;">Add Cones</button>
@@ -381,6 +386,7 @@
                 this.bindEvents();
                 this.initPlayers();
                 this.setupSaveUpload();
+                this.setupGifExport();
 
                 // Set initial mode indicator to blank
                 this.modeIndicator.innerHTML = '';
@@ -1279,6 +1285,11 @@
                 document.getElementById('uploadInput').onchange = (e) => this.uploadDrill(e);
             }
 
+            setupGifExport() {
+                document.getElementById('downloadGifBtn').onclick = () => this.exportGif();
+                this.gifProgress = document.getElementById('gifProgress');
+            }
+
             saveDrill() {
                 const drillName = prompt("Enter a name for this drill:");
                 if (!drillName) return;
@@ -1331,6 +1342,79 @@
                     }
                 };
                 reader.readAsText(file);
+            }
+
+            exportGif() {
+                if (this.isPlaying) {
+                    alert("Please pause the animation before exporting.");
+                    return;
+                }
+                this.gifProgress.textContent = "Generating GIF...";
+
+                this.generateCurrentDrill();
+
+                const frames = 40;
+                const duration = this.totalTime;
+                const frameDelay = Math.round(duration / frames / 10); // gif.js uses delay in 1/100s
+
+                const gif = new window.GIF({
+                    workers: 2,
+                    quality: 10,
+                    width: this.pitch.offsetWidth,
+                    height: this.pitch.offsetHeight,
+                    workerScript: 'https://cdn.jsdelivr.net/npm/gif.js.optimized/dist/gif.worker.js'
+                });
+
+                // Hide overlays for GIF
+                const overlays = [this.timeline, this.modeIndicator];
+                overlays.forEach(el => el.style.visibility = 'hidden');
+
+                // Helper to capture a frame and add to GIF
+                const captureFrame = (progress, cb) => {
+                    // Move players to correct positions
+                    this.players.forEach((player, idx) => {
+                        const movement = this.currentDrill.movements[idx];
+                        const pos = this.getPositionAlongPath(movement, progress);
+                        player.style.left = pos.x + 'px';
+                        player.style.top = pos.y + 'px';
+                    });
+                    this.timelineMarker.style.left = (progress * (this.timeline.offsetWidth - 2)) + 'px';
+
+                    html2canvas(this.pitch, {
+                        scale: 1
+                    }).then(canvas => {
+                        gif.addFrame(canvas, {delay: frameDelay});
+                        cb();
+                    });
+                };
+
+                let i = 0;
+                const nextFrame = () => {
+                    if (i > frames) {
+                        overlays.forEach(el => el.style.visibility = 'visible');
+                        this.gifProgress.textContent = "Rendering GIF...";
+                        gif.on('finished', (blob) => {
+                            const url = URL.createObjectURL(blob);
+                            const a = document.createElement('a');
+                            a.href = url;
+                            a.download = 'rugby_drill.gif';
+                            document.body.appendChild(a);
+                            a.click();
+                            document.body.removeChild(a);
+                            URL.revokeObjectURL(url);
+                            this.gifProgress.textContent = "GIF downloaded!";
+                        });
+                        gif.render();
+                        return;
+                    }
+                    const progress = i / frames;
+                    this.gifProgress.textContent = `Capturing frames... ${i + 1}/${frames + 1}`;
+                    captureFrame(progress, () => {
+                        i++;
+                        setTimeout(nextFrame, 10);
+                    });
+                };
+                nextFrame();
             }
 
             loadDrillData(data) {
