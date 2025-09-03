@@ -1142,12 +1142,12 @@
                                         // Set flag to prevent ball position updates during animation
                                         this.ballAnimatingAlongPass = true;
                                         
-                                        // Animate ball to receiver's target position
-                                        const ballX = parseFloat(this.ball.style.left) + 6;
-                                        const ballY = parseFloat(this.ball.style.top) + 6;
+                                        // Get passer's current position at the moment of pass
+                                        const passerCurrentPos = this.getPositionAlongPath(passerMovement, progress);
                                         
+                                        // Animate ball from passer's current waypoint to receiver's waypoint
                                         await this.animateBallToWaypoint(
-                                            ballX, ballY,
+                                            passerCurrentPos.x + 6, passerCurrentPos.y + 6,
                                             pass.targetX + 6, pass.targetY + 6,
                                             880
                                         );
