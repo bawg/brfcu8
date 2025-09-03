@@ -1092,7 +1092,7 @@
                     }
                     
                     // Check for pass execution at 80% progress
-                    this.passes.forEach(async (pass) => {
+                    this.passes.forEach((pass) => {
                         if (!pass.executed) {
                             // Handle different types of passes
                             if (pass.type === 'waypoint-sequence') {
@@ -1119,14 +1119,14 @@
                                             }));
                                             
                                             // Animate ball along the path
-                                            await this.animateBallAlongPath(ballPath, 880);
-                                            
-                                            // Transfer ball to the last waypoint's owner (receiver)
-                                            const lastWaypoint = pass.waypoints[pass.waypoints.length - 1];
-                                            this.ballCarrier = lastWaypoint.ownerPlayer;
-                                            
-                                            // Clear flag after animation completes
-                                            this.ballAnimatingAlongPass = false;
+                                            this.animateBallAlongPath(ballPath, 880).then(() => {
+                                                // Transfer ball to the last waypoint's owner (receiver)
+                                                const lastWaypoint = pass.waypoints[pass.waypoints.length - 1];
+                                                this.ballCarrier = lastWaypoint.ownerPlayer;
+                                                
+                                                // Clear flag after animation completes
+                                                this.ballAnimatingAlongPass = false;
+                                            });
                                         }
                                     }
                                 }
@@ -1146,17 +1146,17 @@
                                         const passerCurrentPos = this.getPositionAlongPath(passerMovement, progress);
                                         
                                         // Animate ball from passer's current waypoint to receiver's waypoint
-                                        await this.animateBallToWaypoint(
+                                        this.animateBallToWaypoint(
                                             passerCurrentPos.x + 6, passerCurrentPos.y + 6,
                                             pass.targetX + 6, pass.targetY + 6,
                                             880
-                                        );
-                                        
-                                        // Transfer ball to receiver
-                                        this.ballCarrier = pass.receiver;
-                                        
-                                        // Clear flag after animation completes
-                                        this.ballAnimatingAlongPass = false;
+                                        ).then(() => {
+                                            // Transfer ball to receiver
+                                            this.ballCarrier = pass.receiver;
+                                            
+                                            // Clear flag after animation completes
+                                            this.ballAnimatingAlongPass = false;
+                                        });
                                     }
                                 }
                             }
@@ -1378,8 +1378,18 @@
 
             createPass(passer, receiver) {
                 // Get receiver's end position (waypoint or starting position)
-                const receiverEndX = parseFloat(receiver.dataset.endX);
-                const receiverEndY = parseFloat(receiver.dataset.endY);
+                let receiverEndX, receiverEndY;
+                
+                // If receiver has waypoints, use the last waypoint position
+                if (receiver.waypoints && receiver.waypoints.length > 0) {
+                    const lastWaypoint = receiver.waypoints[receiver.waypoints.length - 1];
+                    receiverEndX = lastWaypoint.x;
+                    receiverEndY = lastWaypoint.y;
+                } else {
+                    // Use the dataset end position as fallback
+                    receiverEndX = parseFloat(receiver.dataset.endX);
+                    receiverEndY = parseFloat(receiver.dataset.endY);
+                }
                 
                 const pass = {
                     passer: passer,
