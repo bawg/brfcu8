@@ -763,7 +763,109 @@
             <button class="mockup-btn" onclick="showSection('drills')">Drills</button>
             <button class="mockup-btn active" onclick="showSection('calendar')">Practice Calendar</button>
             <button class="mockup-btn" onclick="showSection('overview')">System Overview</button>
+            <button class="mockup-btn" onclick="showSection('design-drill')">Design Drill</button>
         </nav>
+        
+        <!-- Drills Section -->
+        <section id="drills" class="mockup-section">
+            <div class="section-header">
+                <h2 class="section-title">📋 Drills Management</h2>
+                <button class="add-btn" onclick="toggleDrillForm()">
+                    <span>+</span> Add New Drill
+                </button>
+            </div>
+            
+            <div id="drill-success" class="success-message">
+                Drill added successfully!
+            </div>
+            
+            <!-- Upload Section (Initially Hidden) -->
+            <div id="drill-form" style="display: none;">
+                <div class="form-mockup">
+                    <h3 style="margin-bottom: 24px; color: #1e3a8a; font-weight: 600;">Drill Information</h3>
+                    <div class="form-grid">
+                        <div class="form-field">
+                            <label class="form-label" for="drill-name">Drill Name</label>
+                            <input class="form-input" id="drill-name" type="text" placeholder="Enter drill name" required>
+                        </div>
+                        <div class="form-field">
+                            <label class="form-label" for="drill-skill">Skill</label>
+                            <select class="form-input" id="drill-skill" required>
+                                <option value="">Select skill</option>
+                                <option value="Passing">Passing</option>
+                                <option value="Awareness">Awareness</option>
+                                <option value="Defense">Defense</option>
+                            </select>
+                        </div>
+                        <div class="form-field full-width" style="display: flex; flex-direction: row; align-items: flex-end; gap: 12px;">
+                            <div style="flex:1;">
+                                <label class="form-label" for="drill-duration">Duration</label>
+                                <select class="form-input" id="drill-duration" required>
+                                    <option value="">Select duration</option>
+                                    <option value="15 minutes">15 min</option>
+                                    <option value="30 minutes">30 min</option>
+                                    <option value="45 minutes">45 min</option>
+                                    <option value="60 minutes">60 min</option>
+                                </select>
+                            </div>
+                            <a href="try.html">
+                                <button type="button" class="btn-primary" style="margin-bottom:0;">Create Drill</button>
+                            </a>
+                        </div>
+                        <div class="form-field full-width">
+                            <label class="form-label" for="drill-description">Description</label>
+                            <textarea class="form-input" id="drill-description" rows="2" placeholder="Enter drill description" required></textarea>
+                        </div>
+                    </div>
+                    
+                    <div style="margin: 24px 0;">
+                        <label class="form-label" style="margin-bottom: 12px; display: block;">Upload Supporting Document (Optional)</label>
+                        <div class="file-upload" onclick="handleFileUpload()">
+                            <div class="upload-icon">📄</div>
+                            <div class="upload-text">Upload Drill Document</div>
+                            <div class="upload-subtext">Drop your PowerPoint, Word, or PDF document here, or click to browse</div>
+                            <div class="upload-subtext" style="margin-top: 8px;">Supported formats: .pptx, .docx, .pdf (Max 10MB)</div>
+                        </div>
+                    </div>
+                    
+                    <div style="display: flex; gap: 12px; justify-content: flex-end; margin-top: 24px;">
+                        <button class="btn-secondary" onclick="toggleDrillForm()">Cancel</button>
+                        <button class="btn-primary" onclick="addDrillToRepository()">Save Drill</button>
+                    </div>
+                </div>
+            </div>
+            
+            <h3 style="margin: 32px 0 24px 0; color: #1e3a8a; font-weight: 600; font-size: 1.5rem;">📊 Drill Repository</h3>
+            
+            <input type="text" class="search-box" placeholder="🔍 Search drills by name, skill, or description..." oninput="filterDrills()">
+            
+            <div class="filters">
+                <button class="filter-btn active" onclick="filterBySkill('all')">All Skills</button>
+                <button class="filter-btn" onclick="filterBySkill('Passing')">Passing</button>
+                <button class="filter-btn" onclick="filterBySkill('Awareness')">Awareness</button>
+                <button class="filter-btn" onclick="filterBySkill('Defense')">Defense</button>
+            </div>
+            
+            <div class="filters">
+                <button class="filter-btn active" onclick="filterByDuration('all')">All Durations</button>
+                <button class="filter-btn" onclick="filterByDuration('15 minutes')">15 min</button>
+                <button class="filter-btn" onclick="filterByDuration('30 minutes')">30 min</button>
+                <button class="filter-btn" onclick="filterByDuration('45 minutes')">45 min</button>
+                <button class="filter-btn" onclick="filterByDuration('60 minutes')">60 min</button>
+            </div>
+            
+            <div class="table-container">
+                <div class="table-header">
+                    <div>Drill Name & Description</div>
+                    <div>Skill</div>
+                    <div>Duration</div>
+                </div>
+                
+                <div id="drills-table-body">
+                    <!-- Start with no static rows; rows will be rendered dynamically -->
+                </div>
+            </div>
+        </section>
         
         <!-- Calendar Section -->
         <section id="calendar" class="mockup-section active">
@@ -967,182 +1069,15 @@
             </div>
         </section>
         
-        <!-- Drills Section -->
-        <section id="drills" class="mockup-section">
+        <!-- Design Drill Section -->
+        <section id="design-drill" class="mockup-section" style="margin-top:32px;">
             <div class="section-header">
-                <h2 class="section-title">📋 Drills Management</h2>
-                <button class="add-btn" onclick="toggleDrillForm()">
-                    <span>+</span> Add New Drill
-                </button>
+                <h2 class="section-title">🛠️ Design Drill</h2>
             </div>
-            
-            <div id="drill-success" class="success-message">
-                Drill added successfully!
-            </div>
-            
-            <!-- Upload Section (Initially Hidden) -->
-            <div id="drill-form" style="display: none;">
-                <div class="form-mockup">
-                    <h3 style="margin-bottom: 24px; color: #1e3a8a; font-weight: 600;">Drill Information</h3>
-                    
-                    <div class="form-grid">
-                        <div class="form-field">
-                            <label class="form-label">Drill Name *</label>
-                            <input type="text" id="drill-name" class="form-input" placeholder="Enter drill name..." value="">
-                        </div>
-                        
-                        <div class="form-field">
-                            <label class="form-label">Skill Category *</label>
-                            <select id="drill-skill" class="form-input">
-                                <option value="">Select skill...</option>
-                                <option>Passing</option>
-                                <option>Awareness</option>
-                                <option>Defense</option>
-                            </select>
-                        </div>
-                        
-                        <div class="form-field">
-                            <label class="form-label">Duration *</label>
-                            <select id="drill-duration" class="form-input">
-                                <option value="">Select duration...</option>
-                                <option>15 minutes</option>
-                                <option>30 minutes</option>
-                                <option>45 minutes</option>
-                                <option>60 minutes</option>
-                            </select>
-                        </div>
-                        
-                        <div class="form-field">
-                            <label class="form-label">Rating</label>
-                            <select id="drill-rating" class="form-input">
-                                <option>Select rating...</option>
-                                <option>⭐ 1 Star</option>
-                                <option>⭐⭐ 2 Stars</option>
-                                <option>⭐⭐⭐ 3 Stars</option>
-                                <option>⭐⭐⭐⭐ 4 Stars</option>
-                                <option>⭐⭐⭐⭐⭐ 5 Stars</option>
-                            </select>
-                        </div>
-                        
-                        <div class="form-field full-width">
-                            <label class="form-label">Description *</label>
-                            <textarea id="drill-description" class="form-input" rows="4" placeholder="Describe the drill objectives, setup, and key coaching points..."></textarea>
-                        </div>
-                    </div>
-                    
-                    <div style="margin: 24px 0;">
-                        <label class="form-label" style="margin-bottom: 12px; display: block;">Upload Supporting Document (Optional)</label>
-                        <div class="file-upload" onclick="handleFileUpload()">
-                            <div class="upload-icon">📄</div>
-                            <div class="upload-text">Upload Drill Document</div>
-                            <div class="upload-subtext">Drop your PowerPoint, Word, or PDF document here, or click to browse</div>
-                            <div class="upload-subtext" style="margin-top: 8px;">Supported formats: .pptx, .docx, .pdf (Max 10MB)</div>
-                        </div>
-                    </div>
-                    
-                    <div style="display: flex; gap: 12px; justify-content: flex-end; margin-top: 24px;">
-                        <button class="btn-secondary" onclick="toggleDrillForm()">Cancel</button>
-                        <button class="btn-primary" onclick="addDrillToRepository()">Save Drill</button>
-                    </div>
-                </div>
-            </div>
-            
-            <h3 style="margin: 32px 0 24px 0; color: #1e3a8a; font-weight: 600; font-size: 1.5rem;">📊 Drill Repository</h3>
-            
-            <input type="text" class="search-box" placeholder="🔍 Search drills by name, skill, or description..." oninput="filterDrills()">
-            
-            <div class="filters">
-                <button class="filter-btn active" onclick="filterBySkill('all')">All Skills</button>
-                <button class="filter-btn" onclick="filterBySkill('Passing')">Passing</button>
-                <button class="filter-btn" onclick="filterBySkill('Awareness')">Awareness</button>
-                <button class="filter-btn" onclick="filterBySkill('Defense')">Defense</button>
-            </div>
-            
-            <div class="filters">
-                <button class="filter-btn active" onclick="filterByDuration('all')">All Durations</button>
-                <button class="filter-btn" onclick="filterByDuration('15 minutes')">15 min</button>
-                <button class="filter-btn" onclick="filterByDuration('30 minutes')">30 min</button>
-                <button class="filter-btn" onclick="filterByDuration('45 minutes')">45 min</button>
-                <button class="filter-btn" onclick="filterByDuration('60 minutes')">60 min</button>
-            </div>
-            
-            <div class="table-container">
-                <div class="table-header">
-                    <div>Drill Name & Description</div>
-                    <div>Skill</div>
-                    <div>Duration</div>
-                    <div>Rating</div>
-                    <div>Actions</div>
-                </div>
-                
-                <div id="drills-table-body">
-                    <div class="table-row" data-skill="Passing" data-duration="30 minutes">
-                        <div>
-                            <div class="drill-name">Passing Triangle Drill</div>
-                            <div class="drill-description">A fundamental passing drill focusing on accuracy and quick decision-making in a triangular formation.</div>
-                        </div>
-                        <div><span class="skill-badge skill-passing">Passing</span></div>
-                        <div><span class="duration-badge">30 min</span></div>
-                        <div><span class="star-rating">★★★★★</span></div>
-                        <div><button class="rate-btn" onclick="rateDrill('passing-triangle')">Rate</button></div>
-                    </div>
-                    
-                    <div class="table-row" data-skill="Defense" data-duration="45 minutes">
-                        <div>
-                            <div class="drill-name">Defensive Positioning</div>
-                            <div class="drill-description">Training defensive awareness and positioning in small-sided games.</div>
-                        </div>
-                        <div><span class="skill-badge skill-defense">Defense</span></div>
-                        <div><span class="duration-badge">45 min</span></div>
-                        <div><span class="star-rating">★★★★☆</span></div>
-                        <div><button class="rate-btn" onclick="rateDrill('defensive-positioning')">Rate</button></div>
-                    </div>
-                    
-                    <div class="table-row" data-skill="Awareness" data-duration="15 minutes">
-                        <div>
-                            <div class="drill-name">Situational Awareness</div>
-                            <div class="drill-description">Developing quick decision-making skills under pressure situations.</div>
-                        </div>
-                        <div><span class="skill-badge skill-awareness">Awareness</span></div>
-                        <div><span class="duration-badge">15 min</span></div>
-                        <div><span class="star-rating">★★★☆☆</span></div>
-                        <div><button class="rate-btn" onclick="rateDrill('situational-awareness')">Rate</button></div>
-                    </div>
-                    
-                    <div class="table-row" data-skill="Passing" data-duration="60 minutes">
-                        <div>
-                            <div class="drill-name">Advanced Passing Patterns</div>
-                            <div class="drill-description">Complex passing sequences with multiple players and timing elements.</div>
-                        </div>
-                        <div><span class="skill-badge skill-passing">Passing</span></div>
-                        <div><span class="duration-badge">60 min</span></div>
-                        <div><span class="star-rating">★★★★★</span></div>
-                        <div><button class="rate-btn" onclick="rateDrill('advanced-passing')">Rate</button></div>
-                    </div>
-                    
-                    <div class="table-row" data-skill="Defense" data-duration="30 minutes">
-                        <div>
-                            <div class="drill-name">Tackle Technique</div>
-                            <div class="drill-description">Perfect your tackling form with progressive exercises for safe and effective contact.</div>
-                        </div>
-                        <div><span class="skill-badge skill-defense">Defense</span></div>
-                        <div><span class="duration-badge">30 min</span></div>
-                        <div><span class="star-rating">★★★★☆</span></div>
-                        <div><button class="rate-btn" onclick="rateDrill('tackle-technique')">Rate</button></div>
-                    </div>
-                    
-                    <div class="table-row" data-skill="Awareness" data-duration="45 minutes">
-                        <div>
-                            <div class="drill-name">Game Scanning</div>
-                            <div class="drill-description">Improve field awareness through visual scanning drills and decision-making under pressure.</div>
-                        </div>
-                        <div><span class="skill-badge skill-awareness">Awareness</span></div>
-                        <div><span class="duration-badge">45 min</span></div>
-                        <div><span class="star-rating">★★★★★</span></div>
-                        <div><button class="rate-btn" onclick="rateDrill('game-scanning')">Rate</button></div>
-                    </div>
-                </div>
-            </div>
+            <p style="margin-bottom:16px;">Create and design a new drill using our interactive builder.</p>
+            <a href="try.html">
+                <button class="btn-primary">Go to Drill Designer</button>
+            </a>
         </section>
         
         <!-- Overview Section -->
@@ -1209,11 +1144,12 @@
         
         // Initialize calendar on page load
         document.addEventListener('DOMContentLoaded', function() {
-            currentMonth = 0; // January (0-indexed)
-            currentYear = 2025;
+            currentMonth = today.getMonth();
+            currentYear = today.getFullYear();
             updateCalendarTitle();
             renderCalendar();
             renderEventsTable();
+            renderDrillsTable();
             document.getElementById('availabilityUser').style.display = 'none';
             document.getElementById('availabilityUserLabel').style.display = 'none';
             document.getElementById('toggleAvailabilityBtn').textContent = '+ Add Availability';
@@ -1258,7 +1194,6 @@
                 // Highlight today
                 if (
                     d === today.getDate() &&
-                    currentMonth === today.getMonth() &&
                     currentYear === today.getFullYear()
                 ) {
                     dayDiv.classList.add('today');
@@ -1321,106 +1256,7 @@
             // Add active class to the corresponding button
             document.querySelector(`.mockup-btn[onclick="showSection('${section}')"]`).classList.add('active');
         }
-        
-        function openAddEventModal() {
-            // Simple modal for demonstration; you can expand with a form as needed
-            const modal = document.getElementById('eventModal');
-            const content = document.getElementById('eventModalContent');
-            content.innerHTML = `
-                <h3 style="color:#1e3a8a;">Add New Event</h3>
-                <form id="addEventForm">
-                    <label>Name: <input type="text" name="name" required></label><br><br>
-                    <label>Date: <input type="date" name="date" required></label><br><br>
-                    <label>Time: <input type="text" name="time" placeholder="e.g. 6:00 PM - 8:00 PM"></label><br><br>
-                    <label>Type: 
-                        <select name="type">
-                            <option value="practice">Practice</option>
-                            <option value="festival">Festival</option>
-                            <option value="match">Match</option>
-                        </select>
-                    </label><br><br>
-                    <label>Location: <input type="text" name="location"></label><br><br>
-                    <label>Details: <textarea name="details"></textarea></label><br><br>
-                    <button type="submit" class="btn-primary">Save Event</button>
-                </form>
-            `;
-            modal.style.display = 'flex';
-
-            document.getElementById('addEventForm').onsubmit = function(e) {
-                e.preventDefault();
-                // Get form data
-                const form = e.target;
-                const newEvent = {
-                    name: form.name.value,
-                    date: form.date.value,
-                    time: form.time.value,
-                    type: form.type.value,
-                    location: form.location.value,
-                    details: form.details.value,
-                    attendees: [],
-                    availability: { manus: '', andy: '', james: '' }
-                };
-                calendarEvents.push(newEvent);
-                closeEventModal();
-                renderEventsTable();
-                renderCalendar();
-            };
-        }
-
-        function closeEventModal() {
-            document.getElementById('eventModal').style.display = 'none';
-        }
-
-        function openEventDetails(eventData) {
-            // For now, just log the event data
-            console.log('Event details:', eventData);
-            // You can expand this to show a detailed view in a modal or new section
-        }
-
-        function openEventDetailsByIndex(idx) {
-            openEventDetails(calendarEvents[idx]);
-        }
-        
-        function toggleAvailabilityEdit() {
-            isEditingAvailability = !isEditingAvailability;
-            const selector = document.getElementById('availabilityUser');
-            const label = document.getElementById('availabilityUserLabel');
-            const btn = document.getElementById('toggleAvailabilityBtn');
-            if (isEditingAvailability) {
-                selector.style.display = '';
-                label.style.display = '';
-                btn.textContent = 'Save Availability';
-            } else {
-                selector.style.display = 'none';
-                label.style.display = 'none';
-                btn.textContent = '+ Add Availability';
-            }
-            renderEventsTable();
-        }
-
-        let eventsPageSize = 10;
-        let eventsPage = 1;
-        let columnFilter = { key: '', value: '' };
-
-        function setEventsPageSize(size) {
-            eventsPageSize = size;
-            eventsPage = 1;
-            renderEventsTable();
-        }
-
-        function filterColumn(key) {
-            const value = prompt(`Enter filter for ${key}:`);
-            if (value !== null) {
-                columnFilter = { key, value: value.trim().toLowerCase() };
-                eventsPage = 1;
-                renderEventsTable();
-            }
-        }
-
-        function clearColumnFilter() {
-            columnFilter = { key: '', value: '' };
-            renderEventsTable();
-        }
+        window.showSection = showSection;
 
         function renderEventsTable() {
             const tableBody = document.getElementById('events-table-body');
@@ -1438,12 +1274,7 @@
                         case 'date': val = ev.date; break;
                         case 'time': val = ev.time; break;
                         case 'type': val = ev.type; break;
-                        case 'availability':
-                            val = Object.entries(ev.availability)
-                                .filter(([user, v]) => v === 'yes')
-                                .map(([user]) => user)
-                                .join(', ');
-                            break;
+                        case 'availability': val = Object.values(ev.availability).join(','); break;
                     }
                     return val && val.toLowerCase().includes(columnFilter.value);
                 });
@@ -1479,9 +1310,7 @@
             const totalPages = Math.ceil(filteredEvents.length / eventsPageSize);
             if (totalPages > 1) {
                 const paginationDiv = document.createElement('div');
-                paginationDiv.style = 'display:flex; gap:8px; justify-content:center; align-items:center; margin:12px 0;';
                 paginationDiv.innerHTML = `
-                    <button class="filter-btn" ${eventsPage === 1 ? 'disabled' : ''} onclick="eventsPage--; renderEventsTable();">Prev</button>
                     <span style="font-weight:500;">Page ${eventsPage} of ${totalPages}</span>
                     <button class="filter-btn" ${eventsPage === totalPages ? 'disabled' : ''} onclick="eventsPage++; renderEventsTable();">Next</button>
                     <button class="filter-btn" onclick="clearColumnFilter()">Clear Filter</button>
@@ -1510,7 +1339,6 @@
             const name = document.getElementById('drill-name').value;
             const skill = document.getElementById('drill-skill').value;
             const duration = document.getElementById('drill-duration').value;
-            const rating = document.getElementById('drill-rating').value;
             const description = document.getElementById('drill-description').value;
             
             // Basic validation
@@ -1524,12 +1352,11 @@
                 name,
                 skill,
                 duration,
-                rating,
                 description,
                 id: Date.now() // Simple unique id
             };
             
-            // Add to drills array (replace this with your actual data handling)
+            // Add to drills array
             drills.push(newDrill);
             
             // Show success message
@@ -1543,11 +1370,33 @@
             document.getElementById('drill-name').value = '';
             document.getElementById('drill-skill').value = '';
             document.getElementById('drill-duration').value = '';
-            document.getElementById('drill-rating').value = '';
             document.getElementById('drill-description').value = '';
             
-            // Re-render drills table (replace this with your actual render function)
+            // Re-render drills table
             renderDrillsTable();
+
+            // Hide the add drill form
+            toggleDrillForm();
+        }
+        
+        function renderDrillsTable() {
+            const tableBody = document.getElementById('drills-table-body');
+            tableBody.innerHTML = '';
+            drills.forEach(drill => {
+                const row = document.createElement('div');
+                row.className = 'table-row';
+                row.setAttribute('data-skill', drill.skill);
+                row.setAttribute('data-duration', drill.duration);
+                row.innerHTML = `
+                    <div>
+                        <span class="drill-name">${drill.name}</span>
+                        <div class="drill-description">${drill.description}</div>
+                    </div>
+                    <div><span class="skill-badge skill-${drill.skill.toLowerCase()}">${drill.skill}</span></div>
+                    <div><span class="duration-badge">${drill.duration}</span></div>
+                `;
+                tableBody.appendChild(row);
+            });
         }
         
         function filterDrills() {
@@ -1598,6 +1447,65 @@
 
         // Re-render table when user changes
         document.getElementById('availabilityUser').addEventListener('change', renderEventsTable);
+
+        // Add this near the top of your <script> section, before using drills
+        const drills = [
+            {
+                name: "Passing Drill",
+                skill: "Passing",
+                duration: "30 minutes",
+                description: "Improve passing accuracy and speed.",
+                id: 1
+            },
+            {
+                name: "Defensive Line Drill",
+                skill: "Defense",
+                duration: "45 minutes",
+                description: "Work on defensive line structure and communication.",
+                id: 2
+            },
+            {
+                name: "Awareness Game",
+                skill: "Awareness",
+                duration: "15 minutes",
+                description: "Enhance spatial awareness with small-sided games.",
+                id: 3
+            },
+            {
+                name: "Long Passing",
+                skill: "Passing",
+                duration: "60 minutes",
+                description: "Focus on long-range passing under pressure.",
+                id: 4
+            },
+            {
+                name: "Tackle Technique",
+                skill: "Defense",
+                duration: "30 minutes",
+                description: "Refine tackle technique and safety.",
+                id: 5
+            },
+            {
+                name: "Vision Drill",
+                skill: "Awareness",
+                duration: "45 minutes",
+                description: "Develop vision and decision-making skills.",
+                id: 6
+            },
+            {
+                name: "Quick Hands",
+                skill: "Passing",
+                duration: "15 minutes",
+                description: "Increase hand speed and reaction time.",
+                id: 7
+            }
+        ];
+
+        let eventsPageSize = 10;
+        let eventsPage = 1;
+        let columnFilter = { key: '', value: '' };
+
+        window.showSection = showSection;
     </script>
 </body>
 </html>
