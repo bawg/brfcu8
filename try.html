@@ -378,6 +378,8 @@
         <button class="control-btn" onclick="rugbyDesigner.pauseMovement()">Pause</button>
         <button class="control-btn" onclick="rugbyDesigner.resetMovement()">Reset</button>
         <button class="control-btn" onclick="rugbyDesigner.clearAll()">Clear All</button>
+        <button class="control-btn" onclick="rugbyDesigner.testPlayer1ToPlayer2Pass()">Test P1→P2 Pass</button>
+        <button class="control-btn" onclick="rugbyDesigner.debugPassExecution()">Debug Passes</button>
         <button class="control-btn" onclick="rugbyDesigner.loadSample()">Load Sample</button>
         <button class="control-btn" id="finishPathBtn" onclick="rugbyDesigner.finishPath()" style="display: none; background: #27ae60;">Finish Path</button>
         <button class="control-btn" id="saveBtn">Save Drill</button>
@@ -1137,6 +1139,10 @@
                                     const passerProgress = this.getMovementProgress(passerMovement, progress);
                                     
                                     if (passerProgress >= 0.8) {
+                                        console.log('Executing pass from', pass.passer.textContent, 'to', pass.receiver.textContent);
+                                        console.log('Passer current position:', passerCurrentPos);
+                                        console.log('Target position:', pass.targetX, pass.targetY);
+                                        
                                         pass.executed = true;
                                         
                                         // Set flag to prevent ball position updates during animation
@@ -1145,12 +1151,30 @@
                                         // Get passer's current position at the moment of pass
                                         const passerCurrentPos = this.getPositionAlongPath(passerMovement, progress);
                                         
+                                        // If passer has waypoints, try to get the closest waypoint position instead of interpolated position
+                                        let passerStartX = passerCurrentPos.x;
+                                        let passerStartY = passerCurrentPos.y;
+                                        
+                                        if (pass.passer.waypoints && pass.passer.waypoints.length > 0) {
+                                            // Find which waypoint the passer is closest to at 80% progress
+                                            const passerWaypointProgress = Math.floor(passerProgress * pass.passer.waypoints.length);
+                                            if (passerWaypointProgress < pass.passer.waypoints.length) {
+                                                const targetWaypoint = pass.passer.waypoints[passerWaypointProgress];
+                                                passerStartX = targetWaypoint.x;
+                                                passerStartY = targetWaypoint.y;
+                                            }
+                                        }
+                                        
+                                        console.log('Using passer position:', passerStartX, passerStartY, 'vs interpolated:', passerCurrentPos);
+                                        
                                         // Animate ball from passer's current waypoint to receiver's waypoint
                                         this.animateBallToWaypoint(
-                                            passerCurrentPos.x + 6, passerCurrentPos.y + 6,
+                                            passerStartX + 6, passerStartY + 6,
                                             pass.targetX + 6, pass.targetY + 6,
                                             880
                                         ).then(() => {
+                                            console.log('Pass animation completed. Transferring ball to receiver:', pass.receiver.textContent);
+                                            
                                             // Transfer ball to receiver
                                             this.ballCarrier = pass.receiver;
                                             
@@ -1374,6 +1398,105 @@
                 
                 this.drawPaths();
                 this.updateModeIndicator('Sample loaded with movement patterns and passes! Orange dashed lines show passes to waypoints. Click Play to see ball animation.');
+            }
+
+            // Test function to verify the specific scenario described by the user
+            testPlayer1ToPlayer2Pass() {
+                console.log('=== Testing Player 1 to Player 2 Pass ===');
+                
+                // Step 1: Load sample
+                this.loadSample();
+                console.log('✓ Sample loaded');
+                
+                // Step 2: Verify initial setup
+                if (this.players.length < 2) {
+                    console.error('✗ Not enough players for test');
+                    return false;
+                }
+                
+                const player1 = this.players[0];
+                const player2 = this.players[1];
+                console.log('✓ Player 1:', player1.textContent, 'Player 2:', player2.textContent);
+                
+                // Step 3: Check if pass exists from player 1 to player 2
+                const player1ToPlayer2Pass = this.passes.find(pass => 
+                    pass.passer === player1 && pass.receiver === player2
+                );
+                
+                if (!player1ToPlayer2Pass) {
+                    console.error('✗ No pass found from player 1 to player 2');
+                    return false;
+                }
+                
+                console.log('✓ Pass found from player 1 to player 2');
+                console.log('  Target position:', player1ToPlayer2Pass.targetX, player1ToPlayer2Pass.targetY);
+                
+                // Step 4: Start playback and monitor ball carrier
+                this.playMovement();
+                
+                if (this.ballCarrier !== player1) {
+                    console.error('✗ Ball carrier should start with player 1, but is:', this.ballCarrier ? this.ballCarrier.textContent : 'none');
+                    return false;
+                }
+                
+                console.log('✓ Ball carrier starts with player 1');
+                
+                // Step 5: Set up a timer to check pass execution
+                const checkPassExecution = () => {
+                    if (player1ToPlayer2Pass.executed) {
+                        console.log('✓ Pass has been executed');
+                        
+                        // Wait a bit for animation to complete
+                        setTimeout(() => {
+                            if (this.ballCarrier === player2) {
+                                console.log('✅ TEST PASSED: Ball successfully transferred to player 2');
+                                return true;
+                            } else {
+                                console.error('✗ TEST FAILED: Ball carrier should be player 2, but is:', this.ballCarrier ? this.ballCarrier.textContent : 'none');
+                                return false;
+                            }
+                        }, 1000);
+                    } else {
+                        // Check again in 100ms
+                        setTimeout(checkPassExecution, 100);
+                    }
+                };
+                
+                setTimeout(checkPassExecution, 500);
+                
+                console.log('🔄 Test running... check console for results');
+                return true;
+            }
+
+            // Debug function to trace pass execution
+            debugPassExecution() {
+                console.log('=== Pass Execution Debug ===');
+                console.log('Number of passes:', this.passes.length);
+                console.log('Ball carrier:', this.ballCarrier ? this.ballCarrier.textContent : 'none');
+                console.log('Ball animating along pass:', this.ballAnimatingAlongPass);
+                
+                this.passes.forEach((pass, index) => {
+                    console.log(`Pass ${index + 1}:`);
+                    console.log('  Passer:', pass.passer ? pass.passer.textContent : 'none');
+                    console.log('  Receiver:', pass.receiver ? pass.receiver.textContent : 'none');
+                    console.log('  Target:', pass.targetX, pass.targetY);
+                    console.log('  Executed:', pass.executed);
+                    
+                    if (pass.passer && this.currentDrill) {
+                        const passerIndex = this.players.indexOf(pass.passer);
+                        if (passerIndex >= 0) {
+                            const movement = this.currentDrill.movements[passerIndex];
+                            console.log('  Passer movement points:', movement.pathPoints.length);
+                            console.log('  Passer total distance:', movement.totalDistance);
+                        }
+                    }
+                });
+                
+                if (this.ballCarrier) {
+                    console.log('Ball position:', this.ball.style.left, this.ball.style.top);
+                    console.log('Ball carrier position:', this.ballCarrier.style.left, this.ballCarrier.style.top);
+                }
+                console.log('======================');
             }
 
             createPass(passer, receiver) {
