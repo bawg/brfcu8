@@ -955,6 +955,18 @@
                 font-size: 14px;
                 min-height: 44px;
             }
+
+            /* Add drill form button container mobile styling */
+            #drill-form > div > div[style*="display: flex"][style*="justify-content: flex-end"] {
+                flex-direction: column !important;
+                align-items: stretch !important;
+            }
+            
+            #drill-form > div > div[style*="display: flex"][style*="justify-content: flex-end"] .btn-secondary,
+            #drill-form > div > div[style*="display: flex"][style*="justify-content: flex-end"] .btn-primary {
+                width: 100% !important;
+                margin: 0 !important;
+            }
         }
         
         /* Tablet improvements */
