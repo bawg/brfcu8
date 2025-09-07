@@ -380,7 +380,6 @@
         <button class="control-btn" onclick="rugbyDesigner.clearAll()">Clear All</button>
         <button class="control-btn" onclick="rugbyDesigner.loadSample()">Load Sample</button>
         <button class="control-btn" id="finishPathBtn" onclick="rugbyDesigner.finishPath()" style="display: none; background: #27ae60;">Finish Path</button>
-        <button class="control-btn" id="savePassBtn" onclick="rugbyDesigner.saveCurrentPass()" style="display: none; background: #FF8C00;">Save Pass</button>
         <button class="control-btn" id="saveBtn">Save Drill</button>
         <input type="file" id="uploadInput" style="display:none" accept=".json">
         <button class="control-btn" id="uploadBtn">Upload Drill</button>
@@ -390,6 +389,7 @@
     <div class="controls" id="designControlsRow">
         <button class="control-btn" id="addCodeBtn" onclick="rugbyDesigner.toggleAddCodeMode()" style="background: #2196F3; display: none;">Add Cones</button>
         <button class="control-btn" id="addPassBtn" onclick="rugbyDesigner.toggleAddPassMode()" style="background: #FF8C00; display: none;">Add a Pass</button>
+        <button class="control-btn" id="savePassBtn" onclick="rugbyDesigner.saveCurrentPass()" style="display: none; background: #FF8C00;">Save Pass</button>
         <button class="control-btn" id="hideWaypointBtn" onclick="rugbyDesigner.toggleWaypoints()" style="background: #888; display: none;">Hide Waypoints</button>
         <button class="control-btn" id="lassoBtn" onclick="rugbyDesigner.toggleLassoMode()" style="background: #6c757d; display: none;">Move</button>
     </div>
