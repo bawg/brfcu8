@@ -709,37 +709,49 @@
             }
 
             initPlayers() {
-                if (this.mode === 'drill') {
-                    this.initDrillPlayers();
-                } else {
-                    this.initMatchPlayers();
-                }
-                this.drawConnections();
-                this.updateModeDisplay();
+                // Ensure container dimensions are available
+                setTimeout(() => {
+                    if (this.mode === 'drill') {
+                        this.initDrillPlayers();
+                    } else {
+                        this.initMatchPlayers();
+                    }
+                    this.drawConnections();
+                    this.updateModeDisplay();
+                }, 10); // Small delay to ensure CSS has been applied
             }
 
             initDrillPlayers() {
-                const spacing = Math.min(60, 600 / this.playerCount);
-                const startX = 100 + (600 - (this.playerCount - 1) * spacing) / 2;
+                // Get actual container dimensions for responsive positioning
+                const containerWidth = this.pitch.offsetWidth || 800;
+                const containerHeight = this.pitch.offsetHeight || 400;
+                
+                const spacing = Math.min(60, (containerWidth * 0.75) / this.playerCount);
+                const startX = containerWidth * 0.125 + ((containerWidth * 0.75) - (this.playerCount - 1) * spacing) / 2;
+                const centerY = containerHeight / 2;
                 
                 for (let i = 0; i < this.playerCount; i++) {
-                    this.createPlayer(startX + i * spacing, 200, 'team-a', i + 1);
+                    this.createPlayer(startX + i * spacing, centerY, 'team-a', i + 1);
                 }
             }
 
             initMatchPlayers() {
-                const teamASpacing = Math.min(40, 350 / this.teamACount);
-                const teamAStartY = 200 - (this.teamACount - 1) * teamASpacing / 2;
+                // Get actual container dimensions for responsive positioning
+                const containerWidth = this.pitch.offsetWidth || 800;
+                const containerHeight = this.pitch.offsetHeight || 400;
+                
+                const teamASpacing = Math.min(40, (containerHeight * 0.875) / this.teamACount);
+                const teamAStartY = containerHeight / 2 - (this.teamACount - 1) * teamASpacing / 2;
                 
                 for (let i = 0; i < this.teamACount; i++) {
-                    this.createPlayer(150, teamAStartY + i * teamASpacing, 'team-a', i + 1);
+                    this.createPlayer(containerWidth * 0.1875, teamAStartY + i * teamASpacing, 'team-a', i + 1);
                 }
                 
-                const teamBSpacing = Math.min(40, 350 / this.teamBCount);
-                const teamBStartY = 200 - (this.teamBCount - 1) * teamBSpacing / 2;
+                const teamBSpacing = Math.min(40, (containerHeight * 0.875) / this.teamBCount);
+                const teamBStartY = containerHeight / 2 - (this.teamBCount - 1) * teamBSpacing / 2;
                 
                 for (let i = 0; i < this.teamBCount; i++) {
-                    this.createPlayer(650, teamBStartY + i * teamBSpacing, 'team-b', i + 1);
+                    this.createPlayer(containerWidth * 0.8125, teamBStartY + i * teamBSpacing, 'team-b', i + 1);
                 }
             }
 
