@@ -1496,15 +1496,7 @@
                 </select>
             </div>
 
-            <!-- Calendar Event Management Controls -->
-            <div style="display:flex; align-items:center; gap:16px; margin-bottom:16px;">
-                <button class="btn-primary" onclick="downloadAllEvents()" style="background: #1e3a8a;">📥 Download Events</button>
-                <input type="file" id="events-upload" accept=".json" style="display: none;" onchange="uploadEvents(event)">
-                <button class="btn-primary" onclick="document.getElementById('events-upload').click()" style="background: #059669;">📤 Upload Events</button>
-            </div>
 
-            <!-- Status message for calendar operations -->
-            <div id="upload-status-calendar" class="upload-status" style="display: none;"></div>
 
             <!-- Add this above the events table, after the attendee filter -->
             <div style="display:flex; align-items:center; gap:16px; margin-bottom:16px;">
@@ -1605,6 +1597,48 @@
                 </ul>
                 
                 <div id="upload-status-system" class="upload-status" style="display: none; margin-top: 16px;"></div>
+            </div>
+            
+            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 24px; margin-bottom: 32px;">
+                <h3 style="color: #1e3a8a; font-weight: 600; font-size: 1.5rem; margin-bottom: 24px;">Calendar Management</h3>
+                <p style="color: #64748b; margin-bottom: 24px;">Administrative tools for managing calendar event data. These operations require admin privileges.</p>
+                
+                <ul style="list-style: none; padding: 0; margin: 0;">
+                    <li style="border-bottom: 1px solid #e2e8f0; padding: 16px 0;">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <h4 style="color: #1e3a8a; font-weight: 600; margin: 0 0 4px 0;">📥 Download All Calendar Events</h4>
+                                <p style="color: #64748b; margin: 0; font-size: 14px;">Export all calendar events to a JSON file with metadata and timestamp</p>
+                            </div>
+                            <button class="btn-primary" onclick="downloadAllEvents()">Download</button>
+                        </div>
+                    </li>
+                    
+                    <li style="border-bottom: 1px solid #e2e8f0; padding: 16px 0;">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <h4 style="color: #1e3a8a; font-weight: 600; margin: 0 0 4px 0;">📤 Upload Calendar Events</h4>
+                                <p style="color: #64748b; margin: 0; font-size: 14px;">Import calendar events from JSON files with options for append, update, or replace</p>
+                            </div>
+                            <div>
+                                <input type="file" id="events-upload-system" accept=".json" style="display: none;" onchange="uploadEvents(event)">
+                                <button class="btn-primary" onclick="document.getElementById('events-upload-system').click()" style="background: #059669;">Upload</button>
+                            </div>
+                        </div>
+                    </li>
+                    
+                    <li style="padding: 16px 0;">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <h4 style="color: #1e3a8a; font-weight: 600; margin: 0 0 4px 0;">🗑️ Delete All Calendar Events</h4>
+                                <p style="color: #64748b; margin: 0; font-size: 14px;">Permanently remove all calendar events from the repository (Admin only)</p>
+                            </div>
+                            <button class="btn-primary" onclick="confirmDeleteAllEvents()" style="background: #dc2626;">Delete All</button>
+                        </div>
+                    </li>
+                </ul>
+                
+                <div id="upload-status-calendar-system" class="upload-status" style="display: none; margin-top: 16px;"></div>
             </div>
         </section>
     </div>
@@ -2530,13 +2564,22 @@
         }
 
         function showCalendarUploadStatus(type, message) {
-            // Update calendar status div
+            // Update calendar status div (if it exists in calendar section)
             const calendarStatusDiv = document.getElementById('upload-status-calendar');
             
             if (calendarStatusDiv) {
                 calendarStatusDiv.className = `upload-status ${type}`;
                 calendarStatusDiv.textContent = message;
                 calendarStatusDiv.style.display = 'block';
+            }
+            
+            // Update system calendar status div (in admin section)
+            const calendarSystemStatusDiv = document.getElementById('upload-status-calendar-system');
+            
+            if (calendarSystemStatusDiv) {
+                calendarSystemStatusDiv.className = `upload-status ${type}`;
+                calendarSystemStatusDiv.textContent = message;
+                calendarSystemStatusDiv.style.display = 'block';
             }
             
             // Also use the general showUploadStatus for consistency
@@ -2546,7 +2589,38 @@
                 if (calendarStatusDiv) {
                     calendarStatusDiv.style.display = 'none';
                 }
+                if (calendarSystemStatusDiv) {
+                    calendarSystemStatusDiv.style.display = 'none';
+                }
             }, 5000);
+        }
+
+        function confirmDeleteAllEvents() {
+            if (currentUserRole !== 'admin') {
+                showCalendarUploadStatus('error', 'Only administrators can delete all calendar events.');
+                return;
+            }
+            
+            document.getElementById('modalIcon').textContent = '🗑️';
+            document.getElementById('modalTitle').textContent = 'Delete All Calendar Events';
+            document.getElementById('modalMessage').innerHTML = `
+                <p><strong>⚠️ WARNING: This action cannot be undone!</strong></p>
+                <p>This will permanently delete all ${calendarEvents.length} calendar events in the repository.</p>
+                <p>Consider downloading a backup first.</p>
+            `;
+            
+            const confirmButton = document.getElementById('confirmButton');
+            confirmButton.textContent = 'Delete All';
+            confirmButton.className = 'modal-btn confirm';
+            
+            confirmationAction = () => {
+                calendarEvents.length = 0; // Clear all calendar events
+                renderEventsTable();
+                renderCalendar();
+                showCalendarUploadStatus('success', 'All calendar events have been deleted.');
+            };
+            
+            showConfirmationModal();
         }
 
         // Modal management functions
