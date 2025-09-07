@@ -955,7 +955,7 @@
         <nav class="mockup-nav">
             <button class="mockup-btn" onclick="showSection('drills')">Drills</button>
             <button class="mockup-btn active" onclick="showSection('calendar')">Practice Calendar</button>
-            <button class="mockup-btn" onclick="showSection('overview')">System Overview</button>
+            <button class="mockup-btn" onclick="showSection('overview')">System</button>
             <button class="mockup-btn" onclick="showSection('design-drill')">Design Drill</button>
         </nav>
         
@@ -1026,24 +1026,6 @@
                         <button class="btn-primary" onclick="addDrillToRepository()">Save Drill</button>
                     </div>
                 </div>
-            </div>
-            
-            <!-- Drill Management Controls -->
-            <div class="management-controls">
-                <h3 style="margin: 32px 0 24px 0; color: #1e3a8a; font-weight: 600; font-size: 1.5rem;">🔧 Drill Management</h3>
-                <div class="control-buttons">
-                    <button class="control-btn download-btn" onclick="downloadAllDrills()">
-                        <span>📥</span> Download All Drills
-                    </button>
-                    <input type="file" id="drills-upload" accept=".json" style="display: none;" onchange="uploadDrills(event)">
-                    <button class="control-btn upload-btn" onclick="document.getElementById('drills-upload').click()">
-                        <span>📤</span> Upload Drills
-                    </button>
-                    <button class="control-btn delete-all-btn" onclick="confirmDeleteAllDrills()">
-                        <span>🗑️</span> Delete All Drills
-                    </button>
-                </div>
-                <div id="upload-status" class="upload-status" style="display: none;"></div>
             </div>
 
             <h3 style="margin: 32px 0 24px 0; color: #1e3a8a; font-weight: 600; font-size: 1.5rem;">📊 Drill Repository</h3>
@@ -1295,9 +1277,50 @@
         <!-- Overview Section -->
         <section id="overview" class="mockup-section">
             <div class="section-header">
-                <h2 class="section-title">📊 System Overview</h2>
+                <h2 class="section-title">🔧 System Administration</h2>
             </div>
-            <p>System overview content would go here...</p>
+            
+            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 24px; margin-bottom: 32px;">
+                <h3 style="color: #1e3a8a; font-weight: 600; font-size: 1.5rem; margin-bottom: 24px;">Drill Management</h3>
+                <p style="color: #64748b; margin-bottom: 24px;">Administrative tools for managing drill data. These operations require admin privileges.</p>
+                
+                <ul style="list-style: none; padding: 0; margin: 0;">
+                    <li style="border-bottom: 1px solid #e2e8f0; padding: 16px 0;">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <h4 style="color: #1e3a8a; font-weight: 600; margin: 0 0 4px 0;">📥 Download All Drills</h4>
+                                <p style="color: #64748b; margin: 0; font-size: 14px;">Export all drills to a JSON file with metadata and timestamp</p>
+                            </div>
+                            <button class="btn-primary" onclick="downloadAllDrills()">Download</button>
+                        </div>
+                    </li>
+                    
+                    <li style="border-bottom: 1px solid #e2e8f0; padding: 16px 0;">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <h4 style="color: #1e3a8a; font-weight: 600; margin: 0 0 4px 0;">📤 Upload Drills</h4>
+                                <p style="color: #64748b; margin: 0; font-size: 14px;">Import drills from JSON files with options for append, update, or replace</p>
+                            </div>
+                            <div>
+                                <input type="file" id="drills-upload-system" accept=".json" style="display: none;" onchange="uploadDrills(event)">
+                                <button class="btn-primary" onclick="document.getElementById('drills-upload-system').click()" style="background: #059669;">Upload</button>
+                            </div>
+                        </div>
+                    </li>
+                    
+                    <li style="padding: 16px 0;">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <h4 style="color: #1e3a8a; font-weight: 600; margin: 0 0 4px 0;">🗑️ Delete All Drills</h4>
+                                <p style="color: #64748b; margin: 0; font-size: 14px;">Permanently remove all drills from the repository (Admin only)</p>
+                            </div>
+                            <button class="btn-primary" onclick="confirmDeleteAllDrills()" style="background: #dc2626;">Delete All</button>
+                        </div>
+                    </li>
+                </ul>
+                
+                <div id="upload-status-system" class="upload-status" style="display: none; margin-top: 16px;"></div>
+            </div>
         </section>
     </div>
 
@@ -1939,13 +1962,24 @@
         }
 
         function showUploadStatus(type, message) {
+            // Update both status divs if they exist
             const statusDiv = document.getElementById('upload-status');
-            statusDiv.className = `upload-status ${type}`;
-            statusDiv.textContent = message;
-            statusDiv.style.display = 'block';
+            const systemStatusDiv = document.getElementById('upload-status-system');
+            
+            [statusDiv, systemStatusDiv].forEach(div => {
+                if (div) {
+                    div.className = `upload-status ${type}`;
+                    div.textContent = message;
+                    div.style.display = 'block';
+                }
+            });
             
             setTimeout(() => {
-                statusDiv.style.display = 'none';
+                [statusDiv, systemStatusDiv].forEach(div => {
+                    if (div) {
+                        div.style.display = 'none';
+                    }
+                });
             }, 5000);
         }
 
