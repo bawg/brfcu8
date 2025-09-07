@@ -589,7 +589,7 @@
     <div class="controls" id="designControlsRow">
         <button class="control-btn" id="finishPathBtn" onclick="rugbyDesigner.finishPath()" style="display: none; background: #27ae60;">Finish Path</button>
         <button class="control-btn" id="addCodeBtn" onclick="rugbyDesigner.toggleAddCodeMode()" style="background: #2196F3; display: none;">Add Cones</button>
-        <button class="control-btn" id="addPassBtn" onclick="rugbyDesigner.toggleAddPassMode()" style="background: #FF8C00; display: none;">Add a Pass</button>
+        <button class="control-btn" id="addPassBtn" onclick="rugbyDesigner.handlePassButton()" style="background: #FF8C00; display: none;">Add a Pass</button>
         <button class="control-btn" id="hideWaypointBtn" onclick="rugbyDesigner.toggleWaypoints()" style="background: #888; display: none;">Hide Waypoints</button>
         <button class="control-btn" id="lassoBtn" onclick="rugbyDesigner.toggleLassoMode()" style="background: #6c757d; display: none;">Move</button>
     </div>
@@ -1769,6 +1769,7 @@
                     this.currentPassWaypoints = [];
                     this.isCreatingWaypointPass = false;
                     document.getElementById('addPassBtn').classList.add('active');
+                    document.getElementById('addPassBtn').textContent = 'Finish Pass';
                     this.updateModeIndicator('Select the waypoint where the pass originates');
                 } else {
                     // Reset all pass-related state
@@ -1777,7 +1778,21 @@
                     this.isCreatingWaypointPass = false;
                     this.clearPassWaypointHighlights();
                     document.getElementById('addPassBtn').classList.remove('active');
+                    document.getElementById('addPassBtn').textContent = 'Add a Pass';
                     this.updateModeIndicator('Design Mode');
+                }
+            }
+
+            handlePassButton() {
+                if (!this.isAddPassMode) {
+                    // Not in pass mode - start pass mode
+                    this.toggleAddPassMode();
+                } else if (this.isCreatingWaypointPass && this.currentPassWaypoints.length >= 2) {
+                    // In pass mode with a pass in progress - finish the current pass
+                    this.finishWaypointPass();
+                } else {
+                    // In pass mode but no pass in progress - exit pass mode
+                    this.toggleAddPassMode();
                 }
             }
 
