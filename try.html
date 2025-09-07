@@ -1114,8 +1114,8 @@
                                             
                                             // Create path from waypoints
                                             const ballPath = pass.waypoints.map(waypoint => ({
-                                                x: parseInt(waypoint.style.left) + 8, // Center of waypoint
-                                                y: parseInt(waypoint.style.top) + 8
+                                                x: waypoint.waypointData ? waypoint.waypointData.x + 6 : parseInt(waypoint.style.left) + 8, // Center of waypoint
+                                                y: waypoint.waypointData ? waypoint.waypointData.y + 6 : parseInt(waypoint.style.top) + 8
                                             }));
                                             
                                             // Animate ball along the path
@@ -1381,6 +1381,16 @@
                     
                     // Pass from player 2 to player 3's waypoint  
                     this.createPass(this.players[1], this.players[2]);
+                    
+                    // Add a waypoint-sequence pass to test ball animation along waypoint path
+                    if (this.players.length >= 4 && this.waypointMarkers.length >= 3) {
+                        const waypointPass = {
+                            type: 'waypoint-sequence',
+                            waypoints: this.waypointMarkers.slice(0, 3), // First 3 waypoint markers
+                            id: Date.now()
+                        };
+                        this.passes.push(waypointPass);
+                    }
                 }
                 
                 this.drawPaths();
