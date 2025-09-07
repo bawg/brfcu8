@@ -750,6 +750,199 @@
         #availabilityModalContent {
             margin-top: 16px;
         }
+
+        /* Drill Management Controls Styles */
+        .management-controls {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 32px;
+        }
+
+        .control-buttons {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .control-btn {
+            background: #1e3a8a;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 14px;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .control-btn:hover {
+            background: #1e40af;
+            transform: translateY(-1px);
+        }
+
+        .control-btn.delete-all-btn {
+            background: #dc2626;
+        }
+
+        .control-btn.delete-all-btn:hover {
+            background: #b91c1c;
+        }
+
+        .control-btn.upload-btn {
+            background: #059669;
+        }
+
+        .control-btn.upload-btn:hover {
+            background: #047857;
+        }
+
+        .upload-status {
+            margin-top: 16px;
+            padding: 12px;
+            border-radius: 8px;
+            font-weight: 500;
+        }
+
+        .upload-status.success {
+            background: #d1fae5;
+            color: #065f46;
+            border: 1px solid #a7f3d0;
+        }
+
+        .upload-status.error {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fca5a5;
+        }
+
+        .upload-status.info {
+            background: #dbeafe;
+            color: #1e40af;
+            border: 1px solid #93c5fd;
+        }
+
+        /* Drill row action buttons */
+        .drill-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .action-btn {
+            background: #6b7280;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .action-btn.edit-btn:hover {
+            background: #059669;
+        }
+
+        .action-btn.delete-btn:hover {
+            background: #dc2626;
+        }
+
+        /* Confirmation Modal Styles */
+        .confirmation-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(30, 58, 138, 0.15);
+            z-index: 1002;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .confirmation-modal.show {
+            display: flex;
+        }
+
+        .confirmation-modal .modal-content {
+            background: white;
+            border-radius: 12px;
+            max-width: 500px;
+            margin: auto;
+            padding: 32px;
+            box-shadow: 0 8px 32px rgba(30, 58, 138, 0.2);
+            position: relative;
+        }
+
+        .confirmation-modal .modal-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .confirmation-modal .modal-header h3 {
+            color: #1e3a8a;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .confirmation-modal .modal-body {
+            color: #374151;
+            line-height: 1.6;
+            margin-bottom: 24px;
+        }
+
+        .confirmation-modal .modal-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+        }
+
+        .modal-btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .modal-btn.cancel {
+            background: #f3f4f6;
+            color: #374151;
+            border: 1px solid #d1d5db;
+        }
+
+        .modal-btn.cancel:hover {
+            background: #e5e7eb;
+        }
+
+        .modal-btn.confirm {
+            background: #dc2626;
+            color: white;
+            border: none;
+        }
+
+        .modal-btn.confirm:hover {
+            background: #b91c1c;
+        }
+
+        .modal-btn.primary {
+            background: #1e3a8a;
+            color: white;
+            border: none;
+        }
+
+        .modal-btn.primary:hover {
+            background: #1e40af;
+        }
     </style>
 </head>
 <body>
@@ -835,6 +1028,24 @@
                 </div>
             </div>
             
+            <!-- Drill Management Controls -->
+            <div class="management-controls">
+                <h3 style="margin: 32px 0 24px 0; color: #1e3a8a; font-weight: 600; font-size: 1.5rem;">🔧 Drill Management</h3>
+                <div class="control-buttons">
+                    <button class="control-btn download-btn" onclick="downloadAllDrills()">
+                        <span>📥</span> Download All Drills
+                    </button>
+                    <input type="file" id="drills-upload" accept=".json" style="display: none;" onchange="uploadDrills(event)">
+                    <button class="control-btn upload-btn" onclick="document.getElementById('drills-upload').click()">
+                        <span>📤</span> Upload Drills
+                    </button>
+                    <button class="control-btn delete-all-btn" onclick="confirmDeleteAllDrills()">
+                        <span>🗑️</span> Delete All Drills
+                    </button>
+                </div>
+                <div id="upload-status" class="upload-status" style="display: none;"></div>
+            </div>
+
             <h3 style="margin: 32px 0 24px 0; color: #1e3a8a; font-weight: 600; font-size: 1.5rem;">📊 Drill Repository</h3>
             
             <input type="text" class="search-box" placeholder="🔍 Search drills by name, skill, or description..." oninput="filterDrills()">
@@ -859,6 +1070,7 @@
                     <div>Drill Name & Description</div>
                     <div>Skill</div>
                     <div>Duration</div>
+                    <div>Actions</div>
                 </div>
                 
                 <div id="drills-table-body">
@@ -1102,6 +1314,68 @@
         <div style="background:white; border-radius:12px; max-width:350px; margin:auto; padding:24px; box-shadow:0 8px 32px rgba(30,58,138,0.2); position:relative;">
             <button onclick="closeAvailabilityModal()" style="position:absolute; top:12px; right:12px; background:#eee; border:none; border-radius:50%; width:32px; height:32px; font-size:18px; cursor:pointer;">×</button>
             <div id="availabilityModalContent"></div>
+        </div>
+    </div>
+
+    <!-- Confirmation Modal -->
+    <div id="confirmationModal" class="confirmation-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span id="modalIcon">⚠️</span>
+                <h3 id="modalTitle">Confirm Action</h3>
+            </div>
+            <div class="modal-body" id="modalMessage">
+                Are you sure you want to proceed?
+            </div>
+            <div class="modal-actions">
+                <button class="modal-btn cancel" onclick="closeConfirmationModal()">Cancel</button>
+                <button class="modal-btn confirm" id="confirmButton" onclick="confirmAction()">Confirm</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Drill Modal -->
+    <div id="editDrillModal" class="confirmation-modal">
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="modal-header">
+                <span>✏️</span>
+                <h3>Edit Drill</h3>
+            </div>
+            <div class="modal-body">
+                <div class="form-grid">
+                    <div class="form-field">
+                        <label class="form-label" for="edit-drill-name">Drill Name</label>
+                        <input class="form-input" id="edit-drill-name" type="text" required>
+                    </div>
+                    <div class="form-field">
+                        <label class="form-label" for="edit-drill-skill">Skill</label>
+                        <select class="form-input" id="edit-drill-skill" required>
+                            <option value="">Select skill</option>
+                            <option value="Passing">Passing</option>
+                            <option value="Awareness">Awareness</option>
+                            <option value="Defense">Defense</option>
+                        </select>
+                    </div>
+                    <div class="form-field">
+                        <label class="form-label" for="edit-drill-duration">Duration</label>
+                        <select class="form-input" id="edit-drill-duration" required>
+                            <option value="">Select duration</option>
+                            <option value="15 minutes">15 min</option>
+                            <option value="30 minutes">30 min</option>
+                            <option value="45 minutes">45 min</option>
+                            <option value="60 minutes">60 min</option>
+                        </select>
+                    </div>
+                    <div class="form-field full-width">
+                        <label class="form-label" for="edit-drill-description">Description</label>
+                        <textarea class="form-input" id="edit-drill-description" rows="3" required></textarea>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button class="modal-btn cancel" onclick="closeEditDrillModal()">Cancel</button>
+                <button class="modal-btn primary" onclick="saveEditedDrill()">Save Changes</button>
+            </div>
         </div>
     </div>
 
@@ -1394,6 +1668,10 @@
                     </div>
                     <div><span class="skill-badge skill-${drill.skill.toLowerCase()}">${drill.skill}</span></div>
                     <div><span class="duration-badge">${drill.duration}</span></div>
+                    <div class="drill-actions">
+                        <button class="action-btn edit-btn" onclick="editDrill(${drill.id})">Edit</button>
+                        <button class="action-btn delete-btn" onclick="confirmDeleteDrill(${drill.id})">Delete</button>
+                    </div>
                 `;
                 tableBody.appendChild(row);
             });
@@ -1504,6 +1782,303 @@
         let eventsPageSize = 10;
         let eventsPage = 1;
         let columnFilter = { key: '', value: '' };
+        
+        // User role simulation (in a real app this would come from authentication)
+        let currentUserRole = 'admin'; // or 'user'
+        
+        // Variables for confirmation modal
+        let confirmationAction = null;
+        let currentEditingDrillId = null;
+
+        // Drill management functions
+        function downloadAllDrills() {
+            const drillsData = {
+                version: "1.0",
+                exported: new Date().toISOString(),
+                drills: drills
+            };
+            
+            const json = JSON.stringify(drillsData, null, 2);
+            const blob = new Blob([json], { type: "application/json" });
+            const url = URL.createObjectURL(blob);
+            
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `drills_export_${new Date().toISOString().split('T')[0]}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            showUploadStatus('success', `Downloaded ${drills.length} drills to JSON file.`);
+        }
+
+        function uploadDrills(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    let importedDrills = data.drills || data; // Handle both wrapped and direct array formats
+                    
+                    if (!Array.isArray(importedDrills)) {
+                        throw new Error('Invalid file format: expected array of drills');
+                    }
+                    
+                    // Validate drill structure
+                    const requiredFields = ['name', 'skill', 'duration', 'description'];
+                    for (let drill of importedDrills) {
+                        for (let field of requiredFields) {
+                            if (!drill[field]) {
+                                throw new Error(`Invalid drill structure: missing field '${field}'`);
+                            }
+                        }
+                    }
+                    
+                    // Show confirmation modal for import options
+                    showImportConfirmation(importedDrills);
+                    
+                } catch (error) {
+                    showUploadStatus('error', `Error reading file: ${error.message}`);
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        function showImportConfirmation(importedDrills) {
+            const existingCount = drills.length;
+            const importCount = importedDrills.length;
+            
+            document.getElementById('modalIcon').textContent = '📤';
+            document.getElementById('modalTitle').textContent = 'Import Drills';
+            document.getElementById('modalMessage').innerHTML = `
+                <p>Found ${importCount} drills to import.</p>
+                <p>Current repository contains ${existingCount} drills.</p>
+                <p><strong>Choose import mode:</strong></p>
+                <div style="margin-top: 12px;">
+                    <label style="display: block; margin-bottom: 8px;">
+                        <input type="radio" name="importMode" value="append" checked> 
+                        <strong>Append:</strong> Add new drills to existing ones
+                    </label>
+                    <label style="display: block; margin-bottom: 8px;">
+                        <input type="radio" name="importMode" value="update"> 
+                        <strong>Update:</strong> Replace drills with matching names
+                    </label>
+                    <label style="display: block;">
+                        <input type="radio" name="importMode" value="replace"> 
+                        <strong>Replace All:</strong> Delete existing and import new drills
+                    </label>
+                </div>
+            `;
+            
+            const confirmButton = document.getElementById('confirmButton');
+            confirmButton.textContent = 'Import';
+            confirmButton.className = 'modal-btn primary';
+            
+            confirmationAction = () => {
+                const mode = document.querySelector('input[name="importMode"]:checked').value;
+                processImport(importedDrills, mode);
+            };
+            
+            showConfirmationModal();
+        }
+
+        function processImport(importedDrills, mode) {
+            let added = 0, updated = 0, replaced = 0;
+            
+            try {
+                switch (mode) {
+                    case 'append':
+                        importedDrills.forEach(drill => {
+                            drill.id = Date.now() + Math.random(); // Ensure unique ID
+                            drills.push(drill);
+                            added++;
+                        });
+                        break;
+                        
+                    case 'update':
+                        importedDrills.forEach(importDrill => {
+                            const existingIndex = drills.findIndex(d => d.name === importDrill.name);
+                            if (existingIndex >= 0) {
+                                importDrill.id = drills[existingIndex].id; // Keep existing ID
+                                drills[existingIndex] = importDrill;
+                                updated++;
+                            } else {
+                                importDrill.id = Date.now() + Math.random();
+                                drills.push(importDrill);
+                                added++;
+                            }
+                        });
+                        break;
+                        
+                    case 'replace':
+                        drills.length = 0; // Clear existing drills
+                        importedDrills.forEach(drill => {
+                            drill.id = Date.now() + Math.random();
+                            drills.push(drill);
+                            replaced++;
+                        });
+                        break;
+                }
+                
+                renderDrillsTable();
+                
+                let message = '';
+                if (mode === 'replace') {
+                    message = `Replaced all drills with ${replaced} imported drills.`;
+                } else {
+                    message = `Import complete: ${added} added, ${updated} updated.`;
+                }
+                showUploadStatus('success', message);
+                
+            } catch (error) {
+                showUploadStatus('error', `Error importing drills: ${error.message}`);
+            }
+        }
+
+        function showUploadStatus(type, message) {
+            const statusDiv = document.getElementById('upload-status');
+            statusDiv.className = `upload-status ${type}`;
+            statusDiv.textContent = message;
+            statusDiv.style.display = 'block';
+            
+            setTimeout(() => {
+                statusDiv.style.display = 'none';
+            }, 5000);
+        }
+
+        function confirmDeleteAllDrills() {
+            if (currentUserRole !== 'admin') {
+                showUploadStatus('error', 'Only administrators can delete all drills.');
+                return;
+            }
+            
+            document.getElementById('modalIcon').textContent = '🗑️';
+            document.getElementById('modalTitle').textContent = 'Delete All Drills';
+            document.getElementById('modalMessage').innerHTML = `
+                <p><strong>⚠️ WARNING: This action cannot be undone!</strong></p>
+                <p>This will permanently delete all ${drills.length} drills in the repository.</p>
+                <p>Consider downloading a backup first.</p>
+            `;
+            
+            const confirmButton = document.getElementById('confirmButton');
+            confirmButton.textContent = 'Delete All';
+            confirmButton.className = 'modal-btn confirm';
+            
+            confirmationAction = () => {
+                drills.length = 0; // Clear all drills
+                renderDrillsTable();
+                showUploadStatus('success', 'All drills have been deleted.');
+            };
+            
+            showConfirmationModal();
+        }
+
+        function editDrill(drillId) {
+            const drill = drills.find(d => d.id === drillId);
+            if (!drill) {
+                showUploadStatus('error', 'Drill not found.');
+                return;
+            }
+            
+            currentEditingDrillId = drillId;
+            
+            // Populate edit form
+            document.getElementById('edit-drill-name').value = drill.name;
+            document.getElementById('edit-drill-skill').value = drill.skill;
+            document.getElementById('edit-drill-duration').value = drill.duration;
+            document.getElementById('edit-drill-description').value = drill.description;
+            
+            showEditDrillModal();
+        }
+
+        function saveEditedDrill() {
+            const name = document.getElementById('edit-drill-name').value;
+            const skill = document.getElementById('edit-drill-skill').value;
+            const duration = document.getElementById('edit-drill-duration').value;
+            const description = document.getElementById('edit-drill-description').value;
+            
+            if (!name || !skill || !duration || !description) {
+                alert('Please fill in all required fields.');
+                return;
+            }
+            
+            const drill = drills.find(d => d.id === currentEditingDrillId);
+            if (drill) {
+                drill.name = name;
+                drill.skill = skill;
+                drill.duration = duration;
+                drill.description = description;
+                
+                renderDrillsTable();
+                closeEditDrillModal();
+                showUploadStatus('success', `Drill "${name}" has been updated.`);
+            }
+        }
+
+        function confirmDeleteDrill(drillId) {
+            if (currentUserRole !== 'admin') {
+                showUploadStatus('error', 'Only administrators can delete drills.');
+                return;
+            }
+            
+            const drill = drills.find(d => d.id === drillId);
+            if (!drill) {
+                showUploadStatus('error', 'Drill not found.');
+                return;
+            }
+            
+            document.getElementById('modalIcon').textContent = '🗑️';
+            document.getElementById('modalTitle').textContent = 'Delete Drill';
+            document.getElementById('modalMessage').innerHTML = `
+                <p>Are you sure you want to delete the drill:</p>
+                <p><strong>"${drill.name}"</strong></p>
+                <p>This action cannot be undone.</p>
+            `;
+            
+            const confirmButton = document.getElementById('confirmButton');
+            confirmButton.textContent = 'Delete';
+            confirmButton.className = 'modal-btn confirm';
+            
+            confirmationAction = () => {
+                const index = drills.findIndex(d => d.id === drillId);
+                if (index >= 0) {
+                    drills.splice(index, 1);
+                    renderDrillsTable();
+                    showUploadStatus('success', `Drill "${drill.name}" has been deleted.`);
+                }
+            };
+            
+            showConfirmationModal();
+        }
+
+        // Modal management functions
+        function showConfirmationModal() {
+            document.getElementById('confirmationModal').classList.add('show');
+        }
+
+        function closeConfirmationModal() {
+            document.getElementById('confirmationModal').classList.remove('show');
+            confirmationAction = null;
+        }
+
+        function confirmAction() {
+            if (confirmationAction) {
+                confirmationAction();
+                closeConfirmationModal();
+            }
+        }
+
+        function showEditDrillModal() {
+            document.getElementById('editDrillModal').classList.add('show');
+        }
+
+        function closeEditDrillModal() {
+            document.getElementById('editDrillModal').classList.remove('show');
+            currentEditingDrillId = null;
+        }
 
         window.showSection = showSection;
     </script>
