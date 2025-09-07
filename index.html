@@ -1716,6 +1716,9 @@
         
         // Initialize calendar on page load
         document.addEventListener('DOMContentLoaded', function() {
+            // Load pending calendar events from localStorage
+            loadPendingCalendarEvents();
+            
             currentMonth = today.getMonth();
             currentYear = today.getFullYear();
             updateCalendarTitle();
@@ -1727,6 +1730,56 @@
             document.getElementById('toggleAvailabilityBtn').textContent = '+ Add Availability';
             isEditingAvailability = false;
         });
+
+        // Function to load pending calendar events from localStorage
+        function loadPendingCalendarEvents() {
+            const pendingEvents = JSON.parse(localStorage.getItem('pendingCalendarEvents') || '[]');
+            if (pendingEvents.length > 0) {
+                // Add pending events to the calendar
+                calendarEvents.push(...pendingEvents);
+                
+                // Clear the pending events from localStorage
+                localStorage.removeItem('pendingCalendarEvents');
+                
+                // Show notification about imported events
+                if (pendingEvents.length === 1) {
+                    showNotification(`Successfully imported 1 practice session from the drill designer!`);
+                } else {
+                    showNotification(`Successfully imported ${pendingEvents.length} practice sessions from the drill designer!`);
+                }
+            }
+        }
+
+        // Function to show notification messages
+        function showNotification(message) {
+            // Create notification element
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: #28a745;
+                color: white;
+                padding: 16px 24px;
+                border-radius: 8px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+                z-index: 1000;
+                font-weight: 500;
+                max-width: 400px;
+                word-wrap: break-word;
+            `;
+            notification.textContent = message;
+            
+            // Add to page
+            document.body.appendChild(notification);
+            
+            // Remove after 4 seconds
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.parentNode.removeChild(notification);
+                }
+            }, 4000);
+        }
         
         function renderCalendar() {
             const calendarGrid = document.querySelector('.calendar-grid');
