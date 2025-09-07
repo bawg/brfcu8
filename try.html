@@ -292,6 +292,207 @@
             z-index: 3;
             opacity: 0.8;
         }
+
+        /* Responsive Design for Rugby Drill Designer */
+        @media (max-width: 768px) {
+            .info {
+                padding: 16px;
+                margin: 16px 8px;
+            }
+            
+            .info h3 {
+                font-size: 1.25rem;
+                margin-bottom: 8px;
+            }
+            
+            .info p {
+                font-size: 14px;
+                line-height: 1.4;
+            }
+            
+            /* Make rugby widget responsive */
+            .rugby-widget {
+                width: calc(100vw - 32px);
+                max-width: 350px;
+                height: 200px;
+                margin: 16px auto;
+                border-width: 1px;
+            }
+            
+            /* Adjust player markers for smaller screen */
+            .player {
+                width: 20px;
+                height: 20px;
+                font-size: 10px;
+                border-width: 1px;
+            }
+            
+            .waypoint-marker {
+                width: 16px;
+                height: 16px;
+                font-size: 8px;
+            }
+            
+            /* Make setup controls responsive */
+            .setup-controls {
+                width: calc(100vw - 32px);
+                max-width: none;
+                margin: 16px auto;
+                padding: 12px;
+            }
+            
+            .setup-row {
+                flex-direction: column;
+                gap: 12px;
+                margin: 12px 0;
+            }
+            
+            .setup-group {
+                flex-direction: column;
+                gap: 8px;
+                align-items: stretch;
+                text-align: left;
+            }
+            
+            .setup-group label {
+                font-weight: 600;
+                font-size: 14px;
+            }
+            
+            .setup-group > div {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 8px;
+            }
+            
+            /* Make buttons more touch-friendly */
+            .setup-btn, .control-btn {
+                padding: 12px 16px;
+                font-size: 14px;
+                min-height: 44px;
+                flex: 1;
+                min-width: 80px;
+                border-radius: 6px;
+            }
+            
+            select {
+                padding: 12px 16px;
+                font-size: 16px; /* Prevent zoom on iOS */
+                min-height: 44px;
+                border-radius: 6px;
+                width: 100%;
+            }
+            
+            /* Controls section improvements */
+            .controls {
+                margin: 16px 8px;
+                padding: 16px;
+                background: #f8f9fa;
+                border-radius: 8px;
+            }
+            
+            .controls .control-btn {
+                margin: 4px 2px;
+                min-width: 70px;
+                flex: 1 1 calc(25% - 4px);
+            }
+            
+            /* Timeline improvements */
+            .timeline {
+                width: calc(100vw - 64px);
+                max-width: 300px;
+                margin: 16px auto;
+            }
+            
+            /* Mode indicator */
+            .mode-indicator {
+                width: calc(100vw - 32px);
+                max-width: none;
+                margin: 16px auto;
+                padding: 12px;
+                font-size: 14px;
+            }
+            
+            /* Ball adjustments */
+            .ball {
+                width: 12px;
+                height: 8px;
+            }
+            
+            .code-marker {
+                width: 16px;
+                height: 16px;
+            }
+        }
+        
+        /* Small mobile devices */
+        @media (max-width: 480px) {
+            .rugby-widget {
+                width: calc(100vw - 24px);
+                max-width: 300px;
+                height: 180px;
+            }
+            
+            .player {
+                width: 18px;
+                height: 18px;
+                font-size: 9px;
+            }
+            
+            .waypoint-marker {
+                width: 14px;
+                height: 14px;
+                font-size: 7px;
+            }
+            
+            .setup-controls {
+                width: calc(100vw - 24px);
+                padding: 10px;
+            }
+            
+            .controls .control-btn {
+                flex: 1 1 calc(50% - 4px);
+                min-width: 60px;
+                font-size: 12px;
+                padding: 10px 8px;
+            }
+            
+            .info {
+                margin: 12px 4px;
+                padding: 12px;
+            }
+            
+            .info h3 {
+                font-size: 1.1rem;
+            }
+            
+            .timeline {
+                max-width: 250px;
+            }
+        }
+        
+        /* Landscape orientation on mobile */
+        @media (max-width: 768px) and (orientation: landscape) {
+            .rugby-widget {
+                max-width: 450px;
+                height: 180px;
+            }
+            
+            .setup-row {
+                flex-direction: row;
+                flex-wrap: wrap;
+            }
+            
+            .setup-group {
+                flex: 1 1 200px;
+                flex-direction: row;
+                align-items: center;
+            }
+            
+            .controls .control-btn {
+                flex: 1 1 calc(20% - 4px);
+            }
+        }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/gif.js.optimized/dist/gif.js"></script>

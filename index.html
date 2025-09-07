@@ -750,6 +750,244 @@
         #availabilityModalContent {
             margin-top: 16px;
         }
+        
+        /* Responsive Design - Mobile First */
+        @media (max-width: 768px) {
+            .container {
+                padding: 16px;
+                max-width: 100%;
+            }
+            
+            .header {
+                padding: 24px 16px;
+                margin-bottom: 24px;
+            }
+            
+            .header h1 {
+                font-size: 1.75rem;
+                line-height: 1.2;
+            }
+            
+            .header p {
+                font-size: 1rem;
+            }
+            
+            /* Navigation improvements */
+            .mockup-nav {
+                flex-wrap: wrap;
+                gap: 8px;
+                padding: 16px;
+            }
+            
+            .mockup-btn {
+                flex: 1 1 calc(50% - 4px);
+                min-width: 140px;
+                padding: 14px 16px;
+                font-size: 15px;
+            }
+            
+            /* Calendar improvements */
+            .calendar-header {
+                flex-direction: column;
+                gap: 16px;
+                padding: 16px;
+            }
+            
+            .calendar-nav {
+                flex-wrap: wrap;
+                gap: 8px;
+                justify-content: center;
+            }
+            
+            .calendar-btn {
+                padding: 8px 12px;
+                font-size: 13px;
+                min-width: 60px;
+            }
+            
+            .calendar-grid {
+                font-size: 13px;
+            }
+            
+            .calendar-day {
+                min-height: 60px;
+                padding: 4px;
+            }
+            
+            .event {
+                font-size: 10px;
+                padding: 2px 4px;
+                margin-bottom: 1px;
+            }
+            
+            /* Form improvements */
+            .form-grid {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+            
+            .form-input, .sort-select {
+                padding: 14px 16px;
+                font-size: 16px; /* Prevent zoom on iOS */
+            }
+            
+            .form-mockup {
+                padding: 20px 16px;
+            }
+            
+            /* Button improvements for touch */
+            .add-btn, .btn-primary, .btn-secondary {
+                padding: 14px 20px;
+                font-size: 16px;
+                min-height: 44px; /* Apple's recommended touch target */
+            }
+            
+            .add-btn {
+                width: 100%;
+                justify-content: center;
+                margin-bottom: 16px;
+            }
+            
+            /* Events table improvements */
+            .events-table-controls {
+                flex-direction: column;
+                gap: 12px;
+                align-items: stretch;
+            }
+            
+            .events-sort {
+                flex-wrap: wrap;
+                gap: 8px;
+            }
+            
+            .sort-label {
+                width: 100%;
+                margin-bottom: 4px;
+            }
+            
+            /* Make table horizontally scrollable */
+            .events-table-wrapper {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+            
+            .events-table {
+                min-width: 600px;
+            }
+            
+            .events-table th,
+            .events-table td {
+                padding: 12px 8px;
+                font-size: 14px;
+            }
+            
+            /* Section headers */
+            .section-header {
+                flex-direction: column;
+                gap: 16px;
+                align-items: stretch;
+            }
+            
+            .section-title {
+                font-size: 1.5rem;
+                text-align: center;
+            }
+            
+            /* Modal improvements */
+            #eventModal .modal-content,
+            #availabilityModal .modal-content {
+                max-width: calc(100vw - 32px);
+                margin: 16px;
+                padding: 24px 16px;
+            }
+            
+            /* File upload */
+            .file-upload {
+                padding: 32px 16px;
+            }
+            
+            .upload-icon {
+                font-size: 36px;
+            }
+            
+            /* Filter buttons */
+            .events-table-controls button {
+                padding: 10px 12px;
+                font-size: 14px;
+                min-height: 44px;
+            }
+            
+            /* Show dropdown for pagination */
+            .events-table-controls > div:last-child {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 8px;
+                align-items: center;
+            }
+            
+            .events-table-controls > div:last-child button {
+                flex: 1;
+                min-width: 50px;
+            }
+        }
+        
+        /* Tablet improvements */
+        @media (min-width: 769px) and (max-width: 1024px) {
+            .container {
+                padding: 20px;
+            }
+            
+            .mockup-btn {
+                flex: 1;
+            }
+            
+            .calendar-nav {
+                gap: 10px;
+            }
+            
+            .events-table-controls {
+                flex-wrap: wrap;
+                gap: 12px;
+            }
+        }
+        
+        /* Small mobile devices */
+        @media (max-width: 480px) {
+            .container {
+                padding: 12px;
+            }
+            
+            .header {
+                padding: 20px 12px;
+            }
+            
+            .header h1 {
+                font-size: 1.5rem;
+            }
+            
+            .mockup-nav {
+                padding: 12px;
+            }
+            
+            .mockup-btn {
+                flex: 1 1 100%;
+                margin-bottom: 8px;
+            }
+            
+            .calendar-day {
+                min-height: 50px;
+                font-size: 12px;
+            }
+            
+            .event {
+                font-size: 9px;
+                padding: 1px 3px;
+            }
+            
+            .section-title {
+                font-size: 1.25rem;
+            }
+        }
     </style>
 </head>
 <body>
