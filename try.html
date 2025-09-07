@@ -380,6 +380,7 @@
         <button class="control-btn" onclick="rugbyDesigner.clearAll()">Clear All</button>
         <button class="control-btn" onclick="rugbyDesigner.loadSample()">Load Sample</button>
         <button class="control-btn" id="finishPathBtn" onclick="rugbyDesigner.finishPath()" style="display: none; background: #27ae60;">Finish Path</button>
+        <button class="control-btn" id="savePassBtn" onclick="rugbyDesigner.saveCurrentPass()" style="display: none; background: #FF8C00;">Save Pass</button>
         <button class="control-btn" id="saveBtn">Save Drill</button>
         <input type="file" id="uploadInput" style="display:none" accept=".json">
         <button class="control-btn" id="uploadBtn">Upload Drill</button>
@@ -630,6 +631,18 @@
                 const rect = this.pitch.getBoundingClientRect();
                 const x = e.clientX - rect.left;
                 const y = e.clientY - rect.top;
+                
+                // Handle double-click to complete pass creation (mobile support)
+                if (this.isAddPassMode && this.isCreatingWaypointPass && this.currentPassWaypoints.length >= 2) {
+                    this.finishWaypointPass();
+                    return;
+                }
+                
+                // Handle double-click to save a completed pass (alternative to Save Pass button)
+                if (this.isAddPassMode && !this.isCreatingWaypointPass && this.currentPassWaypoints.length >= 2) {
+                    this.saveCurrentPass();
+                    return;
+                }
                 
                 const clickedWaypoint = this.getWaypointAt(x, y);
                 if (clickedWaypoint) {
@@ -979,12 +992,17 @@
                         this.selectedPlayer.classList.remove('selected');
                         this.selectedPlayer = null;
                     }
+                    
+                    // Clean up unsaved passes when exiting design mode
+                    this.clearUnsavedPasses();
+                    
                     this.pitch.classList.add('playing');
                     document.getElementById('designBtn').classList.remove('active');
                     document.getElementById('addCodeBtn').style.display = 'none';
                     document.getElementById('addPassBtn').style.display = 'none';
                     document.getElementById('hideWaypointBtn').style.display = 'none';
                     document.getElementById('lassoBtn').style.display = 'none';
+                    document.getElementById('savePassBtn').style.display = 'none';
 
                     this.updateModeDisplay(); // <-- Always call this here
                 }
@@ -1564,6 +1582,7 @@
                     this.isCreatingWaypointPass = false;
                     this.clearPassWaypointHighlights();
                     document.getElementById('addPassBtn').classList.remove('active');
+                    document.getElementById('savePassBtn').style.display = 'none';
                     this.updateModeIndicator('Design Mode');
                 }
             }
@@ -1579,6 +1598,26 @@
                 // Remove temporary pass path visualization
                 const tempPaths = this.pitch.querySelectorAll('.current-pass-path');
                 tempPaths.forEach(path => path.remove());
+            }
+
+            clearUnsavedPasses() {
+                // Clear any unsaved pass state and temporary lines when exiting design mode
+                if (this.currentPassWaypoints.length > 0) {
+                    // Remove temporary pass path visualization for unsaved passes
+                    const tempPaths = this.pitch.querySelectorAll('.current-pass-path');
+                    tempPaths.forEach(path => path.remove());
+                    
+                    // Clear pass waypoint highlights
+                    this.clearPassWaypointHighlights();
+                    
+                    // Reset pass-related state
+                    this.currentPassWaypoints = [];
+                    this.isCreatingWaypointPass = false;
+                    this.isAddPassMode = false;
+                }
+                
+                // Hide Save Pass button
+                document.getElementById('savePassBtn').style.display = 'none';
             }
 
             addWaypointToPass(waypoint) {
@@ -1637,6 +1676,19 @@
 
             finishWaypointPass() {
                 if (this.currentPassWaypoints.length >= 2) {
+                    // Create a pass preview - not saved yet
+                    this.updateModeIndicator(`Pass path ready with ${this.currentPassWaypoints.length} waypoints! Click "Save Pass" to save, double-click anywhere to complete, or right-click to finish without saving.`);
+                    
+                    // Show the Save Pass button
+                    document.getElementById('savePassBtn').style.display = 'inline-block';
+                    
+                    // Keep the current pass waypoints for potential saving
+                    this.isCreatingWaypointPass = false; // Mark as finished but not saved
+                }
+            }
+
+            saveCurrentPass() {
+                if (this.currentPassWaypoints.length >= 2) {
                     // Create a pass object representing the waypoint sequence
                     const passData = {
                         type: 'waypoint-sequence',
@@ -1644,7 +1696,7 @@
                         id: Date.now() // Simple ID for tracking
                     };
                     
-                    // Add to passes array for potential future use
+                    // Add to passes array
                     this.passes.push(passData);
                     
                     // Convert current pass path lines to permanent ones
@@ -1654,7 +1706,10 @@
                         path.classList.add('waypoint-pass-line');
                     });
                     
-                    this.updateModeIndicator(`Pass path created with ${this.currentPassWaypoints.length} waypoints! Click on waypoints to create another pass.`);
+                    this.updateModeIndicator(`Pass saved with ${this.currentPassWaypoints.length} waypoints! Click on waypoints to create another pass.`);
+                    
+                    // Hide the Save Pass button
+                    document.getElementById('savePassBtn').style.display = 'none';
                     
                     // Reset state but keep pass mode active for creating additional passes
                     this.currentPassWaypoints = [];
