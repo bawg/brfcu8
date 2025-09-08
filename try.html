@@ -434,11 +434,11 @@
                 line-height: 1.4;
             }
             
-            /* Make rugby widget responsive */
+            /* Make rugby widget responsive - wider in portrait mode */
             .rugby-widget {
-                width: calc(100vw - 32px);
+                width: calc(100vw - 16px);
                 max-width: none;
-                height: min(50vh, 300px);
+                height: min(55vh, 350px);
                 margin: 16px auto;
                 border-width: 1px;
             }
@@ -457,54 +457,52 @@
                 font-size: 8px;
             }
             
-            /* Make setup controls responsive */
+            /* Make setup controls responsive - keep buttons on same row */
             .setup-controls {
-                width: calc(100vw - 32px);
+                width: calc(100vw - 16px);
                 max-width: none;
                 margin: 16px auto;
                 padding: 12px;
             }
             
             .setup-row {
-                flex-direction: column;
+                flex-direction: row;
+                flex-wrap: wrap;
                 gap: 12px;
                 margin: 12px 0;
+                justify-content: space-between;
+                align-items: center;
             }
             
             .setup-group {
-                flex-direction: column;
+                display: flex;
+                flex-direction: row;
+                align-items: center;
                 gap: 8px;
-                align-items: stretch;
-                text-align: left;
+                flex: 0 1 auto;
             }
             
             .setup-group label {
                 font-weight: 600;
                 font-size: 14px;
-            }
-            
-            .setup-group > div {
-                display: flex;
-                flex-wrap: wrap;
-                gap: 8px;
+                white-space: nowrap;
             }
             
             /* Make buttons more touch-friendly */
             .setup-btn, .control-btn {
-                padding: 12px 16px;
-                font-size: 14px;
-                min-height: 44px;
-                flex: 1;
-                min-width: 80px;
-                border-radius: 6px;
+                padding: 10px 12px;
+                font-size: 12px;
+                min-height: 40px;
+                min-width: 60px;
+                border-radius: 4px;
             }
             
             select {
-                padding: 12px 16px;
+                padding: 8px 12px;
                 font-size: 16px; /* Prevent zoom on iOS */
-                min-height: 44px;
-                border-radius: 6px;
-                width: 100%;
+                min-height: 40px;
+                border-radius: 4px;
+                min-width: 100px;
             }
             
             /* Controls section improvements */
@@ -517,20 +515,23 @@
             
             .controls .control-btn {
                 margin: 4px 2px;
-                min-width: 70px;
-                flex: 1 1 calc(25% - 4px);
+                min-width: 60px;
+                flex: 1 1 calc(20% - 4px);
+                font-size: 12px;
+                padding: 10px 8px;
+                min-height: 40px;
             }
             
             /* Timeline improvements */
             .timeline {
-                width: calc(100vw - 64px);
-                max-width: 300px;
+                width: calc(100vw - 32px);
+                max-width: 400px;
                 margin: 16px auto;
             }
             
             /* Mode indicator */
             .mode-indicator {
-                width: calc(100vw - 32px);
+                width: calc(100vw - 16px);
                 max-width: none;
                 margin: 16px auto;
                 padding: 12px;
@@ -585,9 +586,9 @@
         /* Small mobile devices */
         @media (max-width: 480px) {
             .rugby-widget {
-                width: calc(100vw - 24px);
-                max-width: 300px;
-                height: 180px;
+                width: calc(100vw - 16px);
+                max-width: none;
+                height: min(45vh, 250px);
             }
             
             .player {
@@ -603,15 +604,34 @@
             }
             
             .setup-controls {
-                width: calc(100vw - 24px);
-                padding: 10px;
+                width: calc(100vw - 16px);
+                padding: 8px;
+            }
+            
+            .setup-group label {
+                font-size: 12px;
+            }
+            
+            .setup-btn, .control-btn {
+                padding: 8px 10px;
+                font-size: 11px;
+                min-height: 36px;
+                min-width: 50px;
+            }
+            
+            select {
+                padding: 6px 10px;
+                font-size: 14px;
+                min-height: 36px;
+                min-width: 80px;
             }
             
             .controls .control-btn {
-                flex: 1 1 calc(50% - 4px);
-                min-width: 60px;
-                font-size: 12px;
-                padding: 10px 8px;
+                flex: 1 1 calc(20% - 4px);
+                min-width: 50px;
+                font-size: 11px;
+                padding: 8px 6px;
+                min-height: 36px;
             }
             
             .info {
@@ -624,24 +644,26 @@
             }
             
             .timeline {
-                max-width: 250px;
+                max-width: 300px;
             }
         }
         
         /* Landscape orientation on mobile */
         @media (max-width: 768px) and (orientation: landscape) {
             .rugby-widget {
-                max-width: 450px;
-                height: 180px;
+                width: calc(100vw - 16px);
+                max-width: 600px;
+                height: min(50vh, 220px);
             }
             
             .setup-row {
                 flex-direction: row;
-                flex-wrap: wrap;
+                flex-wrap: nowrap;
+                justify-content: space-between;
             }
             
             .setup-group {
-                flex: 1 1 200px;
+                flex: 0 1 auto;
                 flex-direction: row;
                 align-items: center;
             }
@@ -726,6 +748,7 @@
                     <button class="option-item" onclick="rugbyDesigner.saveDrill()">Save Drill</button>
                     <button class="option-item" onclick="rugbyDesigner.triggerUpload()">Upload Drill</button>
                     <button class="option-item" onclick="rugbyDesigner.exportGif()">Download GIF</button>
+                    <button class="option-item" id="hideWaypointsOption" onclick="rugbyDesigner.toggleWaypointsFromMenu()" style="display: none;">Hide Waypoints</button>
                     <button class="option-item" onclick="rugbyDesigner.clearAll()">Clear All</button>
                 </div>
             </div>
@@ -757,7 +780,6 @@
         <button class="control-btn" id="finishPathBtn" onclick="rugbyDesigner.finishPath()" style="display: none; background: #27ae60;">Finish Path</button>
         <button class="control-btn" id="addCodeBtn" onclick="rugbyDesigner.toggleAddCodeMode()" style="background: #2196F3; display: none;">Add Cones</button>
         <button class="control-btn" id="addPassBtn" onclick="rugbyDesigner.handlePassButton()" style="background: #FF8C00; display: none;">Add a Pass</button>
-        <button class="control-btn" id="hideWaypointBtn" onclick="rugbyDesigner.toggleWaypoints()" style="background: #888; display: none;">Hide Waypoints</button>
         <button class="control-btn" id="lassoBtn" onclick="rugbyDesigner.toggleLassoMode()" style="background: #6c757d; display: none;">Move</button>
     </div>
 
@@ -1327,7 +1349,7 @@
                     document.getElementById('designBtn').classList.add('active');
                     document.getElementById('addCodeBtn').style.display = 'inline-block';
                     document.getElementById('addPassBtn').style.display = 'inline-block';
-                    document.getElementById('hideWaypointBtn').style.display = 'inline-block';
+                    document.getElementById('hideWaypointsOption').style.display = 'block';
                     document.getElementById('lassoBtn').style.display = 'inline-block';
                     this.setWaypointsVisible(!this.waypointsHidden);
                     
@@ -1346,8 +1368,6 @@
                     document.getElementById('addCodeBtn').style.color = '#333';
                     document.getElementById('addPassBtn').style.background = '#e0e0e0';
                     document.getElementById('addPassBtn').style.color = '#333';
-                    document.getElementById('hideWaypointBtn').style.background = '#e0e0e0';
-                    document.getElementById('hideWaypointBtn').style.color = '#333';
                     document.getElementById('lassoBtn').style.background = '#e0e0e0';
                     document.getElementById('lassoBtn').style.color = '#333';
 
@@ -1363,7 +1383,7 @@
                     document.getElementById('designBtn').classList.remove('active');
                     document.getElementById('addCodeBtn').style.display = 'none';
                     document.getElementById('addPassBtn').style.display = 'none';
-                    document.getElementById('hideWaypointBtn').style.display = 'none';
+                    document.getElementById('hideWaypointsOption').style.display = 'none';
                     document.getElementById('lassoBtn').style.display = 'none';
 
                     this.updateModeDisplay(); // <-- Always call this here
@@ -1397,7 +1417,7 @@
                     this.selectedPlayer = null;
                 }
                 this.pitch.classList.add('playing');
-                document.getElementById('hideWaypointBtn').style.display = 'none';
+                document.getElementById('hideWaypointsOption').style.display = 'none';
                 document.getElementById('lassoBtn').style.display = 'none';
                 this.updateModeIndicator(this.mode === 'drill' ? 'PLAYING DRILL' : 'PLAYING MATCH');
             }
@@ -1954,12 +1974,15 @@
                 if (!this.isAddPassMode) {
                     // Not in pass mode - start pass mode
                     this.toggleAddPassMode();
-                } else if (this.isCreatingWaypointPass && this.currentPassWaypoints.length >= 2) {
-                    // In pass mode with a pass in progress - finish the current pass
-                    this.finishWaypointPass();
                 } else {
-                    // In pass mode but no pass in progress - exit pass mode
-                    this.toggleAddPassMode();
+                    // In pass mode - check if we have a pass in progress that can be finished
+                    if (this.isCreatingWaypointPass && this.currentPassWaypoints.length >= 2) {
+                        // Finish the current pass
+                        this.finishWaypointPass();
+                    } else {
+                        // No valid pass in progress - exit pass mode
+                        this.toggleAddPassMode();
+                    }
                 }
             }
 
@@ -2049,14 +2072,17 @@
                         path.classList.add('waypoint-pass-line');
                     });
                     
-                    this.updateModeIndicator(`Pass path created with ${this.currentPassWaypoints.length} waypoints! Click on waypoints to create another pass.`);
+                    this.updateModeIndicator(`Pass path created with ${this.currentPassWaypoints.length} waypoints! Click "Add a Pass" to create another pass or click it again to exit pass mode.`);
                     
-                    // Reset state but keep pass mode active for creating additional passes
+                    // Reset pass creation state but keep pass mode active
                     this.currentPassWaypoints = [];
                     this.isCreatingWaypointPass = false;
                     
-                    // Remove temporary highlights
+                    // Remove temporary highlights  
                     this.clearPassWaypointHighlights();
+                    
+                    // Reset button text to allow creating another pass or exiting
+                    document.getElementById('addPassBtn').textContent = 'Add a Pass';
                 }
             }
 
@@ -2109,6 +2135,14 @@
                 this.waypointsHidden = !this.waypointsHidden;
                 this.setWaypointsVisible(!this.waypointsHidden);
                 document.getElementById('hideWaypointBtn').textContent = this.waypointsHidden ? 'Show Waypoints' : 'Hide Waypoints';
+            }
+
+            toggleWaypointsFromMenu() {
+                this.waypointsHidden = !this.waypointsHidden;
+                this.setWaypointsVisible(!this.waypointsHidden);
+                document.getElementById('hideWaypointsOption').textContent = this.waypointsHidden ? 'Show Waypoints' : 'Hide Waypoints';
+                // Close the options menu
+                this.toggleOptions();
             }
 
             setWaypointsVisible(visible) {
