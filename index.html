@@ -1765,6 +1765,10 @@
             currentMonth = today.getMonth();
             currentYear = today.getFullYear();
             updateCalendarTitle();
+            
+            // Check for pending events from drill designer
+            loadPendingEvents();
+            
             renderCalendar();
             renderEventsTable();
             renderDrillsTable();
@@ -1776,6 +1780,27 @@
             // Initialize pinch-to-zoom for events table
             initializePinchZoom();
         });
+        
+        function loadPendingEvents() {
+            // Check localStorage for pending events from drill designer
+            const pendingEvents = JSON.parse(localStorage.getItem('pendingCalendarEvents') || '[]');
+            if (pendingEvents.length > 0) {
+                // Add pending events to the calendar
+                pendingEvents.forEach(event => {
+                    calendarEvents.push(event);
+                });
+                
+                // Clear the pending events
+                localStorage.removeItem('pendingCalendarEvents');
+                
+                // Show notification
+                if (pendingEvents.length === 1) {
+                    showCalendarUploadStatus('success', `Added 1 new event from drill designer!`);
+                } else {
+                    showCalendarUploadStatus('success', `Added ${pendingEvents.length} new events from drill designer!`);
+                }
+            }
+        }
         
         function renderCalendar() {
             const calendarGrid = document.querySelector('.calendar-grid');

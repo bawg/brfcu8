@@ -313,6 +313,22 @@
             outline: none;
         }
 
+        /* Event Panel Styles */
+        #eventPanel {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            z-index: 1001;
+            width: 350px;
+            max-width: 90vw;
+            display: none;
+        }
+
         .timeline {
             width: min(80vw, 800px);
             margin: 10px auto;
@@ -792,6 +808,7 @@
         <button class="control-btn" onclick="rugbyDesigner.pauseMovement()">Pause</button>
         <button class="control-btn" onclick="rugbyDesigner.resetMovement()">Reset</button>
         <button class="control-btn" onclick="rugbyDesigner.toggleNotes()">Notes</button>
+        <button class="control-btn" onclick="rugbyDesigner.scheduleEvent()" style="background: #9c27b0;">Schedule Event</button>
         <input type="file" id="uploadInput" style="display:none" accept=".json">
         <span id="gifProgress" style="font-size:12px; margin-left:10px;"></span>
     </div>
@@ -2482,6 +2499,97 @@
                     <textarea id="drillNotes" placeholder="Add notes about this drill..."></textarea>
                 `;
                 document.body.appendChild(notesPanel);
+            }
+
+            scheduleEvent() {
+                let eventPanel = document.getElementById('eventPanel');
+                if (!eventPanel) {
+                    this.createEventPanel();
+                    // Panel is created with display: block, so we don't need to toggle on first creation
+                    return;
+                }
+                const isVisible = eventPanel.style.display === 'block';
+                eventPanel.style.display = isVisible ? 'none' : 'block';
+            }
+
+            createEventPanel() {
+                const eventPanel = document.createElement('div');
+                eventPanel.id = 'eventPanel';
+                eventPanel.style.display = 'block'; // Show immediately when created
+                eventPanel.innerHTML = `
+                    <div class="notes-header">
+                        <h4>Schedule Drill Event</h4>
+                        <button onclick="rugbyDesigner.scheduleEvent()" class="notes-close">×</button>
+                    </div>
+                    <div style="padding: 10px;">
+                        <label for="eventName">Event Name:</label><br>
+                        <input type="text" id="eventName" style="width: 100%; margin-bottom: 10px; padding: 5px;" placeholder="Drill Practice Session"><br>
+                        
+                        <label for="eventDate">Date:</label><br>
+                        <input type="date" id="eventDate" style="width: 100%; margin-bottom: 10px; padding: 5px;"><br>
+                        
+                        <label for="eventTime">Time:</label><br>
+                        <input type="text" id="eventTime" style="width: 100%; margin-bottom: 10px; padding: 5px;" placeholder="e.g., 6:00 PM - 8:00 PM"><br>
+                        
+                        <label for="eventLocation">Location:</label><br>
+                        <input type="text" id="eventLocation" style="width: 100%; margin-bottom: 10px; padding: 5px;" placeholder="Barnes Rugby Field"><br>
+                        
+                        <label for="eventType">Type:</label><br>
+                        <select id="eventType" style="width: 100%; margin-bottom: 10px; padding: 5px;">
+                            <option value="practice">Practice</option>
+                            <option value="match">Match</option>
+                            <option value="festival">Festival</option>
+                        </select><br>
+                        
+                        <label for="eventDetails">Details:</label><br>
+                        <textarea id="eventDetails" style="width: 100%; margin-bottom: 10px; padding: 5px; height: 60px;" placeholder="Drill-focused training session"></textarea>
+                        
+                        <button onclick="rugbyDesigner.saveEvent()" style="background: #27ae60; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; width: 100%;">Add to Calendar</button>
+                    </div>
+                `;
+                document.body.appendChild(eventPanel);
+            }
+
+            saveEvent() {
+                const name = document.getElementById('eventName').value || 'Drill Practice Session';
+                const date = document.getElementById('eventDate').value;
+                const time = document.getElementById('eventTime').value || '6:00 PM - 8:00 PM';
+                const location = document.getElementById('eventLocation').value || 'Barnes Rugby Field';
+                const type = document.getElementById('eventType').value;
+                const details = document.getElementById('eventDetails').value || 'Drill-focused training session';
+
+                if (!date) {
+                    alert('Please select a date for the event.');
+                    return;
+                }
+
+                const newEvent = {
+                    name,
+                    date,
+                    time,
+                    location,
+                    type,
+                    details,
+                    attendees: [],
+                    availability: { manus: '', andy: '', james: '' }
+                };
+
+                // Save to localStorage for index.html to pick up
+                let pendingEvents = JSON.parse(localStorage.getItem('pendingCalendarEvents') || '[]');
+                pendingEvents.push(newEvent);
+                localStorage.setItem('pendingCalendarEvents', JSON.stringify(pendingEvents));
+
+                alert('Event scheduled successfully! Go back to the main calendar to see it.');
+                
+                // Clear the form
+                document.getElementById('eventName').value = '';
+                document.getElementById('eventDate').value = '';
+                document.getElementById('eventTime').value = '';
+                document.getElementById('eventLocation').value = '';
+                document.getElementById('eventDetails').value = '';
+                
+                // Hide the panel
+                this.scheduleEvent();
             }
         }
 
