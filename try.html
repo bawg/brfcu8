@@ -402,6 +402,17 @@
                 flex: 1 1 calc(25% - 4px);
             }
             
+            /* Specific mobile styling for alignment buttons */
+            #alignHorizontalBtn,
+            #alignVerticalBtn {
+                flex: 1 1 calc(50% - 4px);
+                min-width: 80px;
+                font-size: 12px;
+                padding: 12px 6px;
+                text-align: center;
+                white-space: nowrap;
+            }
+            
             /* Timeline improvements */
             .timeline {
                 width: calc(100vw - 64px);
@@ -460,6 +471,19 @@
                 min-width: 60px;
                 font-size: 12px;
                 padding: 10px 8px;
+            }
+            
+            /* Smaller alignment button text for small mobile devices */
+            #alignHorizontalBtn,
+            #alignVerticalBtn {
+                flex: 1 1 calc(50% - 4px);
+                min-width: 70px;
+                font-size: 11px;
+                padding: 10px 4px;
+                text-align: center;
+                white-space: nowrap;
+                text-overflow: ellipsis;
+                overflow: hidden;
             }
             
             .info {
@@ -653,6 +677,7 @@
                 this.initPlayers();
                 this.setupSaveUpload();
                 this.setupGifExport();
+                this.updateMobileButtonText();
 
                 // Set initial mode indicator to blank
                 this.modeIndicator.innerHTML = '';
@@ -674,6 +699,9 @@
                 this.pitch.addEventListener('mousedown', (e) => this.handleLassoDown(e));
                 document.addEventListener('mousemove', (e) => this.handleLassoMove(e));
                 document.addEventListener('mouseup', (e) => this.handleLassoUp(e));
+                
+                // Add resize event listener for mobile button text updates
+                window.addEventListener('resize', () => this.updateMobileButtonText());
             }
 
             setMode(mode) {
@@ -2452,6 +2480,25 @@
                 this.drawConnections();
                 this.drawPaths();
                 this.updateModeIndicator(`Loaded drill: ${data.name || 'Unnamed'}`);
+            }
+
+            updateMobileButtonText() {
+                // Check if screen width is mobile
+                if (window.innerWidth <= 768) {
+                    // Use shorter text for mobile devices
+                    const alignHorizontalBtn = document.getElementById('alignHorizontalBtn');
+                    const alignVerticalBtn = document.getElementById('alignVerticalBtn');
+                    
+                    if (alignHorizontalBtn) alignHorizontalBtn.textContent = 'Align H';
+                    if (alignVerticalBtn) alignVerticalBtn.textContent = 'Align V';
+                } else {
+                    // Use full text for larger screens
+                    const alignHorizontalBtn = document.getElementById('alignHorizontalBtn');
+                    const alignVerticalBtn = document.getElementById('alignVerticalBtn');
+                    
+                    if (alignHorizontalBtn) alignHorizontalBtn.textContent = 'Align Horizontal';
+                    if (alignVerticalBtn) alignVerticalBtn.textContent = 'Align Vertical';
+                }
             }
         }
 
