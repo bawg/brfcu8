@@ -784,6 +784,7 @@
                     <span class="dots">⋯</span>
                 </button>
                 <div class="options-menu" id="optionsMenu" style="display: none;">
+                    <button class="option-item" onclick="rugbyDesigner.backToPlatform()">← Back to Platform</button>
                     <button class="option-item" onclick="rugbyDesigner.loadSample()">Load Sample</button>
                     <button class="option-item" onclick="rugbyDesigner.saveDrill()">Save Drill</button>
                     <button class="option-item" onclick="rugbyDesigner.triggerUpload()">Upload Drill</button>
@@ -2748,6 +2749,14 @@
             triggerUpload() {
                 document.getElementById('uploadInput').click();
                 this.toggleOptions(); // Close dropdown
+            }
+
+            // Back to platform functionality
+            backToPlatform() {
+                if (confirm('Are you sure you want to return to the main platform? Any unsaved changes will be lost.')) {
+                    window.location.href = 'index.html';
+                }
+                this.toggleOptions(); // Close dropdown regardless of choice
             }
 
             // Notes functionality
