@@ -613,7 +613,7 @@
         <button class="control-btn" id="addPassBtn" onclick="rugbyDesigner.handlePassButton()" style="background: #FF8C00; display: none;">Add a Pass</button>
         <button class="control-btn" id="hideWaypointBtn" onclick="rugbyDesigner.toggleWaypoints()" style="background: #888; display: none;">Hide Waypoints</button>
         <button class="control-btn" id="lassoBtn" onclick="rugbyDesigner.toggleLassoMode()" style="background: #6c757d; display: none;">Move</button>
-        <button class="control-btn" id="eraserBtn" onclick="rugbyDesigner.toggleEraserMode()" style="background: #dc3545; display: none;">Eraser</button>
+        <button class="control-btn" id="eraserBtn" onclick="rugbyDesigner.toggleEraserMode()" style="background: #dc3545; display: none;">Erase</button>
     </div>
 
     <script>
@@ -680,8 +680,10 @@
             }
 
             toggleEraserMode() {
-                this.eraserMode = !this.eraserMode;
-                if (this.eraserMode) {
+                if (!this.eraserMode) {
+                    // Entering eraser mode
+                    this.eraserMode = true;
+                    
                     // Exit other modes when entering eraser mode
                     this.lassoMode = false;
                     this.isAddCodeMode = false;
@@ -694,14 +696,28 @@
                     
                     // Clear any existing selections
                     this.clearSelectedObjects();
+                    
+                    document.getElementById('eraserBtn').classList.add('active');
+                    this.updateModeIndicator('Eraser: Click objects to select, then click Erase to delete selected objects.');
                 } else {
-                    // When exiting eraser mode, delete all selected objects
-                    this.deleteSelectedObjects();
+                    // Exiting eraser mode - prompt user if objects are selected
+                    if (this.selectedObjects.length > 0) {
+                        const count = this.selectedObjects.length;
+                        const objectText = count === 1 ? 'object' : 'objects';
+                        if (confirm(`Are you sure you want to delete ${count} selected ${objectText}?`)) {
+                            this.deleteSelectedObjects();
+                            this.eraserMode = false;
+                            document.getElementById('eraserBtn').classList.remove('active');
+                            this.updateModeIndicator('Design Mode');
+                        }
+                        // If user cancels, stay in eraser mode
+                    } else {
+                        // No objects selected, just exit eraser mode
+                        this.eraserMode = false;
+                        document.getElementById('eraserBtn').classList.remove('active');
+                        this.updateModeIndicator('Design Mode');
+                    }
                 }
-                
-                document.getElementById('eraserBtn').classList.toggle('active', this.eraserMode);
-                document.getElementById('eraserBtn').textContent = this.eraserMode ? 'Exit Eraser' : 'Eraser';
-                this.updateModeIndicator(this.eraserMode ? 'Eraser: Click objects to select, then click Eraser again or press Delete key to delete selected objects.' : 'Design Mode');
             }
 
             clearSelectedObjects() {
@@ -806,7 +822,7 @@
                     
                     // Update mode indicator with selection count
                     const count = this.selectedObjects.length;
-                    this.updateModeIndicator(`Eraser: ${count} object${count !== 1 ? 's' : ''} selected. Click Eraser again or press Delete key to delete selected objects.`);
+                    this.updateModeIndicator(`Eraser: ${count} object${count !== 1 ? 's' : ''} selected. Click Erase button to delete selected objects.`);
                 }
             }
 
@@ -848,7 +864,14 @@
             handleKeyDown(e) {
                 // Handle Delete key in eraser mode
                 if (e.key === 'Delete' && this.eraserMode && this.selectedObjects.length > 0) {
-                    this.deleteSelectedObjects();
+                    const count = this.selectedObjects.length;
+                    const objectText = count === 1 ? 'object' : 'objects';
+                    if (confirm(`Are you sure you want to delete ${count} selected ${objectText}?`)) {
+                        this.deleteSelectedObjects();
+                        this.eraserMode = false;
+                        document.getElementById('eraserBtn').classList.remove('active');
+                        this.updateModeIndicator('Design Mode');
+                    }
                     e.preventDefault();
                 }
             }
