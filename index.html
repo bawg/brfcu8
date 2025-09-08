@@ -1496,6 +1496,8 @@
                 </select>
             </div>
 
+
+
             <!-- Add this above the events table, after the attendee filter -->
             <div style="display:flex; align-items:center; gap:16px; margin-bottom:16px;">
                 <button class="btn-primary" id="toggleAvailabilityBtn" onclick="toggleAvailabilityEdit()">+ Add Availability</button>
@@ -1595,6 +1597,48 @@
                 </ul>
                 
                 <div id="upload-status-system" class="upload-status" style="display: none; margin-top: 16px;"></div>
+            </div>
+            
+            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 24px; margin-bottom: 32px;">
+                <h3 style="color: #1e3a8a; font-weight: 600; font-size: 1.5rem; margin-bottom: 24px;">Calendar Management</h3>
+                <p style="color: #64748b; margin-bottom: 24px;">Administrative tools for managing calendar event data. These operations require admin privileges.</p>
+                
+                <ul style="list-style: none; padding: 0; margin: 0;">
+                    <li style="border-bottom: 1px solid #e2e8f0; padding: 16px 0;">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <h4 style="color: #1e3a8a; font-weight: 600; margin: 0 0 4px 0;">📥 Download All Calendar Events</h4>
+                                <p style="color: #64748b; margin: 0; font-size: 14px;">Export all calendar events to a JSON file with metadata and timestamp</p>
+                            </div>
+                            <button class="btn-primary" onclick="downloadAllEvents()">Download</button>
+                        </div>
+                    </li>
+                    
+                    <li style="border-bottom: 1px solid #e2e8f0; padding: 16px 0;">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <h4 style="color: #1e3a8a; font-weight: 600; margin: 0 0 4px 0;">📤 Upload Calendar Events</h4>
+                                <p style="color: #64748b; margin: 0; font-size: 14px;">Import calendar events from JSON files with options for append, update, or replace</p>
+                            </div>
+                            <div>
+                                <input type="file" id="events-upload-system" accept=".json" style="display: none;" onchange="uploadEvents(event)">
+                                <button class="btn-primary" onclick="document.getElementById('events-upload-system').click()" style="background: #059669;">Upload</button>
+                            </div>
+                        </div>
+                    </li>
+                    
+                    <li style="padding: 16px 0;">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <h4 style="color: #1e3a8a; font-weight: 600; margin: 0 0 4px 0;">🗑️ Delete All Calendar Events</h4>
+                                <p style="color: #64748b; margin: 0; font-size: 14px;">Permanently remove all calendar events from the repository (Admin only)</p>
+                            </div>
+                            <button class="btn-primary" onclick="confirmDeleteAllEvents()" style="background: #dc2626;">Delete All</button>
+                        </div>
+                    </li>
+                </ul>
+                
+                <div id="upload-status-calendar-system" class="upload-status" style="display: none; margin-top: 16px;"></div>
             </div>
         </section>
     </div>
@@ -2358,6 +2402,222 @@
                     renderDrillsTable();
                     showUploadStatus('success', `Drill "${drill.name}" has been deleted.`);
                 }
+            };
+            
+            showConfirmationModal();
+        }
+
+        // Calendar Event management functions
+        function downloadAllEvents() {
+            const eventsData = {
+                version: "1.0",
+                exported: new Date().toISOString(),
+                events: calendarEvents
+            };
+            
+            const json = JSON.stringify(eventsData, null, 2);
+            const blob = new Blob([json], { type: "application/json" });
+            const url = URL.createObjectURL(blob);
+            
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `calendar_events_export_${new Date().toISOString().split('T')[0]}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            showCalendarUploadStatus('success', `Downloaded ${calendarEvents.length} calendar events to JSON file.`);
+        }
+
+        function uploadEvents(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    let importedEvents = data.events || data; // Handle both wrapped and direct array formats
+                    
+                    if (!Array.isArray(importedEvents)) {
+                        throw new Error('Invalid file format: expected array of calendar events');
+                    }
+                    
+                    // Validate calendar event structure
+                    const requiredFields = ['date', 'time', 'type', 'name', 'location', 'details'];
+                    for (let calEvent of importedEvents) {
+                        for (let field of requiredFields) {
+                            if (!calEvent[field]) {
+                                throw new Error(`Invalid calendar event structure: missing field '${field}'`);
+                            }
+                        }
+                        // Ensure attendees array exists
+                        if (!calEvent.attendees) {
+                            calEvent.attendees = [];
+                        }
+                        // Ensure availability object exists
+                        if (!calEvent.availability) {
+                            calEvent.availability = { manus: '', andy: '', james: '' };
+                        }
+                    }
+                    
+                    // Show confirmation modal for import options
+                    showEventImportConfirmation(importedEvents);
+                    
+                } catch (error) {
+                    showCalendarUploadStatus('error', `Error reading file: ${error.message}`);
+                }
+                
+                // Clear the file input for next upload
+                event.target.value = '';
+            };
+            reader.readAsText(file);
+        }
+
+        function showEventImportConfirmation(importedEvents) {
+            const existingCount = calendarEvents.length;
+            const importCount = importedEvents.length;
+            
+            document.getElementById('modalIcon').textContent = '📤';
+            document.getElementById('modalTitle').textContent = 'Import Calendar Events';
+            document.getElementById('modalMessage').innerHTML = `
+                <p>Found ${importCount} calendar events to import.</p>
+                <p>Current calendar contains ${existingCount} events.</p>
+                <p><strong>Choose import mode:</strong></p>
+                <div style="margin-top: 12px;">
+                    <label style="display: block; margin-bottom: 8px;">
+                        <input type="radio" name="importMode" value="append" checked> 
+                        <strong>Append:</strong> Add new events to existing ones
+                    </label>
+                    <label style="display: block; margin-bottom: 8px;">
+                        <input type="radio" name="importMode" value="update"> 
+                        <strong>Update:</strong> Replace events with matching names and dates
+                    </label>
+                    <label style="display: block;">
+                        <input type="radio" name="importMode" value="replace"> 
+                        <strong>Replace All:</strong> Delete existing and import new events
+                    </label>
+                </div>
+            `;
+            
+            const confirmButton = document.getElementById('confirmButton');
+            confirmButton.textContent = 'Import';
+            confirmButton.className = 'modal-btn primary';
+            
+            confirmationAction = () => {
+                const mode = document.querySelector('input[name="importMode"]:checked').value;
+                processEventImport(importedEvents, mode);
+            };
+            
+            showConfirmationModal();
+        }
+
+        function processEventImport(importedEvents, mode) {
+            let added = 0, updated = 0, replaced = 0;
+            
+            try {
+                switch (mode) {
+                    case 'append':
+                        importedEvents.forEach(calEvent => {
+                            calendarEvents.push(calEvent);
+                            added++;
+                        });
+                        break;
+                        
+                    case 'update':
+                        importedEvents.forEach(importEvent => {
+                            const existingIndex = calendarEvents.findIndex(e => e.name === importEvent.name && e.date === importEvent.date);
+                            if (existingIndex >= 0) {
+                                calendarEvents[existingIndex] = importEvent;
+                                updated++;
+                            } else {
+                                calendarEvents.push(importEvent);
+                                added++;
+                            }
+                        });
+                        break;
+                        
+                    case 'replace':
+                        calendarEvents.length = 0; // Clear existing events
+                        importedEvents.forEach(calEvent => {
+                            calendarEvents.push(calEvent);
+                            replaced++;
+                        });
+                        break;
+                }
+                
+                renderEventsTable();
+                renderCalendar();
+                
+                let message = '';
+                if (mode === 'replace') {
+                    message = `Replaced all events with ${replaced} imported events.`;
+                } else {
+                    message = `Import complete: ${added} added, ${updated} updated.`;
+                }
+                showCalendarUploadStatus('success', message);
+                
+            } catch (error) {
+                showCalendarUploadStatus('error', `Error importing calendar events: ${error.message}`);
+            }
+        }
+
+        function showCalendarUploadStatus(type, message) {
+            // Update calendar status div (if it exists in calendar section)
+            const calendarStatusDiv = document.getElementById('upload-status-calendar');
+            
+            if (calendarStatusDiv) {
+                calendarStatusDiv.className = `upload-status ${type}`;
+                calendarStatusDiv.textContent = message;
+                calendarStatusDiv.style.display = 'block';
+            }
+            
+            // Update system calendar status div (in admin section)
+            const calendarSystemStatusDiv = document.getElementById('upload-status-calendar-system');
+            
+            if (calendarSystemStatusDiv) {
+                calendarSystemStatusDiv.className = `upload-status ${type}`;
+                calendarSystemStatusDiv.textContent = message;
+                calendarSystemStatusDiv.style.display = 'block';
+            }
+            
+            // Also use the general showUploadStatus for consistency
+            showUploadStatus(type, message);
+            
+            setTimeout(() => {
+                if (calendarStatusDiv) {
+                    calendarStatusDiv.style.display = 'none';
+                }
+                if (calendarSystemStatusDiv) {
+                    calendarSystemStatusDiv.style.display = 'none';
+                }
+            }, 5000);
+        }
+
+        function confirmDeleteAllEvents() {
+            if (currentUserRole !== 'admin') {
+                showCalendarUploadStatus('error', 'Only administrators can delete all calendar events.');
+                return;
+            }
+            
+            document.getElementById('modalIcon').textContent = '🗑️';
+            document.getElementById('modalTitle').textContent = 'Delete All Calendar Events';
+            document.getElementById('modalMessage').innerHTML = `
+                <p><strong>⚠️ WARNING: This action cannot be undone!</strong></p>
+                <p>This will permanently delete all ${calendarEvents.length} calendar events in the repository.</p>
+                <p>Consider downloading a backup first.</p>
+            `;
+            
+            const confirmButton = document.getElementById('confirmButton');
+            confirmButton.textContent = 'Delete All';
+            confirmButton.className = 'modal-btn confirm';
+            
+            confirmationAction = () => {
+                calendarEvents.length = 0; // Clear all calendar events
+                renderEventsTable();
+                renderCalendar();
+                showCalendarUploadStatus('success', 'All calendar events have been deleted.');
             };
             
             showConfirmationModal();
