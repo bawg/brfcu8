@@ -493,6 +493,38 @@
                 flex: 1 1 calc(20% - 4px);
             }
         }
+        
+        /* Sample Dropdown Styles */
+        .sample-drill-container {
+            position: relative;
+            display: inline-block;
+        }
+        
+        .sample-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background: white;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            z-index: 1000;
+            min-width: 180px;
+        }
+        
+        .sample-option {
+            padding: 8px 12px;
+            cursor: pointer;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .sample-option:last-child {
+            border-bottom: none;
+        }
+        
+        .sample-option:hover {
+            background: #f0f0f0;
+        }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/gif.js.optimized/dist/gif.js"></script>
@@ -579,7 +611,14 @@
         <button class="control-btn" onclick="rugbyDesigner.pauseMovement()">Pause</button>
         <button class="control-btn" onclick="rugbyDesigner.resetMovement()">Reset</button>
         <button class="control-btn" onclick="rugbyDesigner.clearAll()">Clear All</button>
-        <button class="control-btn" onclick="rugbyDesigner.loadSample()">Load Sample</button>
+        <div class="sample-drill-container" style="position: relative; display: inline-block;">
+            <button class="control-btn" onclick="rugbyDesigner.toggleSampleDropdown()">Load Sample Drill</button>
+            <div id="sampleDropdown" class="sample-dropdown" style="display: none;">
+                <div class="sample-option" onclick="rugbyDesigner.loadSampleDrill('basic-patterns')">Basic Movement Patterns</div>
+                <div class="sample-option" onclick="rugbyDesigner.loadSampleDrill('double-pass')">Double Pass</div>
+                <div class="sample-option" onclick="rugbyDesigner.loadSampleDrill('attacking-line')">Attacking Line</div>
+            </div>
+        </div>
         <button class="control-btn" id="saveBtn">Save Drill</button>
         <input type="file" id="uploadInput" style="display:none" accept=".json">
         <button class="control-btn" id="uploadBtn">Upload Drill</button>
@@ -1598,6 +1637,164 @@
                 
                 this.drawPaths();
                 this.updateModeIndicator('Sample loaded with movement patterns and passes! Orange dashed lines show passes to waypoints. Click Play to see ball animation.');
+            }
+
+            toggleSampleDropdown() {
+                const dropdown = document.getElementById('sampleDropdown');
+                if (dropdown.style.display === 'none') {
+                    dropdown.style.display = 'block';
+                    // Close dropdown when clicking outside
+                    setTimeout(() => {
+                        document.addEventListener('click', this.closeSampleDropdown.bind(this), { once: true });
+                    }, 0);
+                } else {
+                    dropdown.style.display = 'none';
+                }
+            }
+
+            closeSampleDropdown(event) {
+                const dropdown = document.getElementById('sampleDropdown');
+                const container = dropdown.closest('.sample-drill-container');
+                if (!container.contains(event.target)) {
+                    dropdown.style.display = 'none';
+                }
+            }
+
+            loadSampleDrill(drillId) {
+                const sampleDrills = {
+                    'basic-patterns': {
+                        name: "Basic Movement Patterns",
+                        mode: "drill",
+                        playerCount: 5,
+                        teamACount: 15,
+                        teamBCount: 15,
+                        players: [
+                            // This will use the existing loadSample() logic
+                        ],
+                        codes: []
+                    },
+                    'double-pass': {
+                        name: "Double pass",
+                        mode: "drill",
+                        playerCount: 3,
+                        teamACount: 15,
+                        teamBCount: 15,
+                        players: [
+                            {
+                                team: "team-a",
+                                number: "1",
+                                startX: "252",
+                                startY: "337",
+                                endX: "273",
+                                endY: "170.25",
+                                waypoints: [
+                                    {
+                                        x: 273,
+                                        y: 170.25
+                                    }
+                                ]
+                            },
+                            {
+                                team: "team-a",
+                                number: "2",
+                                startX: "518",
+                                startY: "340",
+                                endX: "521",
+                                endY: "177.25",
+                                waypoints: [
+                                    {
+                                        x: 521,
+                                        y: 177.25
+                                    }
+                                ]
+                            },
+                            {
+                                team: "team-a",
+                                number: "3",
+                                startX: "761",
+                                startY: "340",
+                                endX: "768",
+                                endY: "168.25",
+                                waypoints: [
+                                    {
+                                        x: 768,
+                                        y: 168.25
+                                    }
+                                ]
+                            }
+                        ],
+                        codes: []
+                    },
+                    'attacking-line': {
+                        name: "Attacking Line",
+                        mode: "drill",
+                        playerCount: 4,
+                        teamACount: 15,
+                        teamBCount: 15,
+                        players: [
+                            {
+                                team: "team-a",
+                                number: "1",
+                                startX: "200",
+                                startY: "300",
+                                endX: "400",
+                                endY: "200",
+                                waypoints: [
+                                    { x: 300, y: 250 },
+                                    { x: 400, y: 200 }
+                                ]
+                            },
+                            {
+                                team: "team-a",
+                                number: "2",
+                                startX: "250",
+                                startY: "300",
+                                endX: "450",
+                                endY: "220",
+                                waypoints: [
+                                    { x: 350, y: 260 },
+                                    { x: 450, y: 220 }
+                                ]
+                            },
+                            {
+                                team: "team-a",
+                                number: "3",
+                                startX: "300",
+                                startY: "300",
+                                endX: "500",
+                                endY: "240",
+                                waypoints: [
+                                    { x: 400, y: 270 },
+                                    { x: 500, y: 240 }
+                                ]
+                            },
+                            {
+                                team: "team-a",
+                                number: "4",
+                                startX: "350",
+                                startY: "300",
+                                endX: "550",
+                                endY: "260",
+                                waypoints: [
+                                    { x: 450, y: 280 },
+                                    { x: 550, y: 260 }
+                                ]
+                            }
+                        ],
+                        codes: []
+                    }
+                };
+
+                // Close dropdown
+                document.getElementById('sampleDropdown').style.display = 'none';
+
+                if (drillId === 'basic-patterns') {
+                    // Use the existing loadSample() method for basic patterns
+                    this.loadSample();
+                } else if (sampleDrills[drillId]) {
+                    // Use loadDrillData for the predefined drills
+                    this.loadDrillData(sampleDrills[drillId]);
+                }
             }
 
 
