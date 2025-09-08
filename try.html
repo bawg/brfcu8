@@ -417,6 +417,27 @@
             opacity: 0.8;
         }
 
+        /* Eraser selection styling */
+        .eraser-selected {
+            box-shadow: 0 0 0 3px #dc3545 !important;
+            filter: brightness(0.8);
+        }
+
+        .eraser-selected.player {
+            border: 3px solid #dc3545 !important;
+        }
+
+        .eraser-selected.waypoint-marker {
+            border: 3px solid #dc3545 !important;
+            background: #dc3545 !important;
+            color: white !important;
+        }
+
+        .eraser-selected.code-marker {
+            border: 3px solid #dc3545 !important;
+            background: #dc3545 !important;
+        }
+
         /* Responsive Design for Rugby Drill Designer */
         @media (max-width: 768px) {
             .info {
@@ -800,6 +821,7 @@
         <button class="control-btn" id="addCodeBtn" onclick="rugbyDesigner.toggleAddCodeMode()" style="background: #2196F3; display: none;">Add Cones</button>
         <button class="control-btn" id="addPassBtn" onclick="rugbyDesigner.handlePassButton()" style="background: #FF8C00; display: none;">Add a Pass</button>
         <button class="control-btn" id="lassoBtn" onclick="rugbyDesigner.toggleLassoMode()" style="background: #6c757d; display: none;">Move</button>
+        <button class="control-btn" id="eraserBtn" onclick="rugbyDesigner.toggleEraserMode()" style="background: #dc3545; display: none;">Erase</button>
     </div>
 
     <script>
@@ -832,6 +854,8 @@
                 this.isAddCodeMode = false;
                 this.waypointsHidden = false;
                 this.lassoMode = false;
+                this.eraserMode = false;
+                this.selectedObjects = [];
                 this.draggedObject = null;
                 this.dragOffset = { x: 0, y: 0 };
                 
@@ -872,6 +896,206 @@
                 this.updateModeIndicator(this.lassoMode ? 'Move: Drag players to reposition.' : 'Design Mode');
             }
 
+            toggleEraserMode() {
+                if (!this.eraserMode) {
+                    // Entering eraser mode
+                    this.eraserMode = true;
+                    
+                    // Exit other modes when entering eraser mode
+                    this.lassoMode = false;
+                    this.isAddCodeMode = false;
+                    this.isAddPassMode = false;
+                    document.getElementById('lassoBtn').classList.remove('active');
+                    document.getElementById('addCodeBtn').classList.remove('active');
+                    document.getElementById('addPassBtn').classList.remove('active');
+                    document.getElementById('lassoBtn').textContent = 'Move';
+                    document.getElementById('addPassBtn').textContent = 'Add a Pass';
+                    
+                    // Clear any existing selections
+                    this.clearSelectedObjects();
+                    
+                    document.getElementById('eraserBtn').classList.add('active');
+                    this.updateModeIndicator('Eraser: Click objects to select, then click Erase to delete selected objects.');
+                } else {
+                    // Exiting eraser mode - prompt user if objects are selected
+                    if (this.selectedObjects.length > 0) {
+                        const count = this.selectedObjects.length;
+                        const objectText = count === 1 ? 'object' : 'objects';
+                        if (confirm(`Are you sure you want to delete ${count} selected ${objectText}?`)) {
+                            this.deleteSelectedObjects();
+                            this.eraserMode = false;
+                            document.getElementById('eraserBtn').classList.remove('active');
+                            this.updateModeIndicator('Design Mode');
+                        }
+                        // If user cancels, stay in eraser mode
+                    } else {
+                        // No objects selected, just exit eraser mode
+                        this.eraserMode = false;
+                        document.getElementById('eraserBtn').classList.remove('active');
+                        this.updateModeIndicator('Design Mode');
+                    }
+                }
+            }
+
+            clearSelectedObjects() {
+                // Remove selection styling from all objects
+                this.selectedObjects.forEach(obj => {
+                    if (obj.element) {
+                        obj.element.classList.remove('eraser-selected');
+                    }
+                });
+                this.selectedObjects = [];
+            }
+
+            deleteSelectedObjects() {
+                if (this.selectedObjects.length === 0) return;
+                
+                // Group objects by type for efficient deletion
+                const toDelete = {
+                    players: [],
+                    waypoints: [],
+                    cones: [],
+                    passes: []
+                };
+                
+                this.selectedObjects.forEach(obj => {
+                    toDelete[obj.type].push(obj);
+                });
+                
+                // Delete cones
+                toDelete.cones.forEach(obj => {
+                    this.removeCode(obj.element);
+                });
+                
+                // Clean up passes that reference deleted waypoints BEFORE deleting waypoints
+                this.cleanupPassesAfterWaypointDeletion(toDelete.waypoints.map(obj => obj.element));
+                
+                // Delete waypoints
+                toDelete.waypoints.forEach(obj => {
+                    this.deleteWaypoint(obj.element);
+                });
+                
+                // Delete passes
+                toDelete.passes.forEach(obj => {
+                    this.removePass(obj.data);
+                });
+                
+                // Delete players (remove all waypoints and reset)
+                toDelete.players.forEach(obj => {
+                    const player = obj.element;
+                    // Clear all waypoints for this player
+                    player.waypoints = [];
+                    // Reset position to start
+                    player.dataset.endX = player.dataset.startX;
+                    player.dataset.endY = player.dataset.startY;
+                });
+                
+                // Update displays
+                this.updateWaypointMarkers();
+                this.drawPaths();
+                this.drawPasses();
+                
+                // Clear selection
+                this.clearSelectedObjects();
+                
+                this.updateModeIndicator('Design Mode');
+            }
+
+            handleEraserClick(clickedPlayer, clickedWaypoint, clickedCone, x, y) {
+                let selectedObject = null;
+                
+                if (clickedPlayer) {
+                    selectedObject = { type: 'players', element: clickedPlayer };
+                } else if (clickedWaypoint) {
+                    selectedObject = { type: 'waypoints', element: clickedWaypoint };
+                } else if (clickedCone) {
+                    selectedObject = { type: 'cones', element: clickedCone };
+                } else {
+                    // Check if clicked on a pass line
+                    const clickedPass = this.getPassAt(x, y);
+                    if (clickedPass) {
+                        selectedObject = { type: 'passes', element: null, data: clickedPass };
+                    }
+                }
+                
+                if (selectedObject) {
+                    // Check if object is already selected
+                    const existingIndex = this.selectedObjects.findIndex(obj => 
+                        obj.type === selectedObject.type && 
+                        obj.element === selectedObject.element &&
+                        obj.data === selectedObject.data
+                    );
+                    
+                    if (existingIndex >= 0) {
+                        // Deselect object
+                        this.selectedObjects.splice(existingIndex, 1);
+                        if (selectedObject.element) {
+                            selectedObject.element.classList.remove('eraser-selected');
+                        }
+                    } else {
+                        // Select object
+                        this.selectedObjects.push(selectedObject);
+                        if (selectedObject.element) {
+                            selectedObject.element.classList.add('eraser-selected');
+                        }
+                    }
+                    
+                    // Update mode indicator with selection count
+                    const count = this.selectedObjects.length;
+                    this.updateModeIndicator(`Eraser: ${count} object${count !== 1 ? 's' : ''} selected. Click Erase button to delete selected objects.`);
+                }
+            }
+
+            getPassAt(x, y) {
+                // Check if click is near any pass line
+                // This is a simplified implementation - in a real app you'd do proper line intersection
+                for (const pass of this.passes) {
+                    if (pass.waypoints && pass.waypoints.length >= 2) {
+                        for (let i = 0; i < pass.waypoints.length - 1; i++) {
+                            const start = pass.waypoints[i];
+                            const end = pass.waypoints[i + 1];
+                            
+                            // Check if point is near the line segment
+                            if (this.isPointNearLine(x, y, start.x, start.y, end.x, end.y, 10)) {
+                                return pass;
+                            }
+                        }
+                    }
+                }
+                return null;
+            }
+
+            isPointNearLine(px, py, x1, y1, x2, y2, threshold) {
+                // Calculate distance from point to line segment
+                const dx = x2 - x1;
+                const dy = y2 - y1;
+                const length = Math.sqrt(dx * dx + dy * dy);
+                
+                if (length === 0) return false;
+                
+                const t = Math.max(0, Math.min(1, ((px - x1) * dx + (py - y1) * dy) / (length * length)));
+                const projX = x1 + t * dx;
+                const projY = y1 + t * dy;
+                const distance = Math.sqrt((px - projX) * (px - projX) + (py - projY) * (py - projY));
+                
+                return distance <= threshold;
+            }
+
+            handleKeyDown(e) {
+                // Handle Delete key in eraser mode
+                if (e.key === 'Delete' && this.eraserMode && this.selectedObjects.length > 0) {
+                    const count = this.selectedObjects.length;
+                    const objectText = count === 1 ? 'object' : 'objects';
+                    if (confirm(`Are you sure you want to delete ${count} selected ${objectText}?`)) {
+                        this.deleteSelectedObjects();
+                        this.eraserMode = false;
+                        document.getElementById('eraserBtn').classList.remove('active');
+                        this.updateModeIndicator('Design Mode');
+                    }
+                    e.preventDefault();
+                }
+            }
+
             bindEvents() {
                 this.pitch.addEventListener('click', (e) => this.handlePitchClick(e));
                 this.pitch.addEventListener('contextmenu', (e) => this.handleRightClick(e));
@@ -881,6 +1105,7 @@
                 this.pitch.addEventListener('mousedown', (e) => this.handleLassoDown(e));
                 document.addEventListener('mousemove', (e) => this.handleLassoMove(e));
                 document.addEventListener('mouseup', (e) => this.handleLassoUp(e));
+                document.addEventListener('keydown', (e) => this.handleKeyDown(e));
             }
 
             setMode(mode) {
@@ -1023,6 +1248,13 @@
                 
                 const clickedPlayer = this.getPlayerAt(x, y);
                 const clickedWaypoint = this.getWaypointAt(x, y);
+                const clickedCone = this.getCodeAt(x, y);
+                
+                // Handle eraser mode - object selection
+                if (this.eraserMode) {
+                    this.handleEraserClick(clickedPlayer, clickedWaypoint, clickedCone, x, y);
+                    return;
+                }
                 
                 // Handle waypoint-based pass creation mode
                 if (this.isAddPassMode && clickedWaypoint) {
@@ -1379,6 +1611,7 @@
                     document.getElementById('addPassBtn').style.display = 'inline-block';
                     document.getElementById('hideWaypointsOption').style.display = 'block';
                     document.getElementById('lassoBtn').style.display = 'inline-block';
+                    document.getElementById('eraserBtn').style.display = 'inline-block';
                     this.setWaypointsVisible(!this.waypointsHidden);
                     
                     // Hide ball in design mode
@@ -1398,6 +1631,8 @@
                     document.getElementById('addPassBtn').style.color = '#333';
                     document.getElementById('lassoBtn').style.background = '#e0e0e0';
                     document.getElementById('lassoBtn').style.color = '#333';
+                    document.getElementById('eraserBtn').style.background = '#e0e0e0';
+                    document.getElementById('eraserBtn').style.color = '#333';
 
                     this.updateModeDisplay(); // <-- Always call this here
                 } else {
@@ -1412,6 +1647,7 @@
                     document.getElementById('addCodeBtn').style.display = 'none';
                     document.getElementById('addPassBtn').style.display = 'none';
                     document.getElementById('lassoBtn').style.display = 'none';
+                    document.getElementById('eraserBtn').style.display = 'none';
 
                     this.updateModeDisplay(); // <-- Always call this here
                 }
@@ -2166,6 +2402,42 @@
             removeCode(code) {
                 code.remove();
                 this.codes = this.codes.filter(c => c !== code);
+            }
+
+            removePass(pass) {
+                // Remove pass from the passes array
+                this.passes = this.passes.filter(p => p !== pass);
+                // Redraw passes to remove visual representation
+                this.drawPasses();
+            }
+
+            cleanupPassesAfterWaypointDeletion(deletedWaypoints) {
+                // Get the list of players whose waypoints are being deleted
+                const affectedPlayers = new Set();
+                deletedWaypoints.forEach(marker => {
+                    if (marker.ownerPlayer) {
+                        affectedPlayers.add(marker.ownerPlayer);
+                    }
+                });
+                
+                // Remove passes that involve waypoints from affected players
+                this.passes = this.passes.filter(pass => {
+                    if (pass.type === 'waypoint-sequence' && pass.waypoints) {
+                        // Check if any waypoint in this pass belongs to an affected player
+                        const hasAffectedWaypoint = pass.waypoints.some(waypointMarker => 
+                            affectedPlayers.has(waypointMarker.ownerPlayer)
+                        );
+                        
+                        // Keep the pass only if it doesn't involve affected players
+                        return !hasAffectedWaypoint;
+                    }
+                    // Keep non-waypoint-sequence passes as-is
+                    return true;
+                });
+                
+                // Also remove any orphaned waypoint-pass-line elements from the DOM
+                // since these are not managed by drawPasses()
+                this.pitch.querySelectorAll('.waypoint-pass-line').forEach(line => line.remove());
             }
 
             toggleWaypoints() {
