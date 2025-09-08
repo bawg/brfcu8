@@ -835,6 +835,9 @@
 
                 // Set initial mode indicator to blank
                 this.modeIndicator.innerHTML = '';
+                
+                // Ensure we start in proper design mode with all UI elements visible
+                this.enterDesignMode();
             }
 
             toggleLassoMode() {
