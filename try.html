@@ -41,6 +41,11 @@
             box-shadow: 0 0 0 2px #ffd700;
         }
 
+        .player.multi-selected, .waypoint-marker.multi-selected, .cone.multi-selected {
+            border: 2px solid #9c27b0;
+            box-shadow: 0 0 0 2px #e1bee7;
+        }
+
         .team-a {
             background: #e74c3c;
         }
@@ -592,6 +597,8 @@
         <button class="control-btn" id="addPassBtn" onclick="rugbyDesigner.handlePassButton()" style="background: #FF8C00; display: none;">Add a Pass</button>
         <button class="control-btn" id="hideWaypointBtn" onclick="rugbyDesigner.toggleWaypoints()" style="background: #888; display: none;">Hide Waypoints</button>
         <button class="control-btn" id="lassoBtn" onclick="rugbyDesigner.toggleLassoMode()" style="background: #6c757d; display: none;">Move</button>
+        <button class="control-btn" id="alignHorizontalBtn" onclick="rugbyDesigner.alignHorizontal()" style="background: #9c27b0; display: none;">Align Horizontal</button>
+        <button class="control-btn" id="alignVerticalBtn" onclick="rugbyDesigner.alignVertical()" style="background: #673ab7; display: none;">Align Vertical</button>
     </div>
 
     <script>
@@ -615,6 +622,7 @@
                 this.totalTime = 3000;
                 this.animationFrame = null;
                 this.selectedPlayer = null;
+                this.selectedObjects = []; // For multi-selection support
                 this.settingEndPosition = false;
                 this.mode = 'drill';
                 this.playerCount = 5;
@@ -806,6 +814,31 @@
                 
                 const clickedPlayer = this.getPlayerAt(x, y);
                 const clickedWaypoint = this.getWaypointAt(x, y);
+                const clickedCone = this.getCodeAt(x, y);
+                
+                // Handle multi-selection with Ctrl key
+                if (e.ctrlKey || e.metaKey) {
+                    if (clickedPlayer) {
+                        this.toggleObjectSelection(clickedPlayer);
+                        return;
+                    }
+                    if (clickedWaypoint) {
+                        this.toggleObjectSelection(clickedWaypoint);
+                        return;
+                    }
+                    if (clickedCone) {
+                        this.toggleObjectSelection(clickedCone);
+                        return;
+                    }
+                    // If clicking on empty space with Ctrl, clear selection
+                    this.clearSelection();
+                    return;
+                }
+                
+                // If not using Ctrl and clicked on empty space, clear selection
+                if (!clickedPlayer && !clickedWaypoint && !clickedCone) {
+                    this.clearSelection();
+                }
                 
                 // Handle waypoint-based pass creation mode
                 if (this.isAddPassMode && clickedWaypoint) {
@@ -1162,6 +1195,7 @@
                     document.getElementById('addPassBtn').style.display = 'inline-block';
                     document.getElementById('hideWaypointBtn').style.display = 'inline-block';
                     document.getElementById('lassoBtn').style.display = 'inline-block';
+                    // Alignment buttons are shown/hidden based on selection
                     this.setWaypointsVisible(!this.waypointsHidden);
                     
                     // Hide ball in design mode
@@ -1183,6 +1217,10 @@
                     document.getElementById('hideWaypointBtn').style.color = '#333';
                     document.getElementById('lassoBtn').style.background = '#e0e0e0';
                     document.getElementById('lassoBtn').style.color = '#333';
+                    document.getElementById('alignHorizontalBtn').style.background = '#e0e0e0';
+                    document.getElementById('alignHorizontalBtn').style.color = '#333';
+                    document.getElementById('alignVerticalBtn').style.background = '#e0e0e0';
+                    document.getElementById('alignVerticalBtn').style.color = '#333';
 
                     this.updateModeDisplay(); // <-- Always call this here
                 } else {
@@ -1198,6 +1236,9 @@
                     document.getElementById('addPassBtn').style.display = 'none';
                     document.getElementById('hideWaypointBtn').style.display = 'none';
                     document.getElementById('lassoBtn').style.display = 'none';
+                    document.getElementById('alignHorizontalBtn').style.display = 'none';
+                    document.getElementById('alignVerticalBtn').style.display = 'none';
+                    this.clearSelection();
 
                     this.updateModeDisplay(); // <-- Always call this here
                 }
@@ -1232,6 +1273,9 @@
                 this.pitch.classList.add('playing');
                 document.getElementById('hideWaypointBtn').style.display = 'none';
                 document.getElementById('lassoBtn').style.display = 'none';
+                document.getElementById('alignHorizontalBtn').style.display = 'none';
+                document.getElementById('alignVerticalBtn').style.display = 'none';
+                this.clearSelection();
                 this.updateModeIndicator(this.mode === 'drill' ? 'PLAYING DRILL' : 'PLAYING MATCH');
             }
 
@@ -2030,6 +2074,119 @@
             handleLassoUp(e) {
                 if (!this.lassoMode) return;
                 this.draggedObject = null;
+            }
+
+            // Multi-selection and alignment methods
+            toggleObjectSelection(obj) {
+                if (!this.isDesignMode) return;
+                
+                const index = this.selectedObjects.indexOf(obj);
+                if (index === -1) {
+                    // Add to selection
+                    this.selectedObjects.push(obj);
+                    obj.classList.add('multi-selected');
+                } else {
+                    // Remove from selection
+                    this.selectedObjects.splice(index, 1);
+                    obj.classList.remove('multi-selected');
+                }
+                
+                // Update alignment buttons visibility
+                this.updateAlignmentButtonsVisibility();
+            }
+
+            clearSelection() {
+                this.selectedObjects.forEach(obj => {
+                    obj.classList.remove('multi-selected');
+                });
+                this.selectedObjects = [];
+                this.updateAlignmentButtonsVisibility();
+            }
+
+            updateAlignmentButtonsVisibility() {
+                const show = this.selectedObjects.length >= 2;
+                document.getElementById('alignHorizontalBtn').style.display = show ? 'inline-block' : 'none';
+                document.getElementById('alignVerticalBtn').style.display = show ? 'inline-block' : 'none';
+            }
+
+            alignHorizontal() {
+                if (this.selectedObjects.length < 2) return;
+                
+                // Calculate the average Y position
+                let totalY = 0;
+                this.selectedObjects.forEach(obj => {
+                    totalY += parseInt(obj.style.top);
+                });
+                const avgY = Math.round(totalY / this.selectedObjects.length);
+                
+                // Align all selected objects to the average Y position
+                this.selectedObjects.forEach(obj => {
+                    obj.style.top = avgY + 'px';
+                    
+                    // Update object data based on type
+                    if (obj.classList.contains('player')) {
+                        obj.dataset.startY = parseInt(obj.style.top);
+                        obj.dataset.endY = obj.dataset.startY;
+                        
+                        // Update corresponding start position marker
+                        const playerIndex = this.players.indexOf(obj);
+                        if (playerIndex !== -1) {
+                            const startPos = this.startPositions[playerIndex];
+                            startPos.style.top = (parseInt(obj.style.top) + 2) + 'px';
+                        }
+                    } else if (obj.classList.contains('waypoint-marker')) {
+                        // Update waypoint data
+                        const waypoint = obj.waypointData;
+                        if (waypoint) {
+                            waypoint.y = parseInt(obj.style.top) + 8 - 6;
+                            obj.ownerPlayer.dataset.endY = waypoint.y;
+                        }
+                    }
+                });
+                
+                // Redraw connections and paths
+                this.drawConnections();
+                this.drawPaths();
+            }
+
+            alignVertical() {
+                if (this.selectedObjects.length < 2) return;
+                
+                // Calculate the average X position
+                let totalX = 0;
+                this.selectedObjects.forEach(obj => {
+                    totalX += parseInt(obj.style.left);
+                });
+                const avgX = Math.round(totalX / this.selectedObjects.length);
+                
+                // Align all selected objects to the average X position
+                this.selectedObjects.forEach(obj => {
+                    obj.style.left = avgX + 'px';
+                    
+                    // Update object data based on type
+                    if (obj.classList.contains('player')) {
+                        obj.dataset.startX = parseInt(obj.style.left);
+                        obj.dataset.endX = obj.dataset.startX;
+                        
+                        // Update corresponding start position marker
+                        const playerIndex = this.players.indexOf(obj);
+                        if (playerIndex !== -1) {
+                            const startPos = this.startPositions[playerIndex];
+                            startPos.style.left = (parseInt(obj.style.left) + 2) + 'px';
+                        }
+                    } else if (obj.classList.contains('waypoint-marker')) {
+                        // Update waypoint data
+                        const waypoint = obj.waypointData;
+                        if (waypoint) {
+                            waypoint.x = parseInt(obj.style.left) + 8 - 6;
+                            obj.ownerPlayer.dataset.endX = waypoint.x;
+                        }
+                    }
+                });
+                
+                // Redraw connections and paths
+                this.drawConnections();
+                this.drawPaths();
             }
 
             setupSaveUpload() {
