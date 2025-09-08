@@ -2500,6 +2500,66 @@
                     if (alignVerticalBtn) alignVerticalBtn.textContent = 'Align Vertical';
                 }
             }
+
+            // Options dropdown functionality
+            toggleOptions() {
+                const menu = document.getElementById('optionsMenu');
+                const btn = document.getElementById('optionsBtn');
+                const isVisible = menu.style.display !== 'none';
+                
+                if (isVisible) {
+                    menu.style.display = 'none';
+                    btn.classList.remove('active');
+                } else {
+                    menu.style.display = 'block';
+                    btn.classList.add('active');
+                    
+                    // Close dropdown when clicking outside
+                    setTimeout(() => {
+                        document.addEventListener('click', this.closeOptionsOnClickOutside.bind(this), { once: true });
+                    }, 0);
+                }
+            }
+
+            closeOptionsOnClickOutside(e) {
+                const dropdown = document.getElementById('optionsDropdown');
+                if (!dropdown.contains(e.target)) {
+                    document.getElementById('optionsMenu').style.display = 'none';
+                    document.getElementById('optionsBtn').classList.remove('active');
+                }
+            }
+
+            // Trigger upload from dropdown
+            triggerUpload() {
+                document.getElementById('uploadInput').click();
+                this.toggleOptions(); // Close dropdown
+            }
+
+            // Notes functionality
+            toggleNotes() {
+                let notesPanel = document.getElementById('notesPanel');
+                if (!notesPanel) {
+                    this.createNotesPanel();
+                    notesPanel = document.getElementById('notesPanel');
+                }
+                
+                const isVisible = notesPanel.style.display === 'block';
+                notesPanel.style.display = isVisible ? 'none' : 'block';
+            }
+
+            createNotesPanel() {
+                const notesPanel = document.createElement('div');
+                notesPanel.id = 'notesPanel';
+                notesPanel.style.display = 'block'; // Show immediately when created
+                notesPanel.innerHTML = `
+                    <div class="notes-header">
+                        <h4>Drill Notes</h4>
+                        <button onclick="rugbyDesigner.toggleNotes()" class="notes-close">×</button>
+                    </div>
+                    <textarea id="drillNotes" placeholder="Add notes about this drill..."></textarea>
+                `;
+                document.body.appendChild(notesPanel);
+            }
         }
 
         // Initialize the app
