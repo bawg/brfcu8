@@ -795,13 +795,13 @@
                     <span class="dots">⋯</span>
                 </button>
                 <div class="options-menu" id="optionsMenu" style="display: none;">
-                    <button class="option-item has-submenu" onclick="rugbyDesigner.toggleSampleSubmenu(event)">Load Sample
+                    <div class="option-item has-submenu" onclick="rugbyDesigner.toggleSampleSubmenu(event)">Load Sample
                         <div class="sample-submenu" id="sampleSubmenu" style="display: none;">
-                            <button class="option-item" onclick="rugbyDesigner.loadSampleDrill('basic-patterns')">Basic Movement Patterns</button>
-                            <button class="option-item" onclick="rugbyDesigner.loadSampleDrill('double-pass')">Double Pass</button>
-                            <button class="option-item" onclick="rugbyDesigner.loadSampleDrill('attacking-line')">Attacking Line</button>
+                            <div class="option-item" onclick="rugbyDesigner.loadSampleDrill('basic-patterns')">Basic Movement Patterns</div>
+                            <div class="option-item" onclick="rugbyDesigner.loadSampleDrill('double-pass')">Double Pass</div>
+                            <div class="option-item" onclick="rugbyDesigner.loadSampleDrill('attacking-line')">Attacking Line</div>
                         </div>
-                    </button>
+                    </div>
                     <button class="option-item" onclick="rugbyDesigner.saveDrill()">Save Drill</button>
                     <button class="option-item" onclick="rugbyDesigner.triggerUpload()">Upload Drill</button>
                     <button class="option-item" onclick="rugbyDesigner.exportGif()">Download GIF</button>
