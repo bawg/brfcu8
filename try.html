@@ -253,16 +253,18 @@
             background: #f8f9fa;
         }
 
-        /* Sample drill submenu styles */
-        .option-item.has-submenu {
+        /* Submenu styles for Load Sample */
+        .has-submenu {
             position: relative;
         }
 
-        .option-item.has-submenu::after {
+        .has-submenu::after {
             content: '▶';
             position: absolute;
             right: 16px;
-            font-size: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 12px;
             color: #6c757d;
         }
 
@@ -274,15 +276,26 @@
             border: 1px solid #dee2e6;
             border-radius: 8px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-            z-index: 1001;
             min-width: 180px;
             padding: 8px 0;
             display: none;
+            z-index: 1001;
         }
 
-        .sample-submenu .option-item {
-            padding: 8px 16px;
-            font-size: 13px;
+        .sample-option {
+            background: none;
+            border: none;
+            padding: 10px 16px;
+            width: 100%;
+            text-align: left;
+            cursor: pointer;
+            font-size: 14px;
+            color: #495057;
+            transition: background 0.2s ease;
+        }
+
+        .sample-option:hover {
+            background: #f8f9fa;
         }
 
         .dots {
@@ -447,6 +460,27 @@
             fill: none;
             z-index: 3;
             opacity: 0.8;
+        }
+
+        /* Eraser selection styling */
+        .eraser-selected {
+            box-shadow: 0 0 0 3px #dc3545 !important;
+            filter: brightness(0.8);
+        }
+
+        .eraser-selected.player {
+            border: 3px solid #dc3545 !important;
+        }
+
+        .eraser-selected.waypoint-marker {
+            border: 3px solid #dc3545 !important;
+            background: #dc3545 !important;
+            color: white !important;
+        }
+
+        .eraser-selected.code-marker {
+            border: 3px solid #dc3545 !important;
+            background: #dc3545 !important;
         }
 
         /* Responsive Design for Rugby Drill Designer */
@@ -795,11 +829,13 @@
                     <span class="dots">⋯</span>
                 </button>
                 <div class="options-menu" id="optionsMenu" style="display: none;">
-                    <div class="option-item has-submenu" onclick="rugbyDesigner.toggleSampleSubmenu(event)">Load Sample
+                    <button class="option-item" onclick="rugbyDesigner.backToPlatform()">← Back to Platform</button>
+                    <div class="option-item has-submenu" onclick="rugbyDesigner.toggleSampleSubmenu(event)">
+                        Load Sample
                         <div class="sample-submenu" id="sampleSubmenu" style="display: none;">
-                            <div class="option-item" onclick="rugbyDesigner.loadSampleDrill('basic-patterns')">Basic Movement Patterns</div>
-                            <div class="option-item" onclick="rugbyDesigner.loadSampleDrill('double-pass')">Double Pass</div>
-                            <div class="option-item" onclick="rugbyDesigner.loadSampleDrill('attacking-line')">Attacking Line</div>
+                            <button class="sample-option" onclick="rugbyDesigner.loadSampleDrill('basic-patterns')">Basic Movement Patterns</button>
+                            <button class="sample-option" onclick="rugbyDesigner.loadSampleDrill('double-pass')">Double Pass</button>
+                            <button class="sample-option" onclick="rugbyDesigner.loadSampleDrill('attacking-line')">Attacking Line</button>
                         </div>
                     </div>
                     <button class="option-item" onclick="rugbyDesigner.saveDrill()">Save Drill</button>
@@ -838,6 +874,7 @@
         <button class="control-btn" id="addCodeBtn" onclick="rugbyDesigner.toggleAddCodeMode()" style="background: #2196F3; display: none;">Add Cones</button>
         <button class="control-btn" id="addPassBtn" onclick="rugbyDesigner.handlePassButton()" style="background: #FF8C00; display: none;">Add a Pass</button>
         <button class="control-btn" id="lassoBtn" onclick="rugbyDesigner.toggleLassoMode()" style="background: #6c757d; display: none;">Move</button>
+        <button class="control-btn" id="eraserBtn" onclick="rugbyDesigner.toggleEraserMode()" style="background: #dc3545; display: none;">Erase</button>
     </div>
 
     <script>
@@ -870,6 +907,8 @@
                 this.isAddCodeMode = false;
                 this.waypointsHidden = false;
                 this.lassoMode = false;
+                this.eraserMode = false;
+                this.selectedObjects = [];
                 this.draggedObject = null;
                 this.dragOffset = { x: 0, y: 0 };
                 
@@ -910,6 +949,206 @@
                 this.updateModeIndicator(this.lassoMode ? 'Move: Drag players to reposition.' : 'Design Mode');
             }
 
+            toggleEraserMode() {
+                if (!this.eraserMode) {
+                    // Entering eraser mode
+                    this.eraserMode = true;
+                    
+                    // Exit other modes when entering eraser mode
+                    this.lassoMode = false;
+                    this.isAddCodeMode = false;
+                    this.isAddPassMode = false;
+                    document.getElementById('lassoBtn').classList.remove('active');
+                    document.getElementById('addCodeBtn').classList.remove('active');
+                    document.getElementById('addPassBtn').classList.remove('active');
+                    document.getElementById('lassoBtn').textContent = 'Move';
+                    document.getElementById('addPassBtn').textContent = 'Add a Pass';
+                    
+                    // Clear any existing selections
+                    this.clearSelectedObjects();
+                    
+                    document.getElementById('eraserBtn').classList.add('active');
+                    this.updateModeIndicator('Eraser: Click objects to select, then click Erase to delete selected objects.');
+                } else {
+                    // Exiting eraser mode - prompt user if objects are selected
+                    if (this.selectedObjects.length > 0) {
+                        const count = this.selectedObjects.length;
+                        const objectText = count === 1 ? 'object' : 'objects';
+                        if (confirm(`Are you sure you want to delete ${count} selected ${objectText}?`)) {
+                            this.deleteSelectedObjects();
+                            this.eraserMode = false;
+                            document.getElementById('eraserBtn').classList.remove('active');
+                            this.updateModeIndicator('Design Mode');
+                        }
+                        // If user cancels, stay in eraser mode
+                    } else {
+                        // No objects selected, just exit eraser mode
+                        this.eraserMode = false;
+                        document.getElementById('eraserBtn').classList.remove('active');
+                        this.updateModeIndicator('Design Mode');
+                    }
+                }
+            }
+
+            clearSelectedObjects() {
+                // Remove selection styling from all objects
+                this.selectedObjects.forEach(obj => {
+                    if (obj.element) {
+                        obj.element.classList.remove('eraser-selected');
+                    }
+                });
+                this.selectedObjects = [];
+            }
+
+            deleteSelectedObjects() {
+                if (this.selectedObjects.length === 0) return;
+                
+                // Group objects by type for efficient deletion
+                const toDelete = {
+                    players: [],
+                    waypoints: [],
+                    cones: [],
+                    passes: []
+                };
+                
+                this.selectedObjects.forEach(obj => {
+                    toDelete[obj.type].push(obj);
+                });
+                
+                // Delete cones
+                toDelete.cones.forEach(obj => {
+                    this.removeCode(obj.element);
+                });
+                
+                // Clean up passes that reference deleted waypoints BEFORE deleting waypoints
+                this.cleanupPassesAfterWaypointDeletion(toDelete.waypoints.map(obj => obj.element));
+                
+                // Delete waypoints
+                toDelete.waypoints.forEach(obj => {
+                    this.deleteWaypoint(obj.element);
+                });
+                
+                // Delete passes
+                toDelete.passes.forEach(obj => {
+                    this.removePass(obj.data);
+                });
+                
+                // Delete players (remove all waypoints and reset)
+                toDelete.players.forEach(obj => {
+                    const player = obj.element;
+                    // Clear all waypoints for this player
+                    player.waypoints = [];
+                    // Reset position to start
+                    player.dataset.endX = player.dataset.startX;
+                    player.dataset.endY = player.dataset.startY;
+                });
+                
+                // Update displays
+                this.updateWaypointMarkers();
+                this.drawPaths();
+                this.drawPasses();
+                
+                // Clear selection
+                this.clearSelectedObjects();
+                
+                this.updateModeIndicator('Design Mode');
+            }
+
+            handleEraserClick(clickedPlayer, clickedWaypoint, clickedCone, x, y) {
+                let selectedObject = null;
+                
+                if (clickedPlayer) {
+                    selectedObject = { type: 'players', element: clickedPlayer };
+                } else if (clickedWaypoint) {
+                    selectedObject = { type: 'waypoints', element: clickedWaypoint };
+                } else if (clickedCone) {
+                    selectedObject = { type: 'cones', element: clickedCone };
+                } else {
+                    // Check if clicked on a pass line
+                    const clickedPass = this.getPassAt(x, y);
+                    if (clickedPass) {
+                        selectedObject = { type: 'passes', element: null, data: clickedPass };
+                    }
+                }
+                
+                if (selectedObject) {
+                    // Check if object is already selected
+                    const existingIndex = this.selectedObjects.findIndex(obj => 
+                        obj.type === selectedObject.type && 
+                        obj.element === selectedObject.element &&
+                        obj.data === selectedObject.data
+                    );
+                    
+                    if (existingIndex >= 0) {
+                        // Deselect object
+                        this.selectedObjects.splice(existingIndex, 1);
+                        if (selectedObject.element) {
+                            selectedObject.element.classList.remove('eraser-selected');
+                        }
+                    } else {
+                        // Select object
+                        this.selectedObjects.push(selectedObject);
+                        if (selectedObject.element) {
+                            selectedObject.element.classList.add('eraser-selected');
+                        }
+                    }
+                    
+                    // Update mode indicator with selection count
+                    const count = this.selectedObjects.length;
+                    this.updateModeIndicator(`Eraser: ${count} object${count !== 1 ? 's' : ''} selected. Click Erase button to delete selected objects.`);
+                }
+            }
+
+            getPassAt(x, y) {
+                // Check if click is near any pass line
+                // This is a simplified implementation - in a real app you'd do proper line intersection
+                for (const pass of this.passes) {
+                    if (pass.waypoints && pass.waypoints.length >= 2) {
+                        for (let i = 0; i < pass.waypoints.length - 1; i++) {
+                            const start = pass.waypoints[i];
+                            const end = pass.waypoints[i + 1];
+                            
+                            // Check if point is near the line segment
+                            if (this.isPointNearLine(x, y, start.x, start.y, end.x, end.y, 10)) {
+                                return pass;
+                            }
+                        }
+                    }
+                }
+                return null;
+            }
+
+            isPointNearLine(px, py, x1, y1, x2, y2, threshold) {
+                // Calculate distance from point to line segment
+                const dx = x2 - x1;
+                const dy = y2 - y1;
+                const length = Math.sqrt(dx * dx + dy * dy);
+                
+                if (length === 0) return false;
+                
+                const t = Math.max(0, Math.min(1, ((px - x1) * dx + (py - y1) * dy) / (length * length)));
+                const projX = x1 + t * dx;
+                const projY = y1 + t * dy;
+                const distance = Math.sqrt((px - projX) * (px - projX) + (py - projY) * (py - projY));
+                
+                return distance <= threshold;
+            }
+
+            handleKeyDown(e) {
+                // Handle Delete key in eraser mode
+                if (e.key === 'Delete' && this.eraserMode && this.selectedObjects.length > 0) {
+                    const count = this.selectedObjects.length;
+                    const objectText = count === 1 ? 'object' : 'objects';
+                    if (confirm(`Are you sure you want to delete ${count} selected ${objectText}?`)) {
+                        this.deleteSelectedObjects();
+                        this.eraserMode = false;
+                        document.getElementById('eraserBtn').classList.remove('active');
+                        this.updateModeIndicator('Design Mode');
+                    }
+                    e.preventDefault();
+                }
+            }
+
             bindEvents() {
                 this.pitch.addEventListener('click', (e) => this.handlePitchClick(e));
                 this.pitch.addEventListener('contextmenu', (e) => this.handleRightClick(e));
@@ -919,6 +1158,7 @@
                 this.pitch.addEventListener('mousedown', (e) => this.handleLassoDown(e));
                 document.addEventListener('mousemove', (e) => this.handleLassoMove(e));
                 document.addEventListener('mouseup', (e) => this.handleLassoUp(e));
+                document.addEventListener('keydown', (e) => this.handleKeyDown(e));
             }
 
             setMode(mode) {
@@ -1061,6 +1301,13 @@
                 
                 const clickedPlayer = this.getPlayerAt(x, y);
                 const clickedWaypoint = this.getWaypointAt(x, y);
+                const clickedCone = this.getCodeAt(x, y);
+                
+                // Handle eraser mode - object selection
+                if (this.eraserMode) {
+                    this.handleEraserClick(clickedPlayer, clickedWaypoint, clickedCone, x, y);
+                    return;
+                }
                 
                 // Handle waypoint-based pass creation mode
                 if (this.isAddPassMode && clickedWaypoint) {
@@ -1417,6 +1664,7 @@
                     document.getElementById('addPassBtn').style.display = 'inline-block';
                     document.getElementById('hideWaypointsOption').style.display = 'block';
                     document.getElementById('lassoBtn').style.display = 'inline-block';
+                    document.getElementById('eraserBtn').style.display = 'inline-block';
                     this.setWaypointsVisible(!this.waypointsHidden);
                     
                     // Hide ball in design mode
@@ -1436,6 +1684,8 @@
                     document.getElementById('addPassBtn').style.color = '#333';
                     document.getElementById('lassoBtn').style.background = '#e0e0e0';
                     document.getElementById('lassoBtn').style.color = '#333';
+                    document.getElementById('eraserBtn').style.background = '#e0e0e0';
+                    document.getElementById('eraserBtn').style.color = '#333';
 
                     this.updateModeDisplay(); // <-- Always call this here
                 } else {
@@ -1450,6 +1700,7 @@
                     document.getElementById('addCodeBtn').style.display = 'none';
                     document.getElementById('addPassBtn').style.display = 'none';
                     document.getElementById('lassoBtn').style.display = 'none';
+                    document.getElementById('eraserBtn').style.display = 'none';
 
                     this.updateModeDisplay(); // <-- Always call this here
                 }
@@ -1851,7 +2102,7 @@
                 this.updateModeIndicator('Sample loaded with movement patterns and passes! Orange dashed lines show passes to waypoints. Click Play to see ball animation.');
             }
 
-            // Toggle the sample submenu
+            // New methods for sample submenu functionality
             toggleSampleSubmenu(event) {
                 event.stopPropagation();
                 const submenu = document.getElementById('sampleSubmenu');
@@ -1864,26 +2115,24 @@
                     
                     // Close submenu when clicking outside
                     setTimeout(() => {
-                        document.addEventListener('click', this.closeSampleSubmenu.bind(this), { once: true });
+                        document.addEventListener('click', this.closeSampleSubmenuOnClickOutside.bind(this), { once: true });
                     }, 0);
                 }
             }
 
-            closeSampleSubmenu(e) {
+            closeSampleSubmenuOnClickOutside(e) {
                 const submenu = document.getElementById('sampleSubmenu');
-                const sampleButton = e.target.closest('.has-submenu');
-                if (!sampleButton) {
+                if (!submenu.contains(e.target)) {
                     submenu.style.display = 'none';
                 }
             }
 
-            // Load specific sample drill
             loadSampleDrill(drillType) {
                 this.clearAll();
                 
                 switch(drillType) {
                     case 'basic-patterns':
-                        this.loadBasicPatternsAsDrill();
+                        this.loadBasicMovementPatterns();
                         break;
                     case 'double-pass':
                         this.loadDoublePassDrill();
@@ -1893,17 +2142,19 @@
                         break;
                 }
                 
-                // Close the submenus and options menu
+                // Close both menus
                 document.getElementById('sampleSubmenu').style.display = 'none';
                 this.toggleOptions();
+                
+                this.drawPaths();
+                this.updateModeIndicator(`${drillType.replace('-', ' ')} drill loaded! Click Play to see the animation.`);
             }
 
-            loadBasicPatternsAsDrill() {
-                // Create basic movement patterns
+            loadBasicMovementPatterns() {
+                // Zigzag, cutting, and loop patterns for movement training
                 this.players.forEach((player, index) => {
                     const baseX = parseInt(player.dataset.startX);
                     const baseY = parseInt(player.dataset.startY);
-                    
                     player.waypoints = [];
                     
                     if (index % 3 === 0) {
@@ -1912,15 +2163,16 @@
                         player.waypoints.push({ x: baseX + 120, y: baseY + 40 });
                         player.waypoints.push({ x: baseX + 180, y: baseY - 20 });
                     } else if (index % 3 === 1) {
-                        // Cutting move
+                        // Sharp cutting move
                         player.waypoints.push({ x: baseX + 100, y: baseY });
                         player.waypoints.push({ x: baseX + 120, y: baseY - 60 });
                         player.waypoints.push({ x: baseX + 200, y: baseY - 80 });
                     } else {
-                        // Loop pattern
+                        // Loop back pattern
                         player.waypoints.push({ x: baseX + 60, y: baseY + 50 });
                         player.waypoints.push({ x: baseX + 140, y: baseY + 60 });
                         player.waypoints.push({ x: baseX + 160, y: baseY - 30 });
+                        player.waypoints.push({ x: baseX + 120, y: baseY - 50 });
                     }
                     
                     if (player.waypoints.length > 0) {
@@ -1929,64 +2181,24 @@
                         player.dataset.endY = lastWaypoint.y;
                     }
                 });
-                
-                this.drawPaths();
-                this.updateModeIndicator('Basic Movement Patterns loaded! Various cutting, zigzag, and loop patterns.');
             }
 
             loadDoublePassDrill() {
-                // Set up a double pass drill
-                if (this.players.length >= 3) {
-                    const player1 = this.players[0];
-                    const player2 = this.players[1];
-                    const player3 = this.players[2];
-                    
-                    // Set up basic movements
-                    player1.waypoints = [
-                        { x: parseInt(player1.dataset.startX) + 100, y: parseInt(player1.dataset.startY) }
-                    ];
-                    player2.waypoints = [
-                        { x: parseInt(player2.dataset.startX) + 80, y: parseInt(player2.dataset.startY) - 40 },
-                        { x: parseInt(player2.dataset.startX) + 180, y: parseInt(player2.dataset.startY) - 20 }
-                    ];
-                    player3.waypoints = [
-                        { x: parseInt(player3.dataset.startX) + 120, y: parseInt(player3.dataset.startY) + 40 }
-                    ];
-                    
-                    // Set end positions
-                    this.players.forEach(player => {
-                        if (player.waypoints.length > 0) {
-                            const lastWaypoint = player.waypoints[player.waypoints.length - 1];
-                            player.dataset.endX = lastWaypoint.x;
-                            player.dataset.endY = lastWaypoint.y;
-                        }
-                    });
-                    
-                    // Create the double pass sequence
-                    this.createPass(player1, player2);
-                    this.createPass(player2, player3);
-                }
-                
-                this.drawPaths();
-                this.updateModeIndicator('Double Pass Drill loaded! Pass from 1→2→3 with movement patterns.');
-            }
-
-            loadAttackingLineDrill() {
-                // Set up an attacking line drill
+                // Sequential passing drill with 1→2→3 pass sequence
                 this.players.forEach((player, index) => {
                     const baseX = parseInt(player.dataset.startX);
                     const baseY = parseInt(player.dataset.startY);
-                    
                     player.waypoints = [];
                     
-                    if (player.dataset.team === 'team-a') {
-                        // Attacking movements
-                        player.waypoints.push({ x: baseX + 120, y: baseY - (index * 10) });
-                        player.waypoints.push({ x: baseX + 200, y: baseY - (index * 15) });
+                    if (index < 3) {
+                        // First three players in passing sequence
+                        player.waypoints.push({ x: baseX + 60 + (index * 40), y: baseY });
+                        player.waypoints.push({ x: baseX + 120 + (index * 40), y: baseY - 20 });
+                        player.waypoints.push({ x: baseX + 180 + (index * 40), y: baseY + 10 });
                     } else {
-                        // Defensive movements
-                        player.waypoints.push({ x: baseX - 80, y: baseY + (index * 8) });
-                        player.waypoints.push({ x: baseX - 40, y: baseY + (index * 12) });
+                        // Support players
+                        player.waypoints.push({ x: baseX + 80, y: baseY + 40 });
+                        player.waypoints.push({ x: baseX + 160, y: baseY + 60 });
                     }
                     
                     if (player.waypoints.length > 0) {
@@ -1996,17 +2208,58 @@
                     }
                 });
                 
-                // Add pass along the attacking line
+                // Add sequential passes
+                if (this.players.length >= 3) {
+                    this.createPass(this.players[0], this.players[1]);
+                    this.createPass(this.players[1], this.players[2]);
+                }
+            }
+
+            loadAttackingLineDrill() {
+                // Team A attacking movements with defensive Team B responses
+                this.players.forEach((player, index) => {
+                    const baseX = parseInt(player.dataset.startX);
+                    const baseY = parseInt(player.dataset.startY);
+                    player.waypoints = [];
+                    
+                    if (player.dataset.team === 'team-a') {
+                        // Attacking line with dummy and cut
+                        if (index % 2 === 0) {
+                            player.waypoints.push({ x: baseX + 80, y: baseY + 20 });
+                            player.waypoints.push({ x: baseX + 120, y: baseY - 30 });
+                            player.waypoints.push({ x: baseX + 200, y: baseY - 40 });
+                        } else {
+                            // Support run with loop
+                            player.waypoints.push({ x: baseX + 60, y: baseY - 40 });
+                            player.waypoints.push({ x: baseX + 140, y: baseY - 20 });
+                        }
+                    } else {
+                        // Team B defensive responses
+                        if (index % 2 === 0) {
+                            // Defensive drift
+                            player.waypoints.push({ x: baseX - 60, y: baseY - 20 });
+                            player.waypoints.push({ x: baseX - 120, y: baseY - 40 });
+                            player.waypoints.push({ x: baseX - 160, y: baseY - 30 });
+                        } else {
+                            // Counter-attack run
+                            player.waypoints.push({ x: baseX - 80, y: baseY + 30 });
+                            player.waypoints.push({ x: baseX - 40, y: baseY + 60 });
+                            player.waypoints.push({ x: baseX + 40, y: baseY + 40 });
+                        }
+                    }
+                    
+                    if (player.waypoints.length > 0) {
+                        const lastWaypoint = player.waypoints[player.waypoints.length - 1];
+                        player.dataset.endX = lastWaypoint.x;
+                        player.dataset.endY = lastWaypoint.y;
+                    }
+                });
+                
+                // Add passes for attacking team
                 const teamAPlayers = this.players.filter(p => p.dataset.team === 'team-a');
                 if (teamAPlayers.length >= 2) {
                     this.createPass(teamAPlayers[0], teamAPlayers[1]);
-                    if (teamAPlayers.length >= 3) {
-                        this.createPass(teamAPlayers[1], teamAPlayers[2]);
-                    }
                 }
-                
-                this.drawPaths();
-                this.updateModeIndicator('Attacking Line Drill loaded! Team A attacks while Team B defends.');
             }
 
 
@@ -2364,6 +2617,42 @@
                 this.codes = this.codes.filter(c => c !== code);
             }
 
+            removePass(pass) {
+                // Remove pass from the passes array
+                this.passes = this.passes.filter(p => p !== pass);
+                // Redraw passes to remove visual representation
+                this.drawPasses();
+            }
+
+            cleanupPassesAfterWaypointDeletion(deletedWaypoints) {
+                // Get the list of players whose waypoints are being deleted
+                const affectedPlayers = new Set();
+                deletedWaypoints.forEach(marker => {
+                    if (marker.ownerPlayer) {
+                        affectedPlayers.add(marker.ownerPlayer);
+                    }
+                });
+                
+                // Remove passes that involve waypoints from affected players
+                this.passes = this.passes.filter(pass => {
+                    if (pass.type === 'waypoint-sequence' && pass.waypoints) {
+                        // Check if any waypoint in this pass belongs to an affected player
+                        const hasAffectedWaypoint = pass.waypoints.some(waypointMarker => 
+                            affectedPlayers.has(waypointMarker.ownerPlayer)
+                        );
+                        
+                        // Keep the pass only if it doesn't involve affected players
+                        return !hasAffectedWaypoint;
+                    }
+                    // Keep non-waypoint-sequence passes as-is
+                    return true;
+                });
+                
+                // Also remove any orphaned waypoint-pass-line elements from the DOM
+                // since these are not managed by drawPasses()
+                this.pitch.querySelectorAll('.waypoint-pass-line').forEach(line => line.remove());
+            }
+
             toggleWaypoints() {
                 this.waypointsHidden = !this.waypointsHidden;
                 this.setWaypointsVisible(!this.waypointsHidden);
@@ -2672,6 +2961,14 @@
             triggerUpload() {
                 document.getElementById('uploadInput').click();
                 this.toggleOptions(); // Close dropdown
+            }
+
+            // Back to platform functionality
+            backToPlatform() {
+                if (confirm('Are you sure you want to return to the main platform? Any unsaved changes will be lost.')) {
+                    window.location.href = 'index.html';
+                }
+                this.toggleOptions(); // Close dropdown regardless of choice
             }
 
             // Notes functionality
