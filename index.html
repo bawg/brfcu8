@@ -864,20 +864,15 @@
                 margin-bottom: 4px;
             }
             
-            /* Make table horizontally scrollable */
-            .events-table-wrapper {
+            /* Make table horizontally scrollable on mobile */
+            .events-list-container .table-container {
                 overflow-x: auto;
                 -webkit-overflow-scrolling: touch;
             }
             
-            .events-table {
-                min-width: 600px;
-            }
-            
-            .events-table th,
-            .events-table td {
-                padding: 12px 8px;
-                font-size: 14px;
+            .events-list-container .table-header,
+            .events-list-container .table-row {
+                min-width: 800px; /* Force horizontal scrolling on mobile */
             }
             
             /* Section headers */
@@ -1757,6 +1752,13 @@
                 ev.availability = { manus: '', andy: '', james: '' };
             }
         });
+
+        // Pinch-to-zoom functionality for events table
+        let tableZoomLevel = 1;
+        let isZooming = false;
+        let lastDistance = 0;
+        const minZoom = 0.5;
+        const maxZoom = 2;
         
         // Initialize calendar on page load
         document.addEventListener('DOMContentLoaded', function() {
@@ -1770,6 +1772,9 @@
             document.getElementById('availabilityUserLabel').style.display = 'none';
             document.getElementById('toggleAvailabilityBtn').textContent = '+ Add Availability';
             isEditingAvailability = false;
+            
+            // Initialize pinch-to-zoom for events table
+            initializePinchZoom();
         });
         
         function renderCalendar() {
@@ -1933,6 +1938,40 @@
                 `;
                 tableBody.appendChild(paginationDiv);
             }
+
+            // Re-apply zoom after rendering
+            setTimeout(() => {
+                const eventsTableContainer = document.querySelector('.events-list-container .table-container');
+                if (eventsTableContainer && tableZoomLevel !== 1) {
+                    const header = eventsTableContainer.querySelector('.table-header');
+                    const rows = eventsTableContainer.querySelectorAll('.table-row');
+                    
+                    if (header) {
+                        header.style.fontSize = (14 * tableZoomLevel) + 'px';
+                        header.style.padding = Math.max(8, 16 * tableZoomLevel) + 'px 20px';
+                    }
+                    
+                    rows.forEach(row => {
+                        const eventTitle = row.querySelector('.event-title');
+                        const otherCells = row.querySelectorAll('div:not(.event-title)');
+                        
+                        if (eventTitle) {
+                            eventTitle.style.fontSize = (15 * tableZoomLevel) + 'px';
+                        }
+                        
+                        otherCells.forEach(cell => {
+                            cell.style.fontSize = (14 * tableZoomLevel) + 'px';
+                        });
+                        
+                        const badges = row.querySelectorAll('.event-type-badge');
+                        badges.forEach(badge => {
+                            badge.style.fontSize = (12 * tableZoomLevel) + 'px';
+                        });
+                        
+                        row.style.padding = Math.max(8, 16 * tableZoomLevel) + 'px 20px';
+                    });
+                }
+            }, 10);
         }
         
         function toggleAvailability(eventIdx, user, checked) {
@@ -2647,6 +2686,88 @@
         function closeEditDrillModal() {
             document.getElementById('editDrillModal').classList.remove('show');
             currentEditingDrillId = null;
+        }
+
+        // Pinch-to-zoom functionality for events table
+        function initializePinchZoom() {
+            const eventsTableContainer = document.querySelector('.events-list-container .table-container');
+            if (!eventsTableContainer) return;
+
+            let initialDistance = 0;
+            let initialZoom = tableZoomLevel;
+
+            function getDistance(touches) {
+                const dx = touches[0].clientX - touches[1].clientX;
+                const dy = touches[0].clientY - touches[1].clientY;
+                return Math.sqrt(dx * dx + dy * dy);
+            }
+
+            function applyZoom(zoomLevel) {
+                tableZoomLevel = Math.max(minZoom, Math.min(maxZoom, zoomLevel));
+                
+                // Apply zoom by scaling font sizes
+                const header = eventsTableContainer.querySelector('.table-header');
+                const rows = eventsTableContainer.querySelectorAll('.table-row');
+                
+                if (header) {
+                    header.style.fontSize = (14 * tableZoomLevel) + 'px';
+                }
+                
+                rows.forEach(row => {
+                    const eventTitle = row.querySelector('.event-title');
+                    const otherCells = row.querySelectorAll('div:not(.event-title)');
+                    
+                    if (eventTitle) {
+                        eventTitle.style.fontSize = (15 * tableZoomLevel) + 'px';
+                    }
+                    
+                    otherCells.forEach(cell => {
+                        cell.style.fontSize = (14 * tableZoomLevel) + 'px';
+                    });
+                    
+                    // Scale badges as well
+                    const badges = row.querySelectorAll('.event-type-badge');
+                    badges.forEach(badge => {
+                        badge.style.fontSize = (12 * tableZoomLevel) + 'px';
+                    });
+                });
+                
+                // Also scale the table container padding for better touch targets
+                const scaledPadding = Math.max(8, 16 * tableZoomLevel);
+                header.style.padding = scaledPadding + 'px 20px';
+                rows.forEach(row => {
+                    row.style.padding = scaledPadding + 'px 20px';
+                });
+            }
+
+            eventsTableContainer.addEventListener('touchstart', function(e) {
+                if (e.touches.length === 2) {
+                    e.preventDefault();
+                    isZooming = true;
+                    initialDistance = getDistance(e.touches);
+                    initialZoom = tableZoomLevel;
+                }
+            }, { passive: false });
+
+            eventsTableContainer.addEventListener('touchmove', function(e) {
+                if (e.touches.length === 2 && isZooming) {
+                    e.preventDefault();
+                    const currentDistance = getDistance(e.touches);
+                    const scale = currentDistance / initialDistance;
+                    const newZoom = initialZoom * scale;
+                    
+                    applyZoom(newZoom);
+                }
+            }, { passive: false });
+
+            eventsTableContainer.addEventListener('touchend', function(e) {
+                if (e.touches.length < 2) {
+                    isZooming = false;
+                }
+            });
+
+            // Apply initial zoom
+            applyZoom(tableZoomLevel);
         }
 
         window.showSection = showSection;
