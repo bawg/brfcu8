@@ -634,6 +634,8 @@
                 this.lassoMode = false;
                 this.draggedObject = null;
                 this.dragOffset = { x: 0, y: 0 };
+                this.alignmentMode = false;
+                this.alignmentDirection = null; // 'horizontal' or 'vertical'
                 
                 // Pass-related properties
                 this.passes = [];
@@ -816,6 +818,24 @@
                 const clickedWaypoint = this.getWaypointAt(x, y);
                 const clickedCone = this.getCodeAt(x, y);
                 
+                // Handle alignment mode first (higher priority)
+                if (this.alignmentMode) {
+                    if (clickedPlayer) {
+                        this.toggleObjectSelection(clickedPlayer);
+                        return;
+                    }
+                    if (clickedWaypoint) {
+                        this.toggleObjectSelection(clickedWaypoint);
+                        return;
+                    }
+                    if (clickedCone) {
+                        this.toggleObjectSelection(clickedCone);
+                        return;
+                    }
+                    // If clicking on empty space in alignment mode, just return
+                    return;
+                }
+                
                 // Handle multi-selection with Ctrl key
                 if (e.ctrlKey || e.metaKey) {
                     if (clickedPlayer) {
@@ -830,7 +850,7 @@
                         this.toggleObjectSelection(clickedCone);
                         return;
                     }
-                    // If clicking on empty space with Ctrl, clear selection
+                    // If using Ctrl and clicking on empty space, clear selection
                     this.clearSelection();
                     return;
                 }
@@ -854,7 +874,7 @@
                 }
                 
                 // Handle normal waypoint creation
-                if (clickedPlayer && !this.settingEndPosition && !this.isAddPassMode) {
+                if (clickedPlayer && !this.settingEndPosition && !this.isAddPassMode && !this.alignmentMode) {
                     // Start creating a path for this player
                     this.selectPlayer(clickedPlayer);
                     this.settingEndPosition = true;
@@ -1195,7 +1215,9 @@
                     document.getElementById('addPassBtn').style.display = 'inline-block';
                     document.getElementById('hideWaypointBtn').style.display = 'inline-block';
                     document.getElementById('lassoBtn').style.display = 'inline-block';
-                    // Alignment buttons are shown/hidden based on selection
+                    // Always show alignment buttons in design mode
+                    document.getElementById('alignHorizontalBtn').style.display = 'inline-block';
+                    document.getElementById('alignVerticalBtn').style.display = 'inline-block';
                     this.setWaypointsVisible(!this.waypointsHidden);
                     
                     // Hide ball in design mode
@@ -2101,15 +2123,81 @@
                 });
                 this.selectedObjects = [];
                 this.updateAlignmentButtonsVisibility();
+                // Don't exit alignment mode when clearing selection
             }
 
             updateAlignmentButtonsVisibility() {
-                const show = this.selectedObjects.length >= 2;
+                // Always show alignment buttons in design mode
+                const show = this.isDesignMode;
                 document.getElementById('alignHorizontalBtn').style.display = show ? 'inline-block' : 'none';
                 document.getElementById('alignVerticalBtn').style.display = show ? 'inline-block' : 'none';
             }
 
+            enterAlignmentMode(direction) {
+                this.alignmentMode = true;
+                this.alignmentDirection = direction;
+                
+                // Exit other modes
+                this.isAddCodeMode = false;
+                this.isAddPassMode = false;
+                this.lassoMode = false;
+                document.getElementById('addCodeBtn').classList.remove('active');
+                document.getElementById('addPassBtn').classList.remove('active');
+                document.getElementById('lassoBtn').classList.remove('active');
+                document.getElementById('lassoBtn').textContent = 'Move';
+                
+                // Update button states
+                document.getElementById('alignHorizontalBtn').classList.toggle('active', direction === 'horizontal');
+                document.getElementById('alignVerticalBtn').classList.toggle('active', direction === 'vertical');
+                
+                // Clear current selection
+                this.clearSelection();
+                
+                const directionText = direction === 'horizontal' ? 'Horizontal' : 'Vertical';
+                this.updateModeIndicator(`${directionText} Alignment Mode: Click objects to select them for alignment. Click the Align ${directionText} button again to perform alignment.`);
+            }
+
+            exitAlignmentMode() {
+                this.alignmentMode = false;
+                this.alignmentDirection = null;
+                document.getElementById('alignHorizontalBtn').classList.remove('active');
+                document.getElementById('alignVerticalBtn').classList.remove('active');
+                
+                if (this.isDesignMode) {
+                    this.updateModeDisplay();
+                }
+            }
+
+            toggleAlignmentMode(direction) {
+                if (this.alignmentMode && this.alignmentDirection === direction) {
+                    // Perform alignment if we have 2+ objects selected
+                    if (this.selectedObjects.length >= 2) {
+                        if (direction === 'horizontal') {
+                            this.performHorizontalAlignment();
+                        } else {
+                            this.performVerticalAlignment();
+                        }
+                        this.clearSelection();
+                        this.exitAlignmentMode();
+                    } else {
+                        // Exit alignment mode if no objects selected
+                        this.exitAlignmentMode();
+                    }
+                } else {
+                    // Enter alignment mode
+                    this.enterAlignmentMode(direction);
+                }
+            }
+
             alignHorizontal() {
+                this.toggleAlignmentMode('horizontal');
+            }
+
+            alignVertical() {
+                this.toggleAlignmentMode('vertical');
+            }
+
+            performHorizontalAlignment() {
                 if (this.selectedObjects.length < 2) return;
                 
                 // Calculate the average Y position
@@ -2149,7 +2237,7 @@
                 this.drawPaths();
             }
 
-            alignVertical() {
+            performVerticalAlignment() {
                 if (this.selectedObjects.length < 2) return;
                 
                 // Calculate the average X position
