@@ -253,6 +253,51 @@
             background: #f8f9fa;
         }
 
+        /* Submenu styles for Load Sample */
+        .has-submenu {
+            position: relative;
+        }
+
+        .has-submenu::after {
+            content: '▶';
+            position: absolute;
+            right: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 12px;
+            color: #6c757d;
+        }
+
+        .sample-submenu {
+            position: absolute;
+            left: 100%;
+            top: 0;
+            background: white;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            min-width: 180px;
+            padding: 8px 0;
+            display: none;
+            z-index: 1001;
+        }
+
+        .sample-option {
+            background: none;
+            border: none;
+            padding: 10px 16px;
+            width: 100%;
+            text-align: left;
+            cursor: pointer;
+            font-size: 14px;
+            color: #495057;
+            transition: background 0.2s ease;
+        }
+
+        .sample-option:hover {
+            background: #f8f9fa;
+        }
+
         .dots {
             font-weight: bold;
         }
@@ -785,7 +830,14 @@
                 </button>
                 <div class="options-menu" id="optionsMenu" style="display: none;">
                     <button class="option-item" onclick="rugbyDesigner.backToPlatform()">← Back to Platform</button>
-                    <button class="option-item" onclick="rugbyDesigner.loadSample()">Load Sample</button>
+                    <div class="option-item has-submenu" onclick="rugbyDesigner.toggleSampleSubmenu(event)">
+                        Load Sample
+                        <div class="sample-submenu" id="sampleSubmenu" style="display: none;">
+                            <button class="sample-option" onclick="rugbyDesigner.loadSampleDrill('basic-patterns')">Basic Movement Patterns</button>
+                            <button class="sample-option" onclick="rugbyDesigner.loadSampleDrill('double-pass')">Double Pass</button>
+                            <button class="sample-option" onclick="rugbyDesigner.loadSampleDrill('attacking-line')">Attacking Line</button>
+                        </div>
+                    </div>
                     <button class="option-item" onclick="rugbyDesigner.saveDrill()">Save Drill</button>
                     <button class="option-item" onclick="rugbyDesigner.triggerUpload()">Upload Drill</button>
                     <button class="option-item" onclick="rugbyDesigner.exportGif()">Download GIF</button>
@@ -2048,6 +2100,166 @@
                 
                 this.drawPaths();
                 this.updateModeIndicator('Sample loaded with movement patterns and passes! Orange dashed lines show passes to waypoints. Click Play to see ball animation.');
+            }
+
+            // New methods for sample submenu functionality
+            toggleSampleSubmenu(event) {
+                event.stopPropagation();
+                const submenu = document.getElementById('sampleSubmenu');
+                const isVisible = submenu.style.display !== 'none';
+                
+                if (isVisible) {
+                    submenu.style.display = 'none';
+                } else {
+                    submenu.style.display = 'block';
+                    
+                    // Close submenu when clicking outside
+                    setTimeout(() => {
+                        document.addEventListener('click', this.closeSampleSubmenuOnClickOutside.bind(this), { once: true });
+                    }, 0);
+                }
+            }
+
+            closeSampleSubmenuOnClickOutside(e) {
+                const submenu = document.getElementById('sampleSubmenu');
+                if (!submenu.contains(e.target)) {
+                    submenu.style.display = 'none';
+                }
+            }
+
+            loadSampleDrill(drillType) {
+                this.clearAll();
+                
+                switch(drillType) {
+                    case 'basic-patterns':
+                        this.loadBasicMovementPatterns();
+                        break;
+                    case 'double-pass':
+                        this.loadDoublePassDrill();
+                        break;
+                    case 'attacking-line':
+                        this.loadAttackingLineDrill();
+                        break;
+                }
+                
+                // Close both menus
+                document.getElementById('sampleSubmenu').style.display = 'none';
+                this.toggleOptions();
+                
+                this.drawPaths();
+                this.updateModeIndicator(`${drillType.replace('-', ' ')} drill loaded! Click Play to see the animation.`);
+            }
+
+            loadBasicMovementPatterns() {
+                // Zigzag, cutting, and loop patterns for movement training
+                this.players.forEach((player, index) => {
+                    const baseX = parseInt(player.dataset.startX);
+                    const baseY = parseInt(player.dataset.startY);
+                    player.waypoints = [];
+                    
+                    if (index % 3 === 0) {
+                        // Zigzag pattern
+                        player.waypoints.push({ x: baseX + 80, y: baseY - 40 });
+                        player.waypoints.push({ x: baseX + 120, y: baseY + 40 });
+                        player.waypoints.push({ x: baseX + 180, y: baseY - 20 });
+                    } else if (index % 3 === 1) {
+                        // Sharp cutting move
+                        player.waypoints.push({ x: baseX + 100, y: baseY });
+                        player.waypoints.push({ x: baseX + 120, y: baseY - 60 });
+                        player.waypoints.push({ x: baseX + 200, y: baseY - 80 });
+                    } else {
+                        // Loop back pattern
+                        player.waypoints.push({ x: baseX + 60, y: baseY + 50 });
+                        player.waypoints.push({ x: baseX + 140, y: baseY + 60 });
+                        player.waypoints.push({ x: baseX + 160, y: baseY - 30 });
+                        player.waypoints.push({ x: baseX + 120, y: baseY - 50 });
+                    }
+                    
+                    if (player.waypoints.length > 0) {
+                        const lastWaypoint = player.waypoints[player.waypoints.length - 1];
+                        player.dataset.endX = lastWaypoint.x;
+                        player.dataset.endY = lastWaypoint.y;
+                    }
+                });
+            }
+
+            loadDoublePassDrill() {
+                // Sequential passing drill with 1→2→3 pass sequence
+                this.players.forEach((player, index) => {
+                    const baseX = parseInt(player.dataset.startX);
+                    const baseY = parseInt(player.dataset.startY);
+                    player.waypoints = [];
+                    
+                    if (index < 3) {
+                        // First three players in passing sequence
+                        player.waypoints.push({ x: baseX + 60 + (index * 40), y: baseY });
+                        player.waypoints.push({ x: baseX + 120 + (index * 40), y: baseY - 20 });
+                        player.waypoints.push({ x: baseX + 180 + (index * 40), y: baseY + 10 });
+                    } else {
+                        // Support players
+                        player.waypoints.push({ x: baseX + 80, y: baseY + 40 });
+                        player.waypoints.push({ x: baseX + 160, y: baseY + 60 });
+                    }
+                    
+                    if (player.waypoints.length > 0) {
+                        const lastWaypoint = player.waypoints[player.waypoints.length - 1];
+                        player.dataset.endX = lastWaypoint.x;
+                        player.dataset.endY = lastWaypoint.y;
+                    }
+                });
+                
+                // Add sequential passes
+                if (this.players.length >= 3) {
+                    this.createPass(this.players[0], this.players[1]);
+                    this.createPass(this.players[1], this.players[2]);
+                }
+            }
+
+            loadAttackingLineDrill() {
+                // Team A attacking movements with defensive Team B responses
+                this.players.forEach((player, index) => {
+                    const baseX = parseInt(player.dataset.startX);
+                    const baseY = parseInt(player.dataset.startY);
+                    player.waypoints = [];
+                    
+                    if (player.dataset.team === 'team-a') {
+                        // Attacking line with dummy and cut
+                        if (index % 2 === 0) {
+                            player.waypoints.push({ x: baseX + 80, y: baseY + 20 });
+                            player.waypoints.push({ x: baseX + 120, y: baseY - 30 });
+                            player.waypoints.push({ x: baseX + 200, y: baseY - 40 });
+                        } else {
+                            // Support run with loop
+                            player.waypoints.push({ x: baseX + 60, y: baseY - 40 });
+                            player.waypoints.push({ x: baseX + 140, y: baseY - 20 });
+                        }
+                    } else {
+                        // Team B defensive responses
+                        if (index % 2 === 0) {
+                            // Defensive drift
+                            player.waypoints.push({ x: baseX - 60, y: baseY - 20 });
+                            player.waypoints.push({ x: baseX - 120, y: baseY - 40 });
+                            player.waypoints.push({ x: baseX - 160, y: baseY - 30 });
+                        } else {
+                            // Counter-attack run
+                            player.waypoints.push({ x: baseX - 80, y: baseY + 30 });
+                            player.waypoints.push({ x: baseX - 40, y: baseY + 60 });
+                            player.waypoints.push({ x: baseX + 40, y: baseY + 40 });
+                        }
+                    }
+                    
+                    if (player.waypoints.length > 0) {
+                        const lastWaypoint = player.waypoints[player.waypoints.length - 1];
+                        player.dataset.endX = lastWaypoint.x;
+                        player.dataset.endY = lastWaypoint.y;
+                    }
+                });
+                
+                // Add passes for attacking team
+                const teamAPlayers = this.players.filter(p => p.dataset.team === 'team-a');
+                if (teamAPlayers.length >= 2) {
+                    this.createPass(teamAPlayers[0], teamAPlayers[1]);
+                }
             }
 
 
