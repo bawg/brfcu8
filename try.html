@@ -701,7 +701,7 @@
                 
                 document.getElementById('eraserBtn').classList.toggle('active', this.eraserMode);
                 document.getElementById('eraserBtn').textContent = this.eraserMode ? 'Exit Eraser' : 'Eraser';
-                this.updateModeIndicator(this.eraserMode ? 'Eraser: Click objects to select, then click Eraser again to delete selected objects.' : 'Design Mode');
+                this.updateModeIndicator(this.eraserMode ? 'Eraser: Click objects to select, then click Eraser again or press Delete key to delete selected objects.' : 'Design Mode');
             }
 
             clearSelectedObjects() {
@@ -806,7 +806,7 @@
                     
                     // Update mode indicator with selection count
                     const count = this.selectedObjects.length;
-                    this.updateModeIndicator(`Eraser: ${count} object${count !== 1 ? 's' : ''} selected. Click Eraser again to delete selected objects.`);
+                    this.updateModeIndicator(`Eraser: ${count} object${count !== 1 ? 's' : ''} selected. Click Eraser again or press Delete key to delete selected objects.`);
                 }
             }
 
@@ -845,6 +845,14 @@
                 return distance <= threshold;
             }
 
+            handleKeyDown(e) {
+                // Handle Delete key in eraser mode
+                if (e.key === 'Delete' && this.eraserMode && this.selectedObjects.length > 0) {
+                    this.deleteSelectedObjects();
+                    e.preventDefault();
+                }
+            }
+
             bindEvents() {
                 this.pitch.addEventListener('click', (e) => this.handlePitchClick(e));
                 this.pitch.addEventListener('contextmenu', (e) => this.handleRightClick(e));
@@ -854,6 +862,7 @@
                 this.pitch.addEventListener('mousedown', (e) => this.handleLassoDown(e));
                 document.addEventListener('mousemove', (e) => this.handleLassoMove(e));
                 document.addEventListener('mouseup', (e) => this.handleLassoUp(e));
+                document.addEventListener('keydown', (e) => this.handleKeyDown(e));
             }
 
             setMode(mode) {
