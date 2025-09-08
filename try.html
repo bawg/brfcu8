@@ -1971,11 +1971,15 @@
                 if (this.isAddPassMode) {
                     // Exit other modes
                     this.isAddCodeMode = false;
-                    this.lassoMode = false;
                     document.getElementById('addCodeBtn').classList.remove('active');
-                    document.getElementById('lassoBtn').classList.remove('active');
-                    document.getElementById('lassoBtn').style.background = '';
-                    document.getElementById('lassoBtn').textContent = 'Move';
+                    
+                    // Only reset Move button if it was actually active
+                    if (this.lassoMode) {
+                        this.lassoMode = false;
+                        document.getElementById('lassoBtn').classList.remove('active');
+                        document.getElementById('lassoBtn').style.background = '';
+                        document.getElementById('lassoBtn').textContent = 'Move';
+                    }
                     
                     // Reset pass creation state
                     this.selectedPasser = null;
@@ -2109,8 +2113,9 @@
                     // Remove temporary highlights  
                     this.clearPassWaypointHighlights();
                     
-                    // Reset button text to allow creating another pass or exiting
+                    // Reset button text and color to allow creating another pass or exiting
                     document.getElementById('addPassBtn').textContent = 'Add a Pass';
+                    document.getElementById('addPassBtn').style.background = '';
                 }
             }
 
