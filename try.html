@@ -865,7 +865,8 @@
                     lassoBtn.textContent = 'Finish Move';
                 } else {
                     lassoBtn.classList.remove('active');
-                    lassoBtn.style.background = '';
+                    lassoBtn.style.background = '#e0e0e0';
+                    lassoBtn.style.color = '#333';
                     lassoBtn.textContent = 'Move';
                 }
                 this.updateModeIndicator(this.lassoMode ? 'Move: Drag players to reposition.' : 'Design Mode');
@@ -1977,7 +1978,8 @@
                     if (this.lassoMode) {
                         this.lassoMode = false;
                         document.getElementById('lassoBtn').classList.remove('active');
-                        document.getElementById('lassoBtn').style.background = '';
+                        document.getElementById('lassoBtn').style.background = '#e0e0e0';
+                        document.getElementById('lassoBtn').style.color = '#333';
                         document.getElementById('lassoBtn').textContent = 'Move';
                     }
                     
@@ -1996,7 +1998,8 @@
                     this.isCreatingWaypointPass = false;
                     this.clearPassWaypointHighlights();
                     document.getElementById('addPassBtn').classList.remove('active');
-                    document.getElementById('addPassBtn').style.background = '';
+                    document.getElementById('addPassBtn').style.background = '#e0e0e0';
+                    document.getElementById('addPassBtn').style.color = '#333';
                     document.getElementById('addPassBtn').textContent = 'Add a Pass';
                     this.updateModeIndicator('Design Mode');
                 }
@@ -2113,9 +2116,10 @@
                     // Remove temporary highlights  
                     this.clearPassWaypointHighlights();
                     
-                    // Reset button text and color to allow creating another pass or exiting
+                    // Reset button text and color to design mode appearance
                     document.getElementById('addPassBtn').textContent = 'Add a Pass';
-                    document.getElementById('addPassBtn').style.background = '';
+                    document.getElementById('addPassBtn').style.background = '#e0e0e0';
+                    document.getElementById('addPassBtn').style.color = '#333';
                 }
             }
 
