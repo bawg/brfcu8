@@ -750,13 +750,13 @@
                     this.removeCode(obj.element);
                 });
                 
+                // Clean up passes that reference deleted waypoints BEFORE deleting waypoints
+                this.cleanupPassesAfterWaypointDeletion(toDelete.waypoints.map(obj => obj.element));
+                
                 // Delete waypoints
                 toDelete.waypoints.forEach(obj => {
                     this.deleteWaypoint(obj.element);
                 });
-                
-                // Clean up passes that reference deleted waypoints
-                this.cleanupPassesAfterWaypointDeletion(toDelete.waypoints.map(obj => obj.element));
                 
                 // Delete passes
                 toDelete.passes.forEach(obj => {
@@ -2182,27 +2182,32 @@
             }
 
             cleanupPassesAfterWaypointDeletion(deletedWaypoints) {
-                // Remove passes that reference deleted waypoints or update them to remove invalid waypoints
+                // Get the list of players whose waypoints are being deleted
+                const affectedPlayers = new Set();
+                deletedWaypoints.forEach(marker => {
+                    if (marker.ownerPlayer) {
+                        affectedPlayers.add(marker.ownerPlayer);
+                    }
+                });
+                
+                // Remove passes that involve waypoints from affected players
                 this.passes = this.passes.filter(pass => {
                     if (pass.type === 'waypoint-sequence' && pass.waypoints) {
-                        // Remove deleted waypoints from the pass
-                        const originalLength = pass.waypoints.length;
-                        pass.waypoints = pass.waypoints.filter(waypoint => {
-                            // Check if this waypoint is in the deleted list
-                            return !deletedWaypoints.includes(waypoint);
-                        });
+                        // Check if any waypoint in this pass belongs to an affected player
+                        const hasAffectedWaypoint = pass.waypoints.some(waypointMarker => 
+                            affectedPlayers.has(waypointMarker.ownerPlayer)
+                        );
                         
-                        // If the pass now has fewer than 2 waypoints, remove the entire pass
-                        if (pass.waypoints.length < 2) {
-                            return false;
-                        }
-                        
-                        // If waypoints were removed but pass is still valid, keep it
-                        return true;
+                        // Keep the pass only if it doesn't involve affected players
+                        return !hasAffectedWaypoint;
                     }
                     // Keep non-waypoint-sequence passes as-is
                     return true;
                 });
+                
+                // Also remove any orphaned waypoint-pass-line elements from the DOM
+                // since these are not managed by drawPasses()
+                this.pitch.querySelectorAll('.waypoint-pass-line').forEach(line => line.remove());
             }
 
             toggleWaypoints() {
