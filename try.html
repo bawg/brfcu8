@@ -417,6 +417,34 @@
             opacity: 0.8;
         }
 
+        /* Back button styles */
+        .back-btn {
+            background: #2c3e50;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 4px rgba(44, 62, 80, 0.2);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .back-btn:hover {
+            background: #34495e;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(44, 62, 80, 0.3);
+        }
+
+        .back-btn:active {
+            transform: translateY(0);
+            box-shadow: 0 1px 2px rgba(44, 62, 80, 0.2);
+        }
+
         /* Responsive Design for Rugby Drill Designer */
         @media (max-width: 768px) {
             .info {
@@ -432,6 +460,25 @@
             .info p {
                 font-size: 14px;
                 line-height: 1.4;
+            }
+
+            /* Mobile back button improvements */
+            .info > div {
+                flex-direction: column !important;
+                align-items: stretch !important;
+                text-align: center;
+            }
+
+            .info > div > div {
+                margin-bottom: 16px;
+            }
+
+            .back-btn {
+                width: 100%;
+                justify-content: center;
+                padding: 14px 20px;
+                font-size: 16px;
+                min-height: 48px; /* Better touch target on mobile */
             }
             
             /* Make rugby widget responsive - wider in portrait mode */
@@ -698,8 +745,17 @@
 </head>
 <body>
     <div class="info">
-        <h3>Rugby Drill Designer</h3>
-        <p>Design custom player movements for drills or match scenarios</p>
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+            <div>
+                <h3>Rugby Drill Designer</h3>
+                <p>Design custom player movements for drills or match scenarios</p>
+            </div>
+            <a href="index.html" style="text-decoration: none;">
+                <button class="back-btn" onclick="return confirm('Are you sure you want to return to the main platform? Any unsaved changes will be lost.');">
+                    ← Back to Platform
+                </button>
+            </a>
+        </div>
     </div>
 
     <div class="setup-controls">
