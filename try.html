@@ -858,8 +858,17 @@
 
             toggleLassoMode() {
                 this.lassoMode = !this.lassoMode;
-                document.getElementById('lassoBtn').classList.toggle('active', this.lassoMode);
-                document.getElementById('lassoBtn').textContent = this.lassoMode ? 'Exit Move' : 'Move';
+                const lassoBtn = document.getElementById('lassoBtn');
+                if (this.lassoMode) {
+                    lassoBtn.classList.add('active');
+                    lassoBtn.style.background = '#27ae60';
+                    lassoBtn.textContent = 'Finish Move';
+                } else {
+                    lassoBtn.classList.remove('active');
+                    lassoBtn.style.background = '#e0e0e0';
+                    lassoBtn.style.color = '#333';
+                    lassoBtn.textContent = 'Move';
+                }
                 this.updateModeIndicator(this.lassoMode ? 'Move: Drag players to reposition.' : 'Design Mode');
             }
 
@@ -1963,16 +1972,23 @@
                 if (this.isAddPassMode) {
                     // Exit other modes
                     this.isAddCodeMode = false;
-                    this.lassoMode = false;
                     document.getElementById('addCodeBtn').classList.remove('active');
-                    document.getElementById('lassoBtn').classList.remove('active');
-                    document.getElementById('lassoBtn').textContent = 'Move';
+                    
+                    // Only reset Move button if it was actually active
+                    if (this.lassoMode) {
+                        this.lassoMode = false;
+                        document.getElementById('lassoBtn').classList.remove('active');
+                        document.getElementById('lassoBtn').style.background = '#e0e0e0';
+                        document.getElementById('lassoBtn').style.color = '#333';
+                        document.getElementById('lassoBtn').textContent = 'Move';
+                    }
                     
                     // Reset pass creation state
                     this.selectedPasser = null;
                     this.currentPassWaypoints = [];
                     this.isCreatingWaypointPass = false;
                     document.getElementById('addPassBtn').classList.add('active');
+                    document.getElementById('addPassBtn').style.background = '#27ae60';
                     document.getElementById('addPassBtn').textContent = 'Finish Pass';
                     this.updateModeIndicator('Select the waypoint where the pass originates');
                 } else {
@@ -1982,6 +1998,8 @@
                     this.isCreatingWaypointPass = false;
                     this.clearPassWaypointHighlights();
                     document.getElementById('addPassBtn').classList.remove('active');
+                    document.getElementById('addPassBtn').style.background = '#e0e0e0';
+                    document.getElementById('addPassBtn').style.color = '#333';
                     document.getElementById('addPassBtn').textContent = 'Add a Pass';
                     this.updateModeIndicator('Design Mode');
                 }
@@ -2098,8 +2116,10 @@
                     // Remove temporary highlights  
                     this.clearPassWaypointHighlights();
                     
-                    // Reset button text to allow creating another pass or exiting
+                    // Reset button text and color to design mode appearance
                     document.getElementById('addPassBtn').textContent = 'Add a Pass';
+                    document.getElementById('addPassBtn').style.background = '#e0e0e0';
+                    document.getElementById('addPassBtn').style.color = '#333';
                 }
             }
 
