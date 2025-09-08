@@ -755,6 +755,9 @@
                     this.deleteWaypoint(obj.element);
                 });
                 
+                // Clean up passes that reference deleted waypoints
+                this.cleanupPassesAfterWaypointDeletion(toDelete.waypoints.map(obj => obj.element));
+                
                 // Delete passes
                 toDelete.passes.forEach(obj => {
                     this.removePass(obj.data);
@@ -2176,6 +2179,30 @@
                 this.passes = this.passes.filter(p => p !== pass);
                 // Redraw passes to remove visual representation
                 this.drawPasses();
+            }
+
+            cleanupPassesAfterWaypointDeletion(deletedWaypoints) {
+                // Remove passes that reference deleted waypoints or update them to remove invalid waypoints
+                this.passes = this.passes.filter(pass => {
+                    if (pass.type === 'waypoint-sequence' && pass.waypoints) {
+                        // Remove deleted waypoints from the pass
+                        const originalLength = pass.waypoints.length;
+                        pass.waypoints = pass.waypoints.filter(waypoint => {
+                            // Check if this waypoint is in the deleted list
+                            return !deletedWaypoints.includes(waypoint);
+                        });
+                        
+                        // If the pass now has fewer than 2 waypoints, remove the entire pass
+                        if (pass.waypoints.length < 2) {
+                            return false;
+                        }
+                        
+                        // If waypoints were removed but pass is still valid, keep it
+                        return true;
+                    }
+                    // Keep non-waypoint-sequence passes as-is
+                    return true;
+                });
             }
 
             toggleWaypoints() {
