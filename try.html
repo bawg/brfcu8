@@ -6,12 +6,13 @@
     <title>Rugby Drill Designer</title>
     <style>
         .rugby-widget {
-            width: 800px;
-            height: 400px;
+            width: min(90vw, 1000px);
+            height: min(60vh, 500px);
+            min-height: 400px;
             border: 2px solid #333;
             background: white;
             position: relative;
-            margin: 20px auto;
+            margin: 10px auto;
             overflow: hidden;
             cursor: crosshair;
         }
@@ -190,8 +191,130 @@
             border: 1px solid #ccc;
         }
 
+        /* Options Dropdown Styles */
+        .options-dropdown {
+            position: relative;
+            margin-left: auto;
+        }
+
+        .options-btn {
+            background: #f8f9fa;
+            border: 2px solid #dee2e6;
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            color: #6c757d;
+            transition: all 0.2s ease;
+        }
+
+        .options-btn:hover {
+            background: #e9ecef;
+            border-color: #adb5bd;
+            color: #495057;
+        }
+
+        .options-btn.active {
+            background: #007bff;
+            border-color: #007bff;
+            color: white;
+        }
+
+        .options-menu {
+            position: absolute;
+            right: 0;
+            top: calc(100% + 8px);
+            background: white;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            z-index: 1000;
+            min-width: 150px;
+            padding: 8px 0;
+        }
+
+        .option-item {
+            background: none;
+            border: none;
+            padding: 10px 16px;
+            width: 100%;
+            text-align: left;
+            cursor: pointer;
+            font-size: 14px;
+            color: #495057;
+            transition: background 0.2s ease;
+        }
+
+        .option-item:hover {
+            background: #f8f9fa;
+        }
+
+        .dots {
+            font-weight: bold;
+        }
+
+        /* Notes Panel Styles */
+        #notesPanel {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            z-index: 1001;
+            width: 300px;
+            max-width: 90vw;
+            display: none;
+        }
+
+        .notes-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px;
+            border-bottom: 1px solid #dee2e6;
+            background: #f8f9fa;
+            border-radius: 8px 8px 0 0;
+        }
+
+        .notes-header h4 {
+            margin: 0;
+            color: #495057;
+        }
+
+        .notes-close {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            color: #6c757d;
+            line-height: 1;
+        }
+
+        .notes-close:hover {
+            color: #495057;
+        }
+
+        #drillNotes {
+            width: 100%;
+            height: 150px;
+            border: none;
+            padding: 16px;
+            resize: vertical;
+            font-family: Arial, sans-serif;
+            font-size: 14px;
+            border-radius: 0 0 8px 8px;
+            outline: none;
+        }
+
         .timeline {
-            width: 600px;
+            width: min(80vw, 800px);
             margin: 10px auto;
             background: #f0f0f0;
             height: 20px;
@@ -223,7 +346,8 @@
             font-size: 12px;
             border: 1px solid #dee2e6;
             margin: 10px auto;
-            width: 780px;
+            width: min(80vw, 800px);
+            max-width: none;
         }
 
         .design-mode {
@@ -313,8 +437,8 @@
             /* Make rugby widget responsive */
             .rugby-widget {
                 width: calc(100vw - 32px);
-                max-width: 350px;
-                height: 200px;
+                max-width: none;
+                height: min(50vh, 300px);
                 margin: 16px auto;
                 border-width: 1px;
             }
@@ -422,6 +546,39 @@
             .code-marker {
                 width: 16px;
                 height: 16px;
+            }
+            
+            /* Mobile-friendly options dropdown */
+            .options-dropdown {
+                margin-left: auto;
+                position: relative;
+            }
+            
+            .options-btn {
+                width: 44px;
+                height: 44px;
+                font-size: 20px;
+            }
+            
+            .options-menu {
+                right: 0;
+                min-width: 180px;
+            }
+            
+            .option-item {
+                padding: 14px 20px;
+                font-size: 16px;
+            }
+            
+            /* Setup controls adjustments */
+            .setup-row {
+                flex-wrap: wrap;
+                gap: 12px;
+            }
+            
+            .setup-group {
+                flex: 1;
+                min-width: 140px;
             }
         }
         
@@ -558,6 +715,20 @@
                     <option value="15" selected>15 Players</option>
                 </select>
             </div>
+
+            <!-- Options Dropdown in top-right -->
+            <div class="options-dropdown" id="optionsDropdown">
+                <button class="options-btn" id="optionsBtn" onclick="rugbyDesigner.toggleOptions()">
+                    <span class="dots">⋯</span>
+                </button>
+                <div class="options-menu" id="optionsMenu" style="display: none;">
+                    <button class="option-item" onclick="rugbyDesigner.loadSample()">Load Sample</button>
+                    <button class="option-item" onclick="rugbyDesigner.saveDrill()">Save Drill</button>
+                    <button class="option-item" onclick="rugbyDesigner.triggerUpload()">Upload Drill</button>
+                    <button class="option-item" onclick="rugbyDesigner.exportGif()">Download GIF</button>
+                    <button class="option-item" onclick="rugbyDesigner.clearAll()">Clear All</button>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -574,16 +745,12 @@
     </div>
 
     <div class="controls">
-        <button class="control-btn" id="designBtn" onclick="rugbyDesigner.enterDesignMode()">Design Mode</button>
+        <button class="control-btn" id="designBtn" onclick="rugbyDesigner.enterDesignMode()">Design</button>
         <button class="control-btn" onclick="rugbyDesigner.playMovement()">Play</button>
         <button class="control-btn" onclick="rugbyDesigner.pauseMovement()">Pause</button>
         <button class="control-btn" onclick="rugbyDesigner.resetMovement()">Reset</button>
-        <button class="control-btn" onclick="rugbyDesigner.clearAll()">Clear All</button>
-        <button class="control-btn" onclick="rugbyDesigner.loadSample()">Load Sample</button>
-        <button class="control-btn" id="saveBtn">Save Drill</button>
+        <button class="control-btn" onclick="rugbyDesigner.toggleNotes()">Notes</button>
         <input type="file" id="uploadInput" style="display:none" accept=".json">
-        <button class="control-btn" id="uploadBtn">Upload Drill</button>
-        <button class="control-btn" id="downloadGifBtn">Download GIF</button>
         <span id="gifProgress" style="font-size:12px; margin-left:10px;"></span>
     </div>
     <div class="controls" id="designControlsRow">
@@ -2033,13 +2200,10 @@
             }
 
             setupSaveUpload() {
-                document.getElementById('saveBtn').onclick = () => this.saveDrill();
-                document.getElementById('uploadBtn').onclick = () => document.getElementById('uploadInput').click();
                 document.getElementById('uploadInput').onchange = (e) => this.uploadDrill(e);
             }
 
             setupGifExport() {
-                document.getElementById('downloadGifBtn').onclick = () => this.exportGif();
                 this.gifProgress = document.getElementById('gifProgress');
             }
 
@@ -2207,6 +2371,66 @@
                 this.drawConnections();
                 this.drawPaths();
                 this.updateModeIndicator(`Loaded drill: ${data.name || 'Unnamed'}`);
+            }
+
+            // Options dropdown functionality
+            toggleOptions() {
+                const menu = document.getElementById('optionsMenu');
+                const btn = document.getElementById('optionsBtn');
+                const isVisible = menu.style.display !== 'none';
+                
+                if (isVisible) {
+                    menu.style.display = 'none';
+                    btn.classList.remove('active');
+                } else {
+                    menu.style.display = 'block';
+                    btn.classList.add('active');
+                    
+                    // Close dropdown when clicking outside
+                    setTimeout(() => {
+                        document.addEventListener('click', this.closeOptionsOnClickOutside.bind(this), { once: true });
+                    }, 0);
+                }
+            }
+
+            closeOptionsOnClickOutside(e) {
+                const dropdown = document.getElementById('optionsDropdown');
+                if (!dropdown.contains(e.target)) {
+                    document.getElementById('optionsMenu').style.display = 'none';
+                    document.getElementById('optionsBtn').classList.remove('active');
+                }
+            }
+
+            // Trigger upload from dropdown
+            triggerUpload() {
+                document.getElementById('uploadInput').click();
+                this.toggleOptions(); // Close dropdown
+            }
+
+            // Notes functionality
+            toggleNotes() {
+                let notesPanel = document.getElementById('notesPanel');
+                if (!notesPanel) {
+                    this.createNotesPanel();
+                    notesPanel = document.getElementById('notesPanel');
+                }
+                
+                const isVisible = notesPanel.style.display === 'block';
+                notesPanel.style.display = isVisible ? 'none' : 'block';
+            }
+
+            createNotesPanel() {
+                const notesPanel = document.createElement('div');
+                notesPanel.id = 'notesPanel';
+                notesPanel.style.display = 'block'; // Show immediately when created
+                notesPanel.innerHTML = `
+                    <div class="notes-header">
+                        <h4>Drill Notes</h4>
+                        <button onclick="rugbyDesigner.toggleNotes()" class="notes-close">×</button>
+                    </div>
+                    <textarea id="drillNotes" placeholder="Add notes about this drill..."></textarea>
+                `;
+                document.body.appendChild(notesPanel);
             }
         }
 
