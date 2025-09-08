@@ -864,20 +864,37 @@
                 margin-bottom: 4px;
             }
             
-            /* Make table horizontally scrollable */
+            /* Mobile responsive table layout */
+            .table-header,
+            .table-row {
+                grid-template-columns: 2fr 1.5fr 1fr 1fr 1fr 1.5fr;
+                gap: 12px;
+                padding: 12px 16px;
+            }
+            
             .events-table-wrapper {
-                overflow-x: auto;
-                -webkit-overflow-scrolling: touch;
+                overflow-x: visible;
             }
             
-            .events-table {
-                min-width: 600px;
-            }
-            
-            .events-table th,
-            .events-table td {
-                padding: 12px 8px;
+            .event-title {
                 font-size: 14px;
+            }
+            
+            .table-header div,
+            .table-row div {
+                font-size: 13px;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            }
+            
+            .table-row div:first-child {
+                white-space: normal; /* Allow event name to wrap */
+            }
+            
+            .event-type-badge {
+                font-size: 11px;
+                padding: 3px 8px;
             }
             
             /* Section headers */
@@ -1023,6 +1040,28 @@
             
             .section-title {
                 font-size: 1.25rem;
+            }
+            
+            /* Compact table layout for very small screens */
+            .table-header,
+            .table-row {
+                grid-template-columns: 1.5fr 1fr 0.8fr 0.8fr 0.8fr 1fr;
+                gap: 8px;
+                padding: 10px 12px;
+            }
+            
+            .table-header div,
+            .table-row div {
+                font-size: 12px;
+            }
+            
+            .event-title {
+                font-size: 13px;
+            }
+            
+            .event-type-badge {
+                font-size: 10px;
+                padding: 2px 6px;
             }
         }
 
