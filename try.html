@@ -561,6 +561,25 @@
                 font-size: 20px;
             }
             
+            /* Move Team A/B controls to new line on mobile in match mode */
+            #matchSettings {
+                width: 100%;
+                order: 10;
+                justify-content: flex-start;
+                margin-top: 12px;
+                flex-wrap: wrap;
+                gap: 8px;
+            }
+            
+            #matchSettings label,
+            #matchSettings select {
+                font-size: 12px;
+            }
+            
+            #matchSettings select {
+                max-width: 80px;
+            }
+            
             .options-menu {
                 right: 0;
                 min-width: 180px;
