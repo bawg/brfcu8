@@ -748,7 +748,7 @@
                     <button class="option-item" onclick="rugbyDesigner.saveDrill()">Save Drill</button>
                     <button class="option-item" onclick="rugbyDesigner.triggerUpload()">Upload Drill</button>
                     <button class="option-item" onclick="rugbyDesigner.exportGif()">Download GIF</button>
-                    <button class="option-item" id="hideWaypointsOption" onclick="rugbyDesigner.toggleWaypointsFromMenu()" style="display: none;">Hide Waypoints</button>
+                    <button class="option-item" id="hideWaypointsOption" onclick="rugbyDesigner.toggleWaypointsFromMenu()">Hide Waypoints</button>
                     <button class="option-item" onclick="rugbyDesigner.clearAll()">Clear All</button>
                 </div>
             </div>
@@ -1386,7 +1386,6 @@
                     document.getElementById('designBtn').classList.remove('active');
                     document.getElementById('addCodeBtn').style.display = 'none';
                     document.getElementById('addPassBtn').style.display = 'none';
-                    document.getElementById('hideWaypointsOption').style.display = 'none';
                     document.getElementById('lassoBtn').style.display = 'none';
 
                     this.updateModeDisplay(); // <-- Always call this here
@@ -1420,7 +1419,6 @@
                     this.selectedPlayer = null;
                 }
                 this.pitch.classList.add('playing');
-                document.getElementById('hideWaypointsOption').style.display = 'none';
                 document.getElementById('lassoBtn').style.display = 'none';
                 this.updateModeIndicator(this.mode === 'drill' ? 'PLAYING DRILL' : 'PLAYING MATCH');
             }
