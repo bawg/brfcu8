@@ -17,7 +17,7 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { email, password } = req.body;
+  const { email, password, displayName } = req.body;
 
   // Basic validation
   if (!email || !password) {
@@ -35,6 +35,7 @@ export default async function handler(req, res) {
     const userRecord = await auth.createUser({
       email: email,
       password: password,
+      displayName: displayName || null,
       emailVerified: false,
     });
 

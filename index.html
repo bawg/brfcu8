@@ -3116,7 +3116,7 @@
             
             try {
                 if (auth) {
-                    // Use Firebase client-side authentication
+                    // Use Firebase client-side authentication (production mode)
                     const userCredential = await auth.signInWithEmailAndPassword(email, password);
                     const idToken = await userCredential.user.getIdToken();
                     
@@ -3140,8 +3140,28 @@
                         alert(data.error || 'Login failed. Please try again.');
                     }
                 } else {
-                    // Fallback for demo mode when Firebase is not configured
-                    alert('Demo mode: Login functionality requires Firebase configuration.');
+                    // Demo mode: Use direct API call (like signup does)
+                    const response = await fetch('/api/auth/signin', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ 
+                            email: email, 
+                            password: password 
+                        })
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        alert('Login successful! Welcome back.');
+                        // Clear form
+                        document.getElementById('login-email').value = '';
+                        document.getElementById('login-password').value = '';
+                    } else {
+                        alert(data.error || 'Login failed. Please check your credentials.');
+                    }
                 }
             } catch (error) {
                 console.error('Login error:', error);
@@ -3155,6 +3175,8 @@
                     errorMessage = 'Invalid email address.';
                 } else if (error.code === 'auth/too-many-requests') {
                     errorMessage = 'Too many failed attempts. Please try again later.';
+                } else if (error.message && error.message.includes('fetch')) {
+                    errorMessage = 'Connection error. Please check your network and try again.';
                 }
                 
                 alert(errorMessage);
