@@ -648,6 +648,29 @@
             text-align: center;
         }
         
+        .status-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            text-align: center;
+        }
+        
+        .status-badge.status-open {
+            background: #fef3c7;
+            color: #d97706;
+        }
+        
+        .status-badge.status-closed {
+            background: #dcfce7;
+            color: #16a34a;
+        }
+        
+        .status-badge.status-in-progress {
+            background: #e0f2fe;
+            color: #0369a1;
+        }
+        
         .star-rating {
             color: #fbbf24;
             font-size: 16px;
@@ -1558,6 +1581,35 @@
             </div>
             
             <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 24px; margin-bottom: 32px;">
+                <h3 style="color: #1e3a8a; font-weight: 600; font-size: 1.5rem; margin-bottom: 24px;">Issue Management</h3>
+                <p style="color: #64748b; margin-bottom: 24px;">Log and track issues within the system. Issues are stored locally for now.</p>
+                
+                <ul style="list-style: none; padding: 0; margin: 0;">
+                    <li style="border-bottom: 1px solid #e2e8f0; padding: 16px 0;">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <h4 style="color: #1e3a8a; font-weight: 600; margin: 0 0 4px 0;">📝 Log an Issue</h4>
+                                <p style="color: #64748b; margin: 0; font-size: 14px;">Report a new issue with title and description</p>
+                            </div>
+                            <button class="btn-primary" onclick="showLogIssueForm()">Log Issue</button>
+                        </div>
+                    </li>
+                    
+                    <li style="padding: 16px 0;">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <h4 style="color: #1e3a8a; font-weight: 600; margin: 0 0 4px 0;">📋 View All Issues</h4>
+                                <p style="color: #64748b; margin: 0; font-size: 14px;">View and manage all logged issues</p>
+                            </div>
+                            <button class="btn-primary" onclick="showIssuesTable()">View Issues</button>
+                        </div>
+                    </li>
+                </ul>
+                
+                <div id="upload-status-issues" class="upload-status" style="display: none; margin-top: 16px;"></div>
+            </div>
+            
+            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 24px; margin-bottom: 32px;">
                 <h3 style="color: #1e3a8a; font-weight: 600; font-size: 1.5rem; margin-bottom: 24px;">Drill Management</h3>
                 <p style="color: #64748b; margin-bottom: 24px;">Administrative tools for managing drill data. These operations require admin privileges.</p>
                 
@@ -1768,6 +1820,63 @@
         </div>
     </div>
 
+    <!-- Log Issue Modal -->
+    <div id="logIssueModal" class="confirmation-modal">
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="modal-header">
+                <span>📝</span>
+                <h3>Log an Issue</h3>
+            </div>
+            <div class="modal-body">
+                <div class="form-grid">
+                    <div class="form-field full-width">
+                        <label class="form-label" for="issue-title">Issue Title</label>
+                        <input class="form-input" id="issue-title" type="text" placeholder="Enter a brief title for the issue" required>
+                    </div>
+                    <div class="form-field full-width">
+                        <label class="form-label" for="issue-description">Issue Description</label>
+                        <textarea class="form-input" id="issue-description" rows="5" placeholder="Describe the issue in detail..." required></textarea>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button class="modal-btn cancel" onclick="closeLogIssueModal()">Cancel</button>
+                <button class="modal-btn primary" onclick="saveIssue()">Log Issue</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Issues Table Modal -->
+    <div id="issuesTableModal" class="confirmation-modal">
+        <div class="modal-content" style="max-width: 800px;">
+            <div class="modal-header">
+                <span>📋</span>
+                <h3>All Issues</h3>
+            </div>
+            <div class="modal-body">
+                <div class="table-container" style="max-height: 400px; overflow-y: auto;">
+                    <div class="table-header">
+                        <div style="flex: 2;">Title</div>
+                        <div style="flex: 3;">Description</div>
+                        <div style="flex: 1;">Date</div>
+                        <div style="flex: 1;">Status</div>
+                    </div>
+                    <div id="issues-table-body">
+                        <!-- Issues will be populated here -->
+                    </div>
+                </div>
+                <div id="no-issues-message" style="text-align: center; padding: 32px; color: #64748b; display: none;">
+                    <p>No issues have been logged yet.</p>
+                    <button class="btn-primary" onclick="closeIssuesTableModal(); showLogIssueForm();">Log your first issue</button>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button class="modal-btn cancel" onclick="closeIssuesTableModal()">Close</button>
+                <button class="modal-btn primary" onclick="showLogIssueForm(); closeIssuesTableModal();">Log New Issue</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         // Store calendar state in variables (memory in HTML)
         const today = new Date();
@@ -1797,6 +1906,9 @@
 
         // Add this line to fix the error:
         let isEditingAvailability = false;
+
+        // Issues management data
+        let issues = [];
 
         // Add availability to each event (initialize as empty object if not present)
         calendarEvents.forEach(ev => {
@@ -2887,6 +2999,104 @@
 
             // Apply initial zoom
             applyZoom(tableZoomLevel);
+        }
+
+        // Issue Management Functions
+        function showLogIssueForm() {
+            document.getElementById('logIssueModal').style.display = 'flex';
+            // Clear form fields
+            document.getElementById('issue-title').value = '';
+            document.getElementById('issue-description').value = '';
+        }
+
+        function closeLogIssueModal() {
+            document.getElementById('logIssueModal').style.display = 'none';
+        }
+
+        function saveIssue() {
+            const title = document.getElementById('issue-title').value.trim();
+            const description = document.getElementById('issue-description').value.trim();
+            
+            if (!title || !description) {
+                showIssueStatus('Please fill in both title and description.', 'error');
+                return;
+            }
+            
+            // Create new issue object
+            const issue = {
+                id: Date.now(), // Simple ID generation for frontend-only storage
+                title: title,
+                description: description,
+                dateLogged: new Date().toISOString().split('T')[0], // YYYY-MM-DD format
+                status: 'Open' // Default status
+            };
+            
+            // Add to issues array
+            issues.unshift(issue); // Add to beginning for newest first
+            
+            // Close modal and show success message
+            closeLogIssueModal();
+            showIssueStatus('Issue logged successfully!', 'success');
+            
+            // If issues table is open, refresh it
+            if (document.getElementById('issuesTableModal').style.display === 'flex') {
+                renderIssuesTable();
+            }
+        }
+
+        function showIssuesTable() {
+            document.getElementById('issuesTableModal').style.display = 'flex';
+            renderIssuesTable();
+        }
+
+        function closeIssuesTableModal() {
+            document.getElementById('issuesTableModal').style.display = 'none';
+        }
+
+        function renderIssuesTable() {
+            const tableBody = document.getElementById('issues-table-body');
+            const noIssuesMessage = document.getElementById('no-issues-message');
+            
+            if (issues.length === 0) {
+                tableBody.style.display = 'none';
+                noIssuesMessage.style.display = 'block';
+                return;
+            }
+            
+            tableBody.style.display = 'block';
+            noIssuesMessage.style.display = 'none';
+            
+            tableBody.innerHTML = '';
+            
+            issues.forEach(issue => {
+                const row = document.createElement('div');
+                row.className = 'table-row';
+                row.innerHTML = `
+                    <div style="flex: 2; font-weight: 600;">${issue.title}</div>
+                    <div style="flex: 3;">
+                        <div style="max-height: 60px; overflow: hidden; text-overflow: ellipsis;">
+                            ${issue.description}
+                        </div>
+                    </div>
+                    <div style="flex: 1;">${issue.dateLogged}</div>
+                    <div style="flex: 1;">
+                        <span class="status-badge status-${issue.status.toLowerCase()}">${issue.status}</span>
+                    </div>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+
+        function showIssueStatus(message, type) {
+            const statusDiv = document.getElementById('upload-status-issues');
+            statusDiv.className = `upload-status ${type}`;
+            statusDiv.textContent = message;
+            statusDiv.style.display = 'block';
+            
+            // Hide after 3 seconds
+            setTimeout(() => {
+                statusDiv.style.display = 'none';
+            }, 3000);
         }
 
         window.showSection = showSection;
