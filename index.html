@@ -4,6 +4,28 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Barnes Rugby - Coaching Management Platform</title>
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth.js"></script>
+    <script>
+        // Firebase configuration (these would typically be environment variables)
+        const firebaseConfig = {
+            // Add your Firebase config here
+            // For demo purposes, we'll handle this gracefully if not configured
+        };
+        
+        // Initialize Firebase if config is provided
+        let auth = null;
+        try {
+            if (typeof firebase !== 'undefined' && firebaseConfig.apiKey) {
+                firebase.initializeApp(firebaseConfig);
+                auth = firebase.auth();
+            }
+        } catch (error) {
+            console.log('Firebase not configured for demo mode');
+        }
+    </script>
 
     <style>
         * {
@@ -3064,7 +3086,13 @@
             document.querySelectorAll('.auth-tab').forEach(tab => {
                 tab.classList.remove('active');
             });
-            event.target.classList.add('active');
+            
+            // Find and activate the correct tab
+            document.querySelectorAll('.auth-tab').forEach(tab => {
+                if (tab.textContent.toLowerCase().includes(tabName)) {
+                    tab.classList.add('active');
+                }
+            });
             
             // Update form visibility
             document.querySelectorAll('.auth-form').forEach(form => {
@@ -3073,7 +3101,7 @@
             document.getElementById(tabName + '-form').classList.add('active');
         }
         
-        function handleLogin() {
+        async function handleLogin() {
             const email = document.getElementById('login-email').value;
             const password = document.getElementById('login-password').value;
             
@@ -3082,12 +3110,61 @@
                 return;
             }
             
-            // Mock login functionality
-            alert(`Login attempt for ${email} (this is a demo)`);
-            // In a real app, this would make an API call
+            const loginBtn = document.querySelector('#login-form .auth-primary-btn');
+            loginBtn.disabled = true;
+            loginBtn.textContent = 'Signing In...';
+            
+            try {
+                if (auth) {
+                    // Use Firebase client-side authentication
+                    const userCredential = await auth.signInWithEmailAndPassword(email, password);
+                    const idToken = await userCredential.user.getIdToken();
+                    
+                    // Verify with backend
+                    const response = await fetch('/api/auth/signin', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ idToken })
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        alert('Login successful! Welcome back.');
+                        // Clear form
+                        document.getElementById('login-email').value = '';
+                        document.getElementById('login-password').value = '';
+                    } else {
+                        alert(data.error || 'Login failed. Please try again.');
+                    }
+                } else {
+                    // Fallback for demo mode when Firebase is not configured
+                    alert('Demo mode: Login functionality requires Firebase configuration.');
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                let errorMessage = 'Login failed. Please check your credentials.';
+                
+                if (error.code === 'auth/user-not-found') {
+                    errorMessage = 'No account found with this email address.';
+                } else if (error.code === 'auth/wrong-password') {
+                    errorMessage = 'Incorrect password.';
+                } else if (error.code === 'auth/invalid-email') {
+                    errorMessage = 'Invalid email address.';
+                } else if (error.code === 'auth/too-many-requests') {
+                    errorMessage = 'Too many failed attempts. Please try again later.';
+                }
+                
+                alert(errorMessage);
+            } finally {
+                loginBtn.disabled = false;
+                loginBtn.textContent = 'Sign In';
+            }
         }
         
-        function handleSignup() {
+        async function handleSignup() {
             const name = document.getElementById('signup-name').value;
             const email = document.getElementById('signup-email').value;
             const password = document.getElementById('signup-password').value;
@@ -3103,22 +3180,129 @@
                 return;
             }
             
-            // Mock signup functionality
-            alert(`Signup attempt for ${name} (${email}) - this is a demo`);
-            // In a real app, this would make an API call
-        }
-        
-        function handleForgotPassword() {
-            const email = prompt('Enter your email address to reset password:');
-            if (email) {
-                alert(`Password reset email sent to ${email} (this is a demo)`);
-                // In a real app, this would make an API call
+            if (password.length < 6) {
+                alert('Password must be at least 6 characters long.');
+                return;
+            }
+            
+            const signupBtn = document.querySelector('#signup-form .auth-primary-btn');
+            signupBtn.disabled = true;
+            signupBtn.textContent = 'Creating Account...';
+            
+            try {
+                // Make API call to create account
+                const response = await fetch('/api/auth/signup', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ 
+                        email: email, 
+                        password: password,
+                        displayName: name
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    alert('Account created successfully! You can now sign in.');
+                    // Clear form
+                    document.getElementById('signup-name').value = '';
+                    document.getElementById('signup-email').value = '';
+                    document.getElementById('signup-password').value = '';
+                    document.getElementById('signup-confirm').value = '';
+                    
+                    // Switch to login tab
+                    switchAuthTab('login');
+                } else {
+                    alert(data.error || 'Failed to create account. Please try again.');
+                }
+            } catch (error) {
+                console.error('Signup error:', error);
+                // Fallback message for demo mode when API is not available
+                if (error.message.includes('fetch')) {
+                    alert('Demo mode: Account creation requires backend API configuration.');
+                } else {
+                    alert('Failed to create account. Please check your connection and try again.');
+                }
+            } finally {
+                signupBtn.disabled = false;
+                signupBtn.textContent = 'Create Account';
             }
         }
         
-        function handleGoogleAuth() {
-            alert('Google authentication would be handled here (this is a demo)');
-            // In a real app, this would use Google OAuth
+        async function handleForgotPassword() {
+            const email = prompt('Enter your email address to reset password:');
+            if (!email) {
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/auth/reset-password', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ email: email })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    alert('Password reset email sent successfully. Please check your inbox.');
+                } else {
+                    alert(data.error || 'Failed to send password reset email. Please try again.');
+                }
+            } catch (error) {
+                console.error('Password reset error:', error);
+                // Fallback message for demo mode when API is not available
+                if (error.message.includes('fetch')) {
+                    alert('Demo mode: Password reset requires backend API configuration.');
+                } else {
+                    alert('Failed to send password reset email. Please check your connection and try again.');
+                }
+            }
+        }
+        
+        async function handleGoogleAuth() {
+            try {
+                if (auth) {
+                    // Use Firebase Google authentication
+                    const provider = new firebase.auth.GoogleAuthProvider();
+                    const result = await auth.signInWithPopup(provider);
+                    
+                    const idToken = await result.user.getIdToken();
+                    
+                    // Verify with backend
+                    const response = await fetch('/api/auth/signin', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ idToken })
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        alert('Google sign-in successful! Welcome.');
+                    } else {
+                        alert(data.error || 'Google sign-in failed. Please try again.');
+                    }
+                } else {
+                    alert('Demo mode: Google authentication requires Firebase configuration.');
+                }
+            } catch (error) {
+                console.error('Google auth error:', error);
+                if (error.code === 'auth/popup-blocked') {
+                    alert('Popup blocked. Please allow popups for Google authentication.');
+                } else if (error.code === 'auth/popup-closed-by-user') {
+                    // User closed the popup, no need to show error
+                } else {
+                    alert('Google authentication failed. Please try again.');
+                }
+            }
         }
 
         window.showSection = showSection;
