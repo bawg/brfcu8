@@ -571,7 +571,7 @@
             color: white;
             padding: 16px 20px;
             display: grid;
-            grid-template-columns: 2fr 2fr 1fr 1fr 1fr 2fr; /* 6 columns, adjust widths as needed */
+            grid-template-columns: 2fr 2fr 1fr 1fr 1fr 2fr 1fr; /* 7 columns, added Actions column */
             gap: 20px;
             font-weight: 600;
             font-size: 14px;
@@ -580,7 +580,7 @@
         .table-row {
             padding: 16px 20px;
             display: grid;
-            grid-template-columns: 2fr 2fr 1fr 1fr 1fr 2fr; /* 6 columns, match header */
+            grid-template-columns: 2fr 2fr 1fr 1fr 1fr 2fr 1fr; /* 7 columns, match header */
             gap: 20px;
             border-bottom: 1px solid #f1f5f9;
             align-items: center;
@@ -1115,6 +1115,10 @@
             transition: all 0.2s ease;
         }
 
+        .action-btn.edit-btn {
+            background: #10b981;
+        }
+
         .action-btn.edit-btn:hover {
             background: #059669;
         }
@@ -1529,6 +1533,7 @@
                         <div>Time</div>
                         <div>Type</div>
                         <div>Availability</div>
+                        <div>Actions</div>
                     </div>
                     <div id="events-table-body"></div>
                 </div>
@@ -1712,6 +1717,53 @@
             <div class="modal-actions">
                 <button class="modal-btn cancel" onclick="closeEditDrillModal()">Cancel</button>
                 <button class="modal-btn primary" onclick="saveEditedDrill()">Save Changes</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Calendar Event Modal -->
+    <div id="editEventModal" class="confirmation-modal">
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="modal-header">
+                <span>✏️</span>
+                <h3>Edit Calendar Event</h3>
+            </div>
+            <div class="modal-body">
+                <div class="form-grid">
+                    <div class="form-field">
+                        <label class="form-label" for="edit-event-name">Event Name</label>
+                        <input class="form-input" id="edit-event-name" type="text" required>
+                    </div>
+                    <div class="form-field">
+                        <label class="form-label" for="edit-event-location">Location</label>
+                        <input class="form-input" id="edit-event-location" type="text" required>
+                    </div>
+                    <div class="form-field">
+                        <label class="form-label" for="edit-event-date">Date</label>
+                        <input class="form-input" id="edit-event-date" type="date" required>
+                    </div>
+                    <div class="form-field">
+                        <label class="form-label" for="edit-event-time">Time</label>
+                        <input class="form-input" id="edit-event-time" type="text" placeholder="e.g., 6:00 PM - 8:00 PM" required>
+                    </div>
+                    <div class="form-field">
+                        <label class="form-label" for="edit-event-type">Type</label>
+                        <select class="form-input" id="edit-event-type" required>
+                            <option value="">Select type</option>
+                            <option value="practice">Practice</option>
+                            <option value="match">Match</option>
+                            <option value="festival">Festival</option>
+                        </select>
+                    </div>
+                    <div class="form-field full-width">
+                        <label class="form-label" for="edit-event-details">Details</label>
+                        <textarea class="form-input" id="edit-event-details" rows="3"></textarea>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button class="modal-btn cancel" onclick="closeEditEventModal()">Cancel</button>
+                <button class="modal-btn primary" onclick="saveEditedEvent()">Save Changes</button>
             </div>
         </div>
     </div>
@@ -1912,6 +1964,11 @@
                     .map(([user]) => user.charAt(0).toUpperCase() + user.slice(1));
                 const availabilityCell = attending.length ? attending.join(', ') : '<span style="color:#64748b;">No one attending</span>';
 
+                // Find the actual index in calendarEvents array
+                const actualEventIndex = calendarEvents.findIndex(event => 
+                    event.name === ev.name && event.date === ev.date && event.time === ev.time
+                );
+
                 const row = document.createElement('div');
                 row.className = 'table-row';
                 row.innerHTML = `
@@ -1923,6 +1980,9 @@
                     <div>${ev.time}</div>
                     <div><span class="event-type-badge ${ev.type}">${ev.type.charAt(0).toUpperCase() + ev.type.slice(1)}</span></div>
                     <div>${availabilityCell}</div>
+                    <div>
+                        <button class="action-btn edit-btn" onclick="editCalendarEvent(${actualEventIndex})">Edit</button>
+                    </div>
                 `;
                 tableBody.appendChild(row);
             });
@@ -2170,6 +2230,7 @@
         // Variables for confirmation modal
         let confirmationAction = null;
         let currentEditingDrillId = null;
+        let currentEditingEventIndex = null;
 
         // Drill management functions
         function downloadAllDrills() {
@@ -2686,6 +2747,64 @@
         function closeEditDrillModal() {
             document.getElementById('editDrillModal').classList.remove('show');
             currentEditingDrillId = null;
+        }
+
+        // Calendar Event editing functions
+        function editCalendarEvent(eventIndex) {
+            currentEditingEventIndex = eventIndex;
+            const event = calendarEvents[eventIndex];
+            
+            if (!event) {
+                alert('Event not found.');
+                return;
+            }
+            
+            // Populate form fields
+            document.getElementById('edit-event-name').value = event.name;
+            document.getElementById('edit-event-location').value = event.location || '';
+            document.getElementById('edit-event-date').value = event.date;
+            document.getElementById('edit-event-time').value = event.time;
+            document.getElementById('edit-event-type').value = event.type;
+            document.getElementById('edit-event-details').value = event.details || '';
+            
+            showEditEventModal();
+        }
+
+        function saveEditedEvent() {
+            const name = document.getElementById('edit-event-name').value;
+            const location = document.getElementById('edit-event-location').value;
+            const date = document.getElementById('edit-event-date').value;
+            const time = document.getElementById('edit-event-time').value;
+            const type = document.getElementById('edit-event-type').value;
+            const details = document.getElementById('edit-event-details').value;
+            
+            if (!name || !date || !time || !type) {
+                alert('Please fill in all required fields.');
+                return;
+            }
+            
+            // Update the event
+            const event = calendarEvents[currentEditingEventIndex];
+            event.name = name;
+            event.location = location;
+            event.date = date;
+            event.time = time;
+            event.type = type;
+            event.details = details;
+            
+            // Re-render both table and calendar
+            renderEventsTable();
+            renderCalendar();
+            closeEditEventModal();
+        }
+
+        function showEditEventModal() {
+            document.getElementById('editEventModal').classList.add('show');
+        }
+
+        function closeEditEventModal() {
+            document.getElementById('editEventModal').classList.remove('show');
+            currentEditingEventIndex = null;
         }
 
         // Pinch-to-zoom functionality for events table
