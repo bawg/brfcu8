@@ -38,11 +38,13 @@ export default async function handler(req, res) {
                                  process.env.NEXT_PUBLIC_FIREBASE_API_KEY ||
                                  process.env.VITE_FIREBASE_API_KEY;
     
+    console.log('Signup process - Firebase Web API Key:', FIREBASE_WEB_API_KEY ? 'Available' : 'Not available');
+    
     let userRecord;
     
     if (FIREBASE_WEB_API_KEY) {
       // Use Firebase REST API for consistent password handling with signin
-      console.log('Creating user via Firebase REST API for compatibility with signin');
+      console.log('Creating user via Firebase REST API for password compatibility with signin');
       const signupResponse = await fetch(`https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=${FIREBASE_WEB_API_KEY}`, {
         method: 'POST',
         headers: {
@@ -57,10 +59,12 @@ export default async function handler(req, res) {
       });
       
       const signupData = await signupResponse.json();
+      console.log('Firebase REST API signup response status:', signupResponse.status);
       
       if (!signupResponse.ok) {
         let errorMessage = 'Failed to create account';
         if (signupData.error) {
+          console.log('Signup error details:', signupData.error);
           if (signupData.error.message.includes('EMAIL_EXISTS')) {
             errorMessage = 'An account with this email already exists';
           } else if (signupData.error.message.includes('INVALID_EMAIL')) {
@@ -72,24 +76,32 @@ export default async function handler(req, res) {
         return res.status(400).json({ error: errorMessage });
       }
       
+      console.log('User created successfully via REST API:', signupData.localId);
+      
       // Get the user record from Firebase Admin for consistent response format
       userRecord = await auth.getUser(signupData.localId);
       
       // If displayName was provided, update it (REST API doesn't always set it correctly)
       if (displayName && !userRecord.displayName) {
+        console.log('Updating display name via Admin SDK');
         userRecord = await auth.updateUser(signupData.localId, {
           displayName: displayName
         });
       }
     } else {
       // Fallback to Firebase Admin SDK (demo mode)
-      console.log('Creating user via Firebase Admin SDK (demo mode)');
+      console.warn('Firebase Web API Key not found. Creating user via Firebase Admin SDK (demo mode)');
+      console.warn('WARNING: Users created via Admin SDK may have password compatibility issues with REST API signin');
+      console.warn('For production use, ensure Firebase Web API Key is properly configured');
+      
       userRecord = await auth.createUser({
         email: email,
         password: password,
         displayName: displayName || null,
         emailVerified: false,
       });
+      
+      console.log('User created via Admin SDK:', userRecord.uid);
     }
 
     res.status(201).json({ 

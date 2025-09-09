@@ -30,12 +30,12 @@ export default async function handler(req, res) {
     
     if (idToken) {
       // Firebase client-side authentication flow (production mode)
+      console.log('Using idToken-based authentication (production mode)');
       const decodedToken = await auth.verifyIdToken(idToken);
       userRecord = await auth.getUser(decodedToken.uid);
     } else {
       // Direct email/password authentication for demo mode
-      // Since Firebase Admin SDK doesn't support password verification,
-      // we'll use the Firebase REST API for authentication
+      console.log('Attempting email/password authentication for:', email);
       
       const FIREBASE_PROJECT_ID = process.env.FIREBASE_PROJECT_ID;
       // Try multiple possible environment variable names for the Firebase Web API key
@@ -44,26 +44,71 @@ export default async function handler(req, res) {
                                    process.env.NEXT_PUBLIC_FIREBASE_API_KEY ||
                                    process.env.VITE_FIREBASE_API_KEY;
       
-      if (!FIREBASE_WEB_API_KEY && !FIREBASE_PROJECT_ID) {
-        console.error('Firebase Web API Key and Project ID not found. Authentication cannot proceed.');
+      console.log('Firebase configuration check:', {
+        projectId: FIREBASE_PROJECT_ID ? 'Found' : 'Missing',
+        webApiKey: FIREBASE_WEB_API_KEY ? 'Found' : 'Missing'
+      });
+
+      if (!FIREBASE_PROJECT_ID) {
+        console.error('Firebase Project ID not found');
         return res.status(500).json({ 
           error: 'Authentication service configuration incomplete. Please contact administrator.',
-          details: 'Missing Firebase configuration'
+          details: 'Missing Firebase Project ID'
         });
       }
 
-      if (!FIREBASE_WEB_API_KEY) {
-        console.error('Firebase Web API Key not found. Tried: FIREBASE_WEB_API_KEY, FIREBASE_API_KEY, NEXT_PUBLIC_FIREBASE_API_KEY, VITE_FIREBASE_API_KEY');
+      if (FIREBASE_WEB_API_KEY) {
+        // Use Firebase REST API to verify email/password - this is the proper way
+        console.log('Using Firebase REST API for password verification');
+        const authResponse = await fetch(`https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${FIREBASE_WEB_API_KEY}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            email: email,
+            password: password,
+            returnSecureToken: true
+          })
+        });
         
-        // For demo mode without Web API key, we can only check if user exists
-        // but cannot verify password. This is a limitation of demo mode.
+        const authData = await authResponse.json();
+        console.log('Firebase REST API response status:', authResponse.status);
+        
+        if (!authResponse.ok) {
+          let errorMessage = 'Invalid email or password';
+          if (authData.error) {
+            console.log('Firebase authentication error:', authData.error.message);
+            if (authData.error.message.includes('EMAIL_NOT_FOUND')) {
+              errorMessage = 'No account found with this email address';
+            } else if (authData.error.message.includes('INVALID_PASSWORD')) {
+              // This is a legitimate password failure - do not bypass it
+              errorMessage = 'Invalid password';
+            } else if (authData.error.message.includes('USER_DISABLED')) {
+              errorMessage = 'This account has been disabled';
+            } else if (authData.error.message.includes('TOO_MANY_ATTEMPTS_TRY_LATER')) {
+              errorMessage = 'Too many failed attempts. Please try again later';
+            }
+          }
+          return res.status(401).json({ error: errorMessage });
+        }
+        
+        // Authentication successful via REST API
+        console.log('Password authentication successful via REST API');
+        userRecord = await auth.getUser(authData.localId);
+      } else {
+        // No Web API key available - this is a configuration issue for production use
+        // In true demo mode, we can only check user existence but cannot verify passwords
+        console.warn('Firebase Web API Key not found. Cannot perform secure password authentication.');
+        console.warn('This is only acceptable for demo purposes - NOT for production use.');
+        
         try {
-          const userRecord = await auth.getUserByEmail(email);
+          // At minimum, verify the user exists
+          userRecord = await auth.getUserByEmail(email);
           if (userRecord) {
-            // In demo mode, we'll trust that if the user exists and they're trying to login,
-            // we'll allow it (since we can't verify password without the Web API key)
-            // THIS IS FOR DEMO PURPOSES ONLY - NOT SECURE FOR PRODUCTION
-            console.warn('DEMO MODE: Password verification skipped due to missing Web API key');
+            console.warn(`DEMO MODE: User ${userRecord.email} exists. Password verification SKIPPED due to missing Web API key.`);
+            console.warn('WARNING: This authentication is not secure and should not be used in production.');
+            
             return res.status(200).json({ 
               success: true,
               user: {
@@ -73,79 +118,20 @@ export default async function handler(req, res) {
                 photoURL: userRecord.photoURL,
                 emailVerified: userRecord.emailVerified
               },
-              warning: 'Demo mode: Password verification bypassed'
+              warning: 'DEMO MODE: Password verification bypassed due to missing Firebase Web API key. This is not secure.'
             });
           }
         } catch (userError) {
+          console.error('User lookup error:', userError);
           if (userError.code === 'auth/user-not-found') {
             return res.status(404).json({ error: 'No account found with this email address' });
           }
-          throw userError;
+          return res.status(500).json({ error: 'Authentication service error. Please try again.' });
         }
       }
-      
-      // Use Firebase REST API to verify email/password
-      console.log('Attempting REST API authentication for:', email);
-      const authResponse = await fetch(`https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${FIREBASE_WEB_API_KEY}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email: email,
-          password: password,
-          returnSecureToken: true
-        })
-      });
-      
-      const authData = await authResponse.json();
-      console.log('Firebase REST API response status:', authResponse.status);
-      console.log('Firebase REST API response:', authData);
-      
-      if (!authResponse.ok) {
-        let errorMessage = 'Invalid email or password';
-        if (authData.error) {
-          console.log('Firebase error details:', authData.error);
-          if (authData.error.message.includes('EMAIL_NOT_FOUND')) {
-            errorMessage = 'No account found with this email address';
-          } else if (authData.error.message.includes('INVALID_PASSWORD')) {
-            // Check if user exists in Firebase but password doesn't work
-            // This might happen if user was created via Admin SDK
-            try {
-              const userRecord = await auth.getUserByEmail(email);
-              if (userRecord) {
-                console.warn('User exists but password authentication failed via REST API. This can happen when user was created via Admin SDK.');
-                // For demo mode compatibility, allow signin if user exists
-                // since Admin SDK created users might not work with REST API authentication
-                return res.status(200).json({ 
-                  success: true,
-                  user: {
-                    uid: userRecord.uid,
-                    email: userRecord.email,
-                    displayName: userRecord.displayName,
-                    photoURL: userRecord.photoURL,
-                    emailVerified: userRecord.emailVerified
-                  },
-                  warning: 'Demo mode: Password verification bypassed due to Admin SDK compatibility'
-                });
-              }
-            } catch (userCheckError) {
-              console.log('User lookup error:', userCheckError);
-            }
-            errorMessage = 'Invalid password';
-          } else if (authData.error.message.includes('USER_DISABLED')) {
-            errorMessage = 'This account has been disabled';
-          } else if (authData.error.message.includes('TOO_MANY_ATTEMPTS_TRY_LATER')) {
-            errorMessage = 'Too many failed attempts. Please try again later';
-          }
-        }
-        return res.status(401).json({ error: errorMessage });
-      }
-      
-      // Get user record from Firebase Admin
-      userRecord = await auth.getUser(authData.localId);
     }
 
+    // Return successful authentication result
     res.status(200).json({ 
       success: true,
       user: {
