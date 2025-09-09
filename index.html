@@ -4,6 +4,40 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Barnes Rugby - Coaching Management Platform</title>
+    
+    <!-- Firebase SDK - Using the correct modular SDK for v9+ -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js';
+        import { getAuth, signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js';
+        
+        // Make Firebase available globally for backward compatibility
+        window.firebaseAuth = { 
+            initializeApp, 
+            getAuth, 
+            signInWithEmailAndPassword, 
+            signInWithPopup, 
+            GoogleAuthProvider 
+        };
+    </script>
+    <script>
+        // Firebase configuration (these would typically be environment variables)
+        const firebaseConfig = {
+            // Add your Firebase config here
+            // For demo purposes, we'll handle this gracefully if not configured
+        };
+        
+        // Initialize Firebase if config is provided
+        let auth = null;
+        let firebaseApp = null;
+        try {
+            if (window.firebaseAuth && firebaseConfig.apiKey) {
+                firebaseApp = window.firebaseAuth.initializeApp(firebaseConfig);
+                auth = window.firebaseAuth.getAuth(firebaseApp);
+            }
+        } catch (error) {
+            console.log('Firebase not configured for demo mode:', error.message);
+        }
+    </script>
 
     <style>
         * {
@@ -1240,6 +1274,129 @@
         .modal-btn.primary:hover {
             background: #1e40af;
         }
+
+        /* Auth Tab Styles */
+        .auth-tabs {
+            display: flex;
+            margin-bottom: 24px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .auth-tab {
+            flex: 1;
+            padding: 12px 16px;
+            border: none;
+            background: transparent;
+            color: #64748b;
+            font-weight: 500;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s ease;
+        }
+
+        .auth-tab.active {
+            color: #1e3a8a;
+            border-bottom-color: #1e3a8a;
+        }
+
+        .auth-tab:hover {
+            color: #1e3a8a;
+        }
+
+        /* Form Styles */
+        .auth-form {
+            display: none;
+            margin-bottom: 24px;
+        }
+
+        .auth-form.active {
+            display: block;
+        }
+
+        .auth-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid #cbd5e0;
+            border-radius: 6px;
+            font-size: 16px;
+            margin-bottom: 16px;
+            transition: border-color 0.2s ease;
+        }
+
+        .auth-input:focus {
+            outline: none;
+            border-color: #1e3a8a;
+            box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.1);
+        }
+
+        .auth-primary-btn {
+            width: 100%;
+            background: #1e3a8a;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin-bottom: 16px;
+        }
+
+        .auth-primary-btn:hover {
+            background: #3730a3;
+        }
+
+        .auth-primary-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .forgot-password-link {
+            background: none;
+            border: none;
+            color: #1e3a8a;
+            cursor: pointer;
+            font-size: 14px;
+            text-decoration: underline;
+        }
+
+        .auth-divider {
+            text-align: center;
+            margin: 24px 0;
+            position: relative;
+            color: #64748b;
+            font-size: 14px;
+        }
+
+        .auth-divider::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: #e2e8f0;
+            z-index: 0;
+        }
+
+        .auth-divider span {
+            background: white;
+            padding: 0 16px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Auth Container Styles */
+        .auth-container {
+            background: white;
+            border-radius: 12px;
+            padding: 32px;
+            box-shadow: 0 4px 6px -1px rgba(30, 58, 138, 0.1), 0 2px 4px -1px rgba(30, 58, 138, 0.06);
+            border: 1px solid #e2e8f0;
+            max-width: 400px;
+            margin: 0 auto;
+        }
     </style>
 </head>
 <body>
@@ -1254,6 +1411,7 @@
             <button class="mockup-btn active" onclick="showSection('calendar')">Practice Calendar</button>
             <button class="mockup-btn" onclick="showSection('overview')">System</button>
             <button class="mockup-btn" onclick="showSection('design-drill')">Design Drill</button>
+            <button class="mockup-btn" onclick="showSection('auth')">Authentication</button>
         </nav>
         
         <!-- Drills Section -->
@@ -1572,6 +1730,51 @@
             <a href="try.html">
                 <button class="btn-primary">Go to Drill Designer</button>
             </a>
+        </section>
+        
+        <!-- Authentication Section -->
+        <section id="auth" class="mockup-section">
+            <div class="section-header">
+                <h2 class="section-title">🔐 Authentication</h2>
+            </div>
+            
+            <div class="auth-container">
+                <div class="auth-tabs">
+                    <button class="auth-tab active" onclick="switchAuthTab('login')">Login</button>
+                    <button class="auth-tab" onclick="switchAuthTab('signup')">Sign Up</button>
+                </div>
+                
+                <div id="login-form" class="auth-form active">
+                    <input type="email" class="auth-input" placeholder="Email address" id="login-email">
+                    <input type="password" class="auth-input" placeholder="Password" id="login-password">
+                    <button class="auth-primary-btn" onclick="handleLogin()">Sign In</button>
+                    <button class="forgot-password-link" onclick="handleForgotPassword()">Forgot your password?</button>
+                    
+                    <div class="auth-divider">
+                        <span>or continue with</span>
+                    </div>
+                    
+                    <button class="btn-secondary" onclick="handleGoogleAuth()" style="width: 100%; margin-right: 0;">
+                        Sign in with Google
+                    </button>
+                </div>
+                
+                <div id="signup-form" class="auth-form">
+                    <input type="text" class="auth-input" placeholder="Full name" id="signup-name">
+                    <input type="email" class="auth-input" placeholder="Email address" id="signup-email">
+                    <input type="password" class="auth-input" placeholder="Password" id="signup-password">
+                    <input type="password" class="auth-input" placeholder="Confirm password" id="signup-confirm">
+                    <button class="auth-primary-btn" onclick="handleSignup()">Create Account</button>
+                    
+                    <div class="auth-divider">
+                        <span>or continue with</span>
+                    </div>
+                    
+                    <button class="btn-secondary" onclick="handleGoogleAuth()" style="width: 100%; margin-right: 0;">
+                        Sign up with Google
+                    </button>
+                </div>
+            </div>
         </section>
         
         <!-- Overview Section -->
@@ -2999,6 +3202,253 @@
 
             // Apply initial zoom
             applyZoom(tableZoomLevel);
+        }
+        
+        // Auth functions
+        function switchAuthTab(tabName) {
+            // Update tab buttons
+            document.querySelectorAll('.auth-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Find and activate the correct tab
+            document.querySelectorAll('.auth-tab').forEach(tab => {
+                if (tab.textContent.toLowerCase().includes(tabName)) {
+                    tab.classList.add('active');
+                }
+            });
+            
+            // Update form visibility
+            document.querySelectorAll('.auth-form').forEach(form => {
+                form.classList.remove('active');
+            });
+            document.getElementById(tabName + '-form').classList.add('active');
+        }
+        
+        async function handleLogin() {
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+            
+            if (!email || !password) {
+                alert('Please fill in all fields.');
+                return;
+            }
+            
+            const loginBtn = document.querySelector('#login-form .auth-primary-btn');
+            loginBtn.disabled = true;
+            loginBtn.textContent = 'Signing In...';
+            
+            try {
+                if (auth && window.firebaseAuth) {
+                    // Use Firebase client-side authentication (production mode)
+                    const userCredential = await window.firebaseAuth.signInWithEmailAndPassword(auth, email, password);
+                    const idToken = await userCredential.user.getIdToken();
+                    
+                    // Verify with backend
+                    const response = await fetch('/api/auth/signin', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ idToken })
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        alert('Login successful! Welcome back.');
+                        // Clear form
+                        document.getElementById('login-email').value = '';
+                        document.getElementById('login-password').value = '';
+                    } else {
+                        alert(data.error || 'Login failed. Please try again.');
+                    }
+                } else {
+                    // Demo mode: Use direct API call (like signup does)
+                    const response = await fetch('/api/auth/signin', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ 
+                            email: email, 
+                            password: password 
+                        })
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        alert('Login successful! Welcome back.');
+                        // Clear form
+                        document.getElementById('login-email').value = '';
+                        document.getElementById('login-password').value = '';
+                    } else {
+                        alert(data.error || 'Login failed. Please check your credentials.');
+                    }
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                let errorMessage = 'Login failed. Please check your credentials.';
+                
+                if (error.code === 'auth/user-not-found') {
+                    errorMessage = 'No account found with this email address.';
+                } else if (error.code === 'auth/wrong-password') {
+                    errorMessage = 'Incorrect password.';
+                } else if (error.code === 'auth/invalid-email') {
+                    errorMessage = 'Invalid email address.';
+                } else if (error.code === 'auth/too-many-requests') {
+                    errorMessage = 'Too many failed attempts. Please try again later.';
+                } else if (error.message && error.message.includes('fetch')) {
+                    errorMessage = 'Connection error. Please check your network and try again.';
+                }
+                
+                alert(errorMessage);
+            } finally {
+                loginBtn.disabled = false;
+                loginBtn.textContent = 'Sign In';
+            }
+        }
+        
+        async function handleSignup() {
+            const name = document.getElementById('signup-name').value;
+            const email = document.getElementById('signup-email').value;
+            const password = document.getElementById('signup-password').value;
+            const confirm = document.getElementById('signup-confirm').value;
+            
+            if (!name || !email || !password || !confirm) {
+                alert('Please fill in all fields.');
+                return;
+            }
+            
+            if (password !== confirm) {
+                alert('Passwords do not match.');
+                return;
+            }
+            
+            if (password.length < 6) {
+                alert('Password must be at least 6 characters long.');
+                return;
+            }
+            
+            const signupBtn = document.querySelector('#signup-form .auth-primary-btn');
+            signupBtn.disabled = true;
+            signupBtn.textContent = 'Creating Account...';
+            
+            try {
+                // Make API call to create account
+                const response = await fetch('/api/auth/signup', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ 
+                        email: email, 
+                        password: password,
+                        displayName: name
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    alert('Account created successfully! You can now sign in.');
+                    // Clear form
+                    document.getElementById('signup-name').value = '';
+                    document.getElementById('signup-email').value = '';
+                    document.getElementById('signup-password').value = '';
+                    document.getElementById('signup-confirm').value = '';
+                    
+                    // Switch to login tab
+                    switchAuthTab('login');
+                } else {
+                    alert(data.error || 'Failed to create account. Please try again.');
+                }
+            } catch (error) {
+                console.error('Signup error:', error);
+                // Fallback message for demo mode when API is not available
+                if (error.message.includes('fetch')) {
+                    alert('Demo mode: Account creation requires backend API configuration.');
+                } else {
+                    alert('Failed to create account. Please check your connection and try again.');
+                }
+            } finally {
+                signupBtn.disabled = false;
+                signupBtn.textContent = 'Create Account';
+            }
+        }
+        
+        async function handleForgotPassword() {
+            const email = prompt('Enter your email address to reset password:');
+            if (!email) {
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/auth/reset-password', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ email: email })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    alert('Password reset email sent successfully. Please check your inbox.');
+                } else {
+                    alert(data.error || 'Failed to send password reset email. Please try again.');
+                }
+            } catch (error) {
+                console.error('Password reset error:', error);
+                // Fallback message for demo mode when API is not available
+                if (error.message.includes('fetch')) {
+                    alert('Demo mode: Password reset requires backend API configuration.');
+                } else {
+                    alert('Failed to send password reset email. Please check your connection and try again.');
+                }
+            }
+        }
+        
+        async function handleGoogleAuth() {
+            try {
+                if (auth && window.firebaseAuth) {
+                    // Use Firebase Google authentication
+                    const provider = new window.firebaseAuth.GoogleAuthProvider();
+                    const result = await window.firebaseAuth.signInWithPopup(auth, provider);
+                    
+                    const idToken = await result.user.getIdToken();
+                    
+                    // Verify with backend
+                    const response = await fetch('/api/auth/signin', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ idToken })
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        alert('Google sign-in successful! Welcome.');
+                    } else {
+                        alert(data.error || 'Google sign-in failed. Please try again.');
+                    }
+                } else {
+                    alert('Demo mode: Google authentication requires Firebase configuration.');
+                }
+            } catch (error) {
+                console.error('Google auth error:', error);
+                if (error.code === 'auth/popup-blocked') {
+                    alert('Popup blocked. Please allow popups for Google authentication.');
+                } else if (error.code === 'auth/popup-closed-by-user') {
+                    // User closed the popup, no need to show error
+                } else {
+                    alert('Google authentication failed. Please try again.');
+                }
+            }
         }
 
         // Issue Management Functions
