@@ -36,9 +36,21 @@ export default async function handler(req, res) {
     const FIREBASE_WEB_API_KEY = process.env.FIREBASE_WEB_API_KEY || 
                                  process.env.FIREBASE_API_KEY || 
                                  process.env.NEXT_PUBLIC_FIREBASE_API_KEY ||
-                                 process.env.VITE_FIREBASE_API_KEY;
+                                 process.env.VITE_FIREBASE_API_KEY ||
+                                 process.env.REACT_APP_FIREBASE_API_KEY ||
+                                 process.env.FIREBASE_CLIENT_API_KEY;
     
     console.log('Signup process - Firebase Web API Key:', FIREBASE_WEB_API_KEY ? 'Available' : 'Not available');
+    console.log('Signup process - Environment debug:');
+    console.log('- FIREBASE_WEB_API_KEY:', process.env.FIREBASE_WEB_API_KEY ? 'SET' : 'MISSING');
+    console.log('- FIREBASE_API_KEY:', process.env.FIREBASE_API_KEY ? 'SET' : 'MISSING');
+    console.log('- NEXT_PUBLIC_FIREBASE_API_KEY:', process.env.NEXT_PUBLIC_FIREBASE_API_KEY ? 'SET' : 'MISSING');
+    console.log('- VITE_FIREBASE_API_KEY:', process.env.VITE_FIREBASE_API_KEY ? 'SET' : 'MISSING');
+    console.log('- REACT_APP_FIREBASE_API_KEY:', process.env.REACT_APP_FIREBASE_API_KEY ? 'SET' : 'MISSING');
+    console.log('- FIREBASE_CLIENT_API_KEY:', process.env.FIREBASE_CLIENT_API_KEY ? 'SET' : 'MISSING');
+    console.log('- FIREBASE_PROJECT_ID:', process.env.FIREBASE_PROJECT_ID ? 'SET' : 'MISSING');
+    console.log('- FIREBASE_CLIENT_EMAIL:', process.env.FIREBASE_CLIENT_EMAIL ? 'SET' : 'MISSING');
+    console.log('- FIREBASE_PRIVATE_KEY:', process.env.FIREBASE_PRIVATE_KEY ? 'SET' : 'MISSING');
     
     let userRecord;
     

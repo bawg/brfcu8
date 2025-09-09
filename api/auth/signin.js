@@ -38,22 +38,29 @@ export default async function handler(req, res) {
       console.log('Attempting email/password authentication for:', email);
       
       const FIREBASE_PROJECT_ID = process.env.FIREBASE_PROJECT_ID;
+      const FIREBASE_CLIENT_EMAIL = process.env.FIREBASE_CLIENT_EMAIL;
+      const FIREBASE_PRIVATE_KEY = process.env.FIREBASE_PRIVATE_KEY;
+      
       // Try multiple possible environment variable names for the Firebase Web API key
       const FIREBASE_WEB_API_KEY = process.env.FIREBASE_WEB_API_KEY || 
                                    process.env.FIREBASE_API_KEY || 
                                    process.env.NEXT_PUBLIC_FIREBASE_API_KEY ||
-                                   process.env.VITE_FIREBASE_API_KEY;
+                                   process.env.VITE_FIREBASE_API_KEY ||
+                                   process.env.REACT_APP_FIREBASE_API_KEY ||
+                                   process.env.FIREBASE_CLIENT_API_KEY;
       
-      console.log('Firebase configuration check:', {
+      console.log('Firebase configuration detailed check:', {
         projectId: FIREBASE_PROJECT_ID ? 'Found' : 'Missing',
-        webApiKey: FIREBASE_WEB_API_KEY ? 'Found' : 'Missing'
+        clientEmail: FIREBASE_CLIENT_EMAIL ? 'Found' : 'Missing',
+        privateKey: FIREBASE_PRIVATE_KEY ? 'Found (length: ' + (FIREBASE_PRIVATE_KEY?.length || 0) + ')' : 'Missing',
+        webApiKey: FIREBASE_WEB_API_KEY ? 'Found (starts with: ' + FIREBASE_WEB_API_KEY.substring(0, 10) + '...)' : 'Missing'
       });
 
-      if (!FIREBASE_PROJECT_ID) {
-        console.error('Firebase Project ID not found');
+      if (!FIREBASE_PROJECT_ID || !FIREBASE_CLIENT_EMAIL || !FIREBASE_PRIVATE_KEY) {
+        console.error('Firebase Admin SDK configuration incomplete');
         return res.status(500).json({ 
           error: 'Authentication service configuration incomplete. Please contact administrator.',
-          details: 'Missing Firebase Project ID'
+          details: 'Missing Firebase Admin SDK credentials (Project ID, Client Email, or Private Key)'
         });
       }
 
@@ -99,7 +106,16 @@ export default async function handler(req, res) {
       } else {
         // No Web API key available - cannot perform secure password authentication
         console.error('Firebase Web API Key not found. Cannot perform password verification.');
-        console.error('Password authentication requires Firebase Web API Key to be configured.');
+        console.error('Available environment variables (debug):');
+        console.error('- FIREBASE_WEB_API_KEY:', process.env.FIREBASE_WEB_API_KEY ? 'SET' : 'MISSING');
+        console.error('- FIREBASE_API_KEY:', process.env.FIREBASE_API_KEY ? 'SET' : 'MISSING');
+        console.error('- NEXT_PUBLIC_FIREBASE_API_KEY:', process.env.NEXT_PUBLIC_FIREBASE_API_KEY ? 'SET' : 'MISSING');
+        console.error('- VITE_FIREBASE_API_KEY:', process.env.VITE_FIREBASE_API_KEY ? 'SET' : 'MISSING');
+        console.error('- REACT_APP_FIREBASE_API_KEY:', process.env.REACT_APP_FIREBASE_API_KEY ? 'SET' : 'MISSING');
+        console.error('- FIREBASE_CLIENT_API_KEY:', process.env.FIREBASE_CLIENT_API_KEY ? 'SET' : 'MISSING');
+        console.error('Total env vars:', Object.keys(process.env).length);
+        console.error('Firebase-related env vars:', Object.keys(process.env).filter(key => key.includes('FIREBASE')));
+        console.error('All env var names containing API or KEY:', Object.keys(process.env).filter(key => key.includes('API') || key.includes('KEY')));
         
         return res.status(500).json({ 
           error: 'Authentication service configuration incomplete. Password verification requires Firebase Web API key.',
