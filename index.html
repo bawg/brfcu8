@@ -5,9 +5,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Barnes Rugby - Coaching Management Platform</title>
     
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth.js"></script>
+    <!-- Firebase SDK - Using the correct modular SDK for v9+ -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js';
+        import { getAuth, signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js';
+        
+        // Make Firebase available globally for backward compatibility
+        window.firebaseAuth = { 
+            initializeApp, 
+            getAuth, 
+            signInWithEmailAndPassword, 
+            signInWithPopup, 
+            GoogleAuthProvider 
+        };
+    </script>
     <script>
         // Firebase configuration (these would typically be environment variables)
         const firebaseConfig = {
@@ -17,13 +28,14 @@
         
         // Initialize Firebase if config is provided
         let auth = null;
+        let firebaseApp = null;
         try {
-            if (typeof firebase !== 'undefined' && firebaseConfig.apiKey) {
-                firebase.initializeApp(firebaseConfig);
-                auth = firebase.auth();
+            if (window.firebaseAuth && firebaseConfig.apiKey) {
+                firebaseApp = window.firebaseAuth.initializeApp(firebaseConfig);
+                auth = window.firebaseAuth.getAuth(firebaseApp);
             }
         } catch (error) {
-            console.log('Firebase not configured for demo mode');
+            console.log('Firebase not configured for demo mode:', error.message);
         }
     </script>
 
@@ -3115,9 +3127,9 @@
             loginBtn.textContent = 'Signing In...';
             
             try {
-                if (auth) {
+                if (auth && window.firebaseAuth) {
                     // Use Firebase client-side authentication (production mode)
-                    const userCredential = await auth.signInWithEmailAndPassword(email, password);
+                    const userCredential = await window.firebaseAuth.signInWithEmailAndPassword(auth, email, password);
                     const idToken = await userCredential.user.getIdToken();
                     
                     // Verify with backend
@@ -3289,10 +3301,10 @@
         
         async function handleGoogleAuth() {
             try {
-                if (auth) {
+                if (auth && window.firebaseAuth) {
                     // Use Firebase Google authentication
-                    const provider = new firebase.auth.GoogleAuthProvider();
-                    const result = await auth.signInWithPopup(provider);
+                    const provider = new window.firebaseAuth.GoogleAuthProvider();
+                    const result = await window.firebaseAuth.signInWithPopup(auth, provider);
                     
                     const idToken = await result.user.getIdToken();
                     

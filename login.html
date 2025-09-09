@@ -5,28 +5,50 @@
   <h2>Login Required</h2>
   <button onclick="signIn()">Login with Google</button>
 
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js"></script>
-  <script>
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js';
+    import { getAuth, signInWithPopup, GoogleAuthProvider } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js';
+    
     const firebaseConfig = {
       apiKey: "YOUR_API_KEY",
       authDomain: "YOUR_PROJECT_ID.firebaseapp.com"
     };
-    firebase.initializeApp(firebaseConfig);
+    
+    let app = null;
+    let auth = null;
+    
+    try {
+      if (firebaseConfig.apiKey && firebaseConfig.apiKey !== "YOUR_API_KEY") {
+        app = initializeApp(firebaseConfig);
+        auth = getAuth(app);
+      }
+    } catch (error) {
+      console.log('Firebase configuration incomplete:', error.message);
+    }
 
-    async function signIn() {
-      const provider = new firebase.auth.GoogleAuthProvider();
-      const result = await firebase.auth().signInWithPopup(provider);
-      const idToken = await result.user.getIdToken();
+    window.signIn = async function() {
+      try {
+        if (!auth) {
+          alert('Firebase authentication not configured. Please check your Firebase settings.');
+          return;
+        }
+        
+        const provider = new GoogleAuthProvider();
+        const result = await signInWithPopup(auth, provider);
+        const idToken = await result.user.getIdToken();
 
-      await fetch("https://us-central1-YOUR_PROJECT.cloudfunctions.net/auth/sessionLogin", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ idToken }),
-        credentials: "include"
-      });
+        await fetch("https://us-central1-YOUR_PROJECT.cloudfunctions.net/auth/sessionLogin", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ idToken }),
+          credentials: "include"
+        });
 
-      window.location.href = "/index.html";
+        window.location.href = "/index.html";
+      } catch (error) {
+        console.error('Login error:', error);
+        alert('Login failed: ' + error.message);
+      }
     }
   </script>
 </body>

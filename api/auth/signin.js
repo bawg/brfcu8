@@ -47,7 +47,9 @@ export default async function handler(req, res) {
                                    process.env.NEXT_PUBLIC_FIREBASE_API_KEY ||
                                    process.env.VITE_FIREBASE_API_KEY ||
                                    process.env.REACT_APP_FIREBASE_API_KEY ||
-                                   process.env.FIREBASE_CLIENT_API_KEY;
+                                   process.env.FIREBASE_CLIENT_API_KEY ||
+                                   process.env.VERCEL_FIREBASE_WEB_API_KEY ||
+                                   process.env.VERCEL_FIREBASE_API_KEY;
       
       console.log('Firebase configuration detailed check:', {
         projectId: FIREBASE_PROJECT_ID ? 'Found' : 'Missing',
@@ -55,6 +57,16 @@ export default async function handler(req, res) {
         privateKey: FIREBASE_PRIVATE_KEY ? 'Found (length: ' + (FIREBASE_PRIVATE_KEY?.length || 0) + ')' : 'Missing',
         webApiKey: FIREBASE_WEB_API_KEY ? 'Found (starts with: ' + FIREBASE_WEB_API_KEY.substring(0, 10) + '...)' : 'Missing'
       });
+      
+      console.log('Vercel deployment environment variables check:');
+      console.log('- FIREBASE_WEB_API_KEY:', process.env.FIREBASE_WEB_API_KEY ? 'SET' : 'MISSING');
+      console.log('- FIREBASE_API_KEY:', process.env.FIREBASE_API_KEY ? 'SET' : 'MISSING');
+      console.log('- NEXT_PUBLIC_FIREBASE_API_KEY:', process.env.NEXT_PUBLIC_FIREBASE_API_KEY ? 'SET' : 'MISSING');
+      console.log('- VITE_FIREBASE_API_KEY:', process.env.VITE_FIREBASE_API_KEY ? 'SET' : 'MISSING');
+      console.log('- REACT_APP_FIREBASE_API_KEY:', process.env.REACT_APP_FIREBASE_API_KEY ? 'SET' : 'MISSING');
+      console.log('- FIREBASE_CLIENT_API_KEY:', process.env.FIREBASE_CLIENT_API_KEY ? 'SET' : 'MISSING');
+      console.log('- VERCEL_FIREBASE_WEB_API_KEY:', process.env.VERCEL_FIREBASE_WEB_API_KEY ? 'SET' : 'MISSING');
+      console.log('- VERCEL_FIREBASE_API_KEY:', process.env.VERCEL_FIREBASE_API_KEY ? 'SET' : 'MISSING');
 
       if (!FIREBASE_PROJECT_ID || !FIREBASE_CLIENT_EMAIL || !FIREBASE_PRIVATE_KEY) {
         console.error('Firebase Admin SDK configuration incomplete');
@@ -113,13 +125,20 @@ export default async function handler(req, res) {
         console.error('- VITE_FIREBASE_API_KEY:', process.env.VITE_FIREBASE_API_KEY ? 'SET' : 'MISSING');
         console.error('- REACT_APP_FIREBASE_API_KEY:', process.env.REACT_APP_FIREBASE_API_KEY ? 'SET' : 'MISSING');
         console.error('- FIREBASE_CLIENT_API_KEY:', process.env.FIREBASE_CLIENT_API_KEY ? 'SET' : 'MISSING');
+        console.error('- VERCEL_FIREBASE_WEB_API_KEY:', process.env.VERCEL_FIREBASE_WEB_API_KEY ? 'SET' : 'MISSING');
+        console.error('- VERCEL_FIREBASE_API_KEY:', process.env.VERCEL_FIREBASE_API_KEY ? 'SET' : 'MISSING');
         console.error('Total env vars:', Object.keys(process.env).length);
         console.error('Firebase-related env vars:', Object.keys(process.env).filter(key => key.includes('FIREBASE')));
         console.error('All env var names containing API or KEY:', Object.keys(process.env).filter(key => key.includes('API') || key.includes('KEY')));
         
         return res.status(500).json({ 
           error: 'Authentication service configuration incomplete. Password verification requires Firebase Web API key.',
-          details: 'Missing Firebase Web API key - contact administrator to configure FIREBASE_WEB_API_KEY environment variable'
+          details: 'Missing Firebase Web API key - contact administrator to configure one of: FIREBASE_WEB_API_KEY, FIREBASE_API_KEY, REACT_APP_FIREBASE_API_KEY, FIREBASE_CLIENT_API_KEY, or VERCEL_FIREBASE_WEB_API_KEY environment variable',
+          debug: {
+            totalEnvVars: Object.keys(process.env).length,
+            firebaseRelated: Object.keys(process.env).filter(key => key.includes('FIREBASE')),
+            apiKeyRelated: Object.keys(process.env).filter(key => key.includes('API') || key.includes('KEY'))
+          }
         });
       }
     }
