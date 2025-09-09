@@ -97,37 +97,14 @@ export default async function handler(req, res) {
         console.log('Password authentication successful via REST API');
         userRecord = await auth.getUser(authData.localId);
       } else {
-        // No Web API key available - this is a configuration issue for production use
-        // In true demo mode, we can only check user existence but cannot verify passwords
-        console.warn('Firebase Web API Key not found. Cannot perform secure password authentication.');
-        console.warn('This is only acceptable for demo purposes - NOT for production use.');
+        // No Web API key available - cannot perform secure password authentication
+        console.error('Firebase Web API Key not found. Cannot perform password verification.');
+        console.error('Password authentication requires Firebase Web API Key to be configured.');
         
-        try {
-          // At minimum, verify the user exists
-          userRecord = await auth.getUserByEmail(email);
-          if (userRecord) {
-            console.warn(`DEMO MODE: User ${userRecord.email} exists. Password verification SKIPPED due to missing Web API key.`);
-            console.warn('WARNING: This authentication is not secure and should not be used in production.');
-            
-            return res.status(200).json({ 
-              success: true,
-              user: {
-                uid: userRecord.uid,
-                email: userRecord.email,
-                displayName: userRecord.displayName,
-                photoURL: userRecord.photoURL,
-                emailVerified: userRecord.emailVerified
-              },
-              warning: 'DEMO MODE: Password verification bypassed due to missing Firebase Web API key. This is not secure.'
-            });
-          }
-        } catch (userError) {
-          console.error('User lookup error:', userError);
-          if (userError.code === 'auth/user-not-found') {
-            return res.status(404).json({ error: 'No account found with this email address' });
-          }
-          return res.status(500).json({ error: 'Authentication service error. Please try again.' });
-        }
+        return res.status(500).json({ 
+          error: 'Authentication service configuration incomplete. Password verification requires Firebase Web API key.',
+          details: 'Missing Firebase Web API key - contact administrator to configure FIREBASE_WEB_API_KEY environment variable'
+        });
       }
     }
 
