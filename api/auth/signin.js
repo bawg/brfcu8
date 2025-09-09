@@ -38,10 +38,18 @@ export default async function handler(req, res) {
       // we'll use the Firebase REST API for authentication
       
       const FIREBASE_PROJECT_ID = process.env.FIREBASE_PROJECT_ID;
-      const FIREBASE_WEB_API_KEY = process.env.FIREBASE_WEB_API_KEY || process.env.FIREBASE_API_KEY;
+      // Try multiple possible environment variable names for the Firebase Web API key
+      const FIREBASE_WEB_API_KEY = process.env.FIREBASE_WEB_API_KEY || 
+                                   process.env.FIREBASE_API_KEY || 
+                                   process.env.NEXT_PUBLIC_FIREBASE_API_KEY ||
+                                   process.env.VITE_FIREBASE_API_KEY;
       
       if (!FIREBASE_WEB_API_KEY) {
-        return res.status(500).json({ error: 'Firebase configuration incomplete for demo mode' });
+        console.error('Firebase Web API Key not found. Tried: FIREBASE_WEB_API_KEY, FIREBASE_API_KEY, NEXT_PUBLIC_FIREBASE_API_KEY, VITE_FIREBASE_API_KEY');
+        return res.status(500).json({ 
+          error: 'Authentication service configuration incomplete. Please ensure Firebase Web API key is properly configured.',
+          details: 'Missing Firebase Web API key environment variable'
+        });
       }
       
       // Use Firebase REST API to verify email/password
