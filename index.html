@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Barnes Rugby - Coaching Management Platform</title>
 
+    <!-- Firebase Authentication -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js"></script>
+
     <style>
         * {
             margin: 0;
@@ -773,6 +777,122 @@
             margin-top: 16px;
         }
         
+        /* Authentication Styles */
+        .auth-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+        }
+        
+        .login-card {
+            background: white;
+            border-radius: 12px;
+            padding: 48px;
+            box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.4);
+            text-align: center;
+            max-width: 400px;
+            width: 100%;
+        }
+        
+        .login-card h2 {
+            color: #0f172a;
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 16px;
+        }
+        
+        .login-card p {
+            color: #64748b;
+            margin-bottom: 32px;
+        }
+        
+        .login-btn {
+            background: #1e3a8a;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.2s ease;
+            width: 100%;
+        }
+        
+        .login-btn:hover {
+            background: #1e40af;
+        }
+        
+        .user-info {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            border-radius: 8px;
+            padding: 12px 16px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            z-index: 1000;
+        }
+        
+        .user-info img {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+        }
+        
+        .user-details {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        
+        .user-email {
+            font-size: 14px;
+            font-weight: 500;
+            color: #0f172a;
+        }
+        
+        .user-role {
+            font-size: 12px;
+            color: #64748b;
+        }
+        
+        .logout-btn {
+            background: #ef4444;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: background 0.2s ease;
+        }
+        
+        .logout-btn:hover {
+            background: #dc2626;
+        }
+        
+        .main-app {
+            display: none;
+        }
+        
+        .main-app.authenticated {
+            display: block;
+        }
+        
+        .admin-only {
+            display: none;
+        }
+        
+        .admin-only.show-admin {
+            display: block;
+        }
+        
         /* Responsive Design - Mobile First */
         @media (max-width: 768px) {
             .container {
@@ -1243,6 +1363,27 @@
     </style>
 </head>
 <body>
+    <!-- Authentication UI -->
+    <div id="login-container" class="auth-container">
+        <div class="login-card">
+            <h2>Barnes Rugby</h2>
+            <p>Please sign in to access the coaching management platform</p>
+            <button class="login-btn" onclick="signIn()">Login with Google</button>
+        </div>
+    </div>
+    
+    <!-- User Info Display -->
+    <div id="user-info" class="user-info" style="display: none;">
+        <img id="user-avatar" src="" alt="User Avatar">
+        <div class="user-details">
+            <div id="user-email" class="user-email"></div>
+            <div id="user-role" class="user-role"></div>
+        </div>
+        <button class="logout-btn" onclick="signOut()">Logout</button>
+    </div>
+    
+    <!-- Main Application -->
+    <div id="main-app" class="main-app">
     <div class="container">
         <header class="header">
             <h1>Barnes Rugby - Coaching Platform</h1>
@@ -1609,7 +1750,7 @@
                 <div id="upload-status-issues" class="upload-status" style="display: none; margin-top: 16px;"></div>
             </div>
             
-            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 24px; margin-bottom: 32px;">
+            <div class="admin-only" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 24px; margin-bottom: 32px;">
                 <h3 style="color: #1e3a8a; font-weight: 600; font-size: 1.5rem; margin-bottom: 24px;">Drill Management</h3>
                 <p style="color: #64748b; margin-bottom: 24px;">Administrative tools for managing drill data. These operations require admin privileges.</p>
                 
@@ -1651,7 +1792,7 @@
                 <div id="upload-status-system" class="upload-status" style="display: none; margin-top: 16px;"></div>
             </div>
             
-            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 24px; margin-bottom: 32px;">
+            <div class="admin-only" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 24px; margin-bottom: 32px;">
                 <h3 style="color: #1e3a8a; font-weight: 600; font-size: 1.5rem; margin-bottom: 24px;">Calendar Management</h3>
                 <p style="color: #64748b; margin-bottom: 24px;">Administrative tools for managing calendar event data. These operations require admin privileges.</p>
                 
@@ -2335,9 +2476,6 @@
         let eventsPageSize = 10;
         let eventsPage = 1;
         let columnFilter = { key: '', value: '' };
-        
-        // User role simulation (in a real app this would come from authentication)
-        let currentUserRole = 'admin'; // or 'user'
         
         // Variables for confirmation modal
         let confirmationAction = null;
@@ -3100,6 +3238,130 @@
         }
 
         window.showSection = showSection;
+    </script>
+    </div> <!-- Close main-app -->
+    
+    <!-- Authentication JavaScript -->
+    <script>
+        // Firebase configuration (for production)
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_PROJECT_ID.firebaseapp.com"
+        };
+        
+        // Initialize Firebase if available
+        if (typeof firebase !== 'undefined') {
+            firebase.initializeApp(firebaseConfig);
+            
+            // Firebase authentication state checking
+            firebase.auth().onAuthStateChanged(async (user) => {
+                if (user) {
+                    currentUser = user;
+                    currentUserRole = user.email.includes('admin') ? 'admin' : 'user';
+                    
+                    showMainApp();
+                    updateUserInfo(user);
+                    updateAdminVisibility();
+                } else {
+                    currentUser = null;
+                    currentUserRole = null;
+                    showLoginScreen();
+                }
+            });
+        } else {
+            // Fallback for development/testing - show login screen by default
+            console.log('Firebase not available - using test mode');
+            showLoginScreen();
+        }
+        
+        // Authentication state
+        let currentUser = null;
+        let currentUserRole = null; // Remove hardcoded admin role
+        
+        async function signIn() {
+            // For testing purposes, simulate authentication
+            if (typeof firebase !== 'undefined') {
+                try {
+                    const provider = new firebase.auth.GoogleAuthProvider();
+                    const result = await firebase.auth().signInWithPopup(provider);
+                    const idToken = await result.user.getIdToken();
+                    
+                    // Send token to backend for session creation
+                    await fetch("https://us-central1-YOUR_PROJECT.cloudfunctions.net/auth/sessionLogin", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ idToken }),
+                        credentials: "include"
+                    });
+                } catch (error) {
+                    console.error('Authentication error:', error);
+                    alert('Authentication failed. Please try again.');
+                }
+            } else {
+                // Simulate authentication for testing
+                simulateTestAuth();
+            }
+        }
+        
+        function simulateTestAuth() {
+            // Create a mock user for testing
+            const mockUser = {
+                email: prompt('Enter test email (use "admin@test.com" for admin access):') || 'user@test.com',
+                photoURL: 'https://via.placeholder.com/32',
+                displayName: 'Test User'
+            };
+            
+            currentUser = mockUser;
+            currentUserRole = mockUser.email.includes('admin') ? 'admin' : 'user';
+            
+            showMainApp();
+            updateUserInfo(mockUser);
+            updateAdminVisibility();
+        }
+        
+        async function signOut() {
+            if (typeof firebase !== 'undefined') {
+                try {
+                    await firebase.auth().signOut();
+                } catch (error) {
+                    console.error('Sign out error:', error);
+                }
+            } else {
+                // Simulate sign out for testing
+                currentUser = null;
+                currentUserRole = null;
+                showLoginScreen();
+            }
+        }
+        
+        function showMainApp() {
+            document.getElementById('login-container').style.display = 'none';
+            document.getElementById('main-app').classList.add('authenticated');
+            document.getElementById('user-info').style.display = 'flex';
+        }
+        
+        function showLoginScreen() {
+            document.getElementById('login-container').style.display = 'flex';
+            document.getElementById('main-app').classList.remove('authenticated');
+            document.getElementById('user-info').style.display = 'none';
+        }
+        
+        function updateUserInfo(user) {
+            document.getElementById('user-avatar').src = user.photoURL || 'https://via.placeholder.com/32';
+            document.getElementById('user-email').textContent = user.email;
+            document.getElementById('user-role').textContent = currentUserRole.charAt(0).toUpperCase() + currentUserRole.slice(1);
+        }
+        
+        function updateAdminVisibility() {
+            const adminElements = document.querySelectorAll('.admin-only');
+            adminElements.forEach(element => {
+                if (currentUserRole === 'admin') {
+                    element.classList.add('show-admin');
+                } else {
+                    element.classList.remove('show-admin');
+                }
+            });
+        }
     </script>
 </body>
 </html>
