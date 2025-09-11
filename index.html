@@ -1674,9 +1674,11 @@
 
         // Initialize the application
         document.addEventListener('DOMContentLoaded', function() {
-            // Start with authentication overlay
-            showLoginForm();
+            // Check authentication status on page load
+            checkAuthStatus();
         });
+
+        console.log('🏉 Barnes Rugby - Secure Authentication Ready');
     </script>
 </body>
 </html>
