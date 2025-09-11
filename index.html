@@ -618,7 +618,3109 @@
 
         // ====== YOUR EXISTING APP FUNCTIONS ======
         // Add your existing drill management and calendar JavaScript here
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Barnes Rugby - Coaching Management Platform</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
         
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            color: #0f172a;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 24px;
+            background: transparent;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #0f172a, #1e293b);
+            color: white;
+            padding: 32px;
+            border-radius: 12px;
+            margin-bottom: 32px;
+            box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.4), 0 10px 10px -5px rgba(15, 23, 42, 0.06);
+        }
+        
+        .header h1 {
+            font-size: 2.25rem;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 8px;
+        }
+        
+        .header p {
+            text-align: center;
+            font-size: 1.125rem;
+            font-weight: 500;
+            opacity: 0.9;
+        }
+        
+        .mockup-nav {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 32px;
+            flex-wrap: wrap;
+            background: white;
+            padding: 8px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(15, 23, 42, 0.2);
+            border: 1px solid #334155;
+        }
+        
+        .mockup-btn {
+            background: transparent;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            color: #64748b;
+            transition: all 0.2s ease;
+            font-size: 14px;
+        }
+        
+        .mockup-btn:hover {
+            background: #f1f5f9;
+            color: #1e3a8a;
+        }
+        
+        .mockup-btn.active {
+            background: #1e3a8a;
+            color: white;
+        }
+        
+        .mockup-section {
+            display: none;
+            background: white;
+            border-radius: 12px;
+            padding: 32px;
+            box-shadow: 0 4px 6px -1px rgba(30, 58, 138, 0.1), 0 2px 4px -1px rgba(30, 58, 138, 0.06);
+            border: 1px solid #e2e8f0;
+        }
+        
+        .mockup-section.active {
+            display: block;
+            animation: fadeIn 0.3s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 32px;
+            padding-bottom: 16px;
+            border-bottom: 2px solid #e2e8f0;
+        }
+        
+        .section-title {
+            color: #1e3a8a;
+            font-size: 1.875rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .add-btn {
+            background: #1e3a8a;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s ease;
+        }
+        
+        .add-btn:hover {
+            background: #3730a3;
+            transform: translateY(-1px);
+        }
+        
+        .form-mockup {
+            background: #f8fafc;
+            padding: 24px;
+            border-radius: 8px;
+            margin: 24px 0;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .form-field {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        
+        .form-field.full-width {
+            grid-column: 1 / -1;
+        }
+        
+        .form-label {
+            font-weight: 600;
+            color: #1e3a8a;
+            font-size: 14px;
+        }
+        
+        .form-input {
+            padding: 12px 16px;
+            border: 1px solid #cbd5e0;
+            border-radius: 6px;
+            background: white;
+            font-size: 14px;
+            transition: border-color 0.2s ease;
+            color: #374151;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #1e3a8a;
+            box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.1);
+        }
+        
+        .file-upload {
+            border: 2px dashed #94a3b8;
+            border-radius: 8px;
+            padding: 48px 24px;
+            text-align: center;
+            background: #f8fafc;
+            margin-bottom: 24px;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+        
+        .file-upload:hover {
+            border-color: #1e3a8a;
+            background: #eff6ff;
+        }
+        
+        .upload-icon {
+            font-size: 48px;
+            color: #64748b;
+            margin-bottom: 16px;
+        }
+        
+        .upload-text {
+            font-size: 16px;
+            font-weight: 500;
+            color: #1e3a8a;
+            margin-bottom: 8px;
+        }
+        
+        .upload-subtext {
+            color: #64748b;
+            font-size: 14px;
+        }
+        
+        .btn-primary {
+            background: #1e3a8a;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 14px;
+            transition: all 0.2s ease;
+        }
+        
+        .btn-primary:hover {
+            background: #3730a3;
+        }
+        
+        .btn-secondary {
+            background: white;
+            color: #1e3a8a;
+            border: 1px solid #cbd5e0;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 14px;
+            transition: all 0.2s ease;
+            margin-right: 12px;
+        }
+        
+        .btn-secondary:hover {
+            background: #f1f5f9;
+            border-color: #1e3a8a;
+        }
+        
+        .success-message {
+            background: #dcfce7;
+            border: 1px solid #16a34a;
+            color: #15803d;
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin: 16px 0;
+            display: none;
+        }
+
+        .calendar-container {
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px -1px rgba(30, 58, 138, 0.1);
+            border: 1px solid #e2e8f0;
+        }
+        
+        .calendar-header {
+            background: #1e3a8a;
+            color: white;
+            padding: 20px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .calendar-title {
+            font-size: 20px;
+            font-weight: 600;
+        }
+        
+        .calendar-nav {
+            display: flex;
+            gap: 12px;
+        }
+        
+        .calendar-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+        
+        .calendar-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+        
+        .calendar-btn.active {
+            background: white;
+            color: #1e3a8a;
+            border-color: white;
+        }
+        
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+        }
+        
+        .calendar-day-header {
+            background: #f1f5f9;
+            padding: 12px;
+            text-align: center;
+            font-weight: 600;
+            color: #1e3a8a;
+            font-size: 14px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        .calendar-day {
+            min-height: 120px;
+            padding: 8px;
+            border-bottom: 1px solid #f1f5f9;
+            border-right: 1px solid #f1f5f9;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+        
+        .calendar-day:nth-child(7n) {
+            border-right: none;
+        }
+        
+        .calendar-day:hover {
+            background: #f8fafc;
+        }
+        
+        .calendar-day.today {
+            background: #eff6ff;
+            border: 2px solid #1e3a8a;
+        }
+        
+        .calendar-day.other-month {
+            opacity: 0.4;
+        }
+        
+        .day-number {
+            font-weight: 600;
+            color: #1e3a8a;
+            margin-bottom: 4px;
+            font-size: 14px;
+        }
+        
+        .day-number.today {
+            background: #1e3a8a;
+            color: white;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 700;
+        }
+        
+        .event {
+            background: #1e3a8a;
+            color: white;
+            padding: 3px 6px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 500;
+            margin-bottom: 2px;
+            cursor: pointer;
+            line-height: 1.3;
+            transition: all 0.2s ease;
+        }
+        
+        .event:hover {
+            opacity: 0.8;
+            transform: translateY(-1px);
+        }
+        
+        .event.practice {
+            background: #0369a1;
+        }
+        
+        .event.festival {
+            background: #dc2626;
+        }
+        
+        .event.match {
+            background: #059669;
+        }
+        
+        .event.vacation {
+            background: #64748b;
+        }
+        
+        .events-list-container {
+            margin-top: 32px;
+        }
+        
+        .events-table-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            gap: 16px;
+        }
+        
+        .events-sort {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .sort-label {
+            font-weight: 600;
+            color: #1e3a8a;
+            font-size: 14px;
+        }
+        
+        .sort-select {
+            padding: 8px 12px;
+            border: 1px solid #cbd5e0;
+            border-radius: 6px;
+            background: white;
+            font-size: 14px;
+            color: #374151;
+            cursor: pointer;
+        }
+        
+        .sort-select:focus {
+            outline: none;
+            border-color: #1e3a8a;
+            box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.1);
+        }
+        
+        .events-table-wrapper {
+            max-height: 400px;
+            overflow-y: auto;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px -1px rgba(30, 58, 138, 0.1);
+            border: 1px solid #e2e8f0;
+        }
+        
+        .events-table-wrapper::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .events-table-wrapper::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        
+        .events-table-wrapper::-webkit-scrollbar-thumb {
+            background: #cbd5e0;
+            border-radius: 4px;
+        }
+        
+        .events-table-wrapper::-webkit-scrollbar-thumb:hover {
+            background: #1e3a8a;
+        }
+        
+        .event-title {
+            font-weight: 600;
+            color: #1e3a8a;
+            font-size: 15px;
+        }
+        
+        .event-type-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            text-align: center;
+        }
+        
+        .event-type-badge.practice {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+        
+        .event-type-badge.festival {
+            background: #fecaca;
+            color: #dc2626;
+        }
+        
+        .event-type-badge.match {
+            background: #d1fae5;
+            color: #059669;
+        }
+        
+        .event-type-badge.vacation {
+            background: #f1f5f9;
+            color: #64748b;
+        }
+        
+        .filters {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+        
+        .filter-btn {
+            background: white;
+            border: 1px solid #cbd5e0;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 14px;
+            font-weight: 500;
+            color: #1e3a8a;
+        }
+        
+        .filter-btn:hover {
+            background: #f1f5f9;
+            border-color: #1e3a8a;
+        }
+        
+        .filter-btn.active {
+            background: #1e3a8a;
+            color: white;
+            border-color: #1e3a8a;
+        }
+        
+        .search-box {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid #cbd5e0;
+            border-radius: 8px;
+            font-size: 16px;
+            margin-bottom: 24px;
+            background: white;
+            color: #374151;
+        }
+        
+        .search-box:focus {
+            outline: none;
+            border-color: #1e3a8a;
+            box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.1);
+        }
+        
+        .table-container {
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px -1px rgba(30, 58, 138, 0.1);
+            margin: 24px 0;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .table-header {
+            background: #1e3a8a;
+            color: white;
+            padding: 16px 20px;
+            display: grid;
+            grid-template-columns: 2fr 2fr 1fr 1fr 1fr 2fr 1fr; /* 7 columns, added Actions column */
+            gap: 20px;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        
+        .table-row {
+            padding: 16px 20px;
+            display: grid;
+            grid-template-columns: 2fr 2fr 1fr 1fr 1fr 2fr 1fr; /* 7 columns, match header */
+            gap: 20px;
+            border-bottom: 1px solid #f1f5f9;
+            align-items: center;
+            transition: background-color 0.2s ease;
+        }
+        
+        .table-row:hover {
+            background: #f8fafc;
+        }
+        
+        .table-row:last-child {
+            border-bottom: none;
+        }
+        
+        .drill-name {
+            color: #1e3a8a;
+            text-decoration: none;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 15px;
+        }
+        
+        .drill-name:hover {
+            text-decoration: underline;
+            color: #3730a3;
+        }
+        
+        .drill-description {
+            font-size: 13px;
+            color: #64748b;
+            margin-top: 4px;
+            line-height: 1.4;
+        }
+        
+        .skill-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            text-align: center;
+        }
+        
+        .skill-passing { 
+            background: #dbeafe; 
+            color: #1e40af; 
+        }
+        
+        .skill-awareness { 
+            background: #e0f2fe; 
+            color: #0369a1; 
+        }
+        
+        .skill-defense { 
+            background: #f0f9ff; 
+            color: #0c4a6e; 
+        }
+        
+        .duration-badge {
+            background: #e0f2fe;
+            color: #0369a1;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            text-align: center;
+        }
+        
+        .status-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            text-align: center;
+        }
+        
+        .status-badge.status-open {
+            background: #fef3c7;
+            color: #d97706;
+        }
+        
+        .status-badge.status-closed {
+            background: #dcfce7;
+            color: #16a34a;
+        }
+        
+        .status-badge.status-in-progress {
+            background: #e0f2fe;
+            color: #0369a1;
+        }
+        
+        .star-rating {
+            color: #fbbf24;
+            font-size: 16px;
+        }
+        
+        .rate-btn {
+            background: #64748b;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 500;
+            transition: background-color 0.2s ease;
+        }
+        
+        .rate-btn:hover {
+            background: #1e3a8a;
+        }
+
+        /* Modal Styles */
+        #eventModal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(30, 58, 138, 0.15);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        #eventModal .modal-content {
+            background: white;
+            border-radius: 12px;
+            max-width: 400px;
+            margin: auto;
+            padding: 32px;
+            box-shadow: 0 8px 32px rgba(30, 58, 138, 0.2);
+            position: relative;
+        }
+        
+        #eventModal .close-btn {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: #eee;
+            border: none;
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            font-size: 18px;
+            cursor: pointer;
+        }
+        
+        #eventModalContent {
+            margin-top: 16px;
+        }
+
+        #availabilityModal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(30, 58, 138, 0.15);
+            z-index: 1001;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        #availabilityModal .modal-content {
+            background: white;
+            border-radius: 12px;
+            max-width: 350px;
+            margin: auto;
+            padding: 24px;
+            box-shadow: 0 8px 32px rgba(30, 58, 138, 0.2);
+            position: relative;
+        }
+        
+        #availabilityModal .close-btn {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: #eee;
+            border: none;
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            font-size: 18px;
+            cursor: pointer;
+        }
+        
+        #availabilityModalContent {
+            margin-top: 16px;
+        }
+        
+        /* Responsive Design - Mobile First */
+        @media (max-width: 768px) {
+            .container {
+                padding: 16px;
+                max-width: 100%;
+            }
+            
+            .header {
+                padding: 24px 16px;
+                margin-bottom: 24px;
+            }
+            
+            .header h1 {
+                font-size: 1.75rem;
+                line-height: 1.2;
+            }
+            
+            .header p {
+                font-size: 1rem;
+            }
+            
+            /* Navigation improvements */
+            .mockup-nav {
+                flex-wrap: wrap;
+                gap: 8px;
+                padding: 16px;
+            }
+            
+            .mockup-btn {
+                flex: 1 1 calc(50% - 4px);
+                min-width: 140px;
+                padding: 14px 16px;
+                font-size: 15px;
+            }
+            
+            /* Calendar improvements */
+            .calendar-header {
+                flex-direction: column;
+                gap: 16px;
+                padding: 16px;
+            }
+            
+            .calendar-nav {
+                flex-wrap: wrap;
+                gap: 8px;
+                justify-content: center;
+            }
+            
+            .calendar-btn {
+                padding: 8px 12px;
+                font-size: 13px;
+                min-width: 60px;
+            }
+            
+            .calendar-grid {
+                font-size: 13px;
+            }
+            
+            .calendar-day {
+                min-height: 60px;
+                padding: 4px;
+            }
+            
+            .event {
+                font-size: 10px;
+                padding: 2px 4px;
+                margin-bottom: 1px;
+            }
+            
+            /* Form improvements */
+            .form-grid {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+            
+            .form-input, .sort-select {
+                padding: 14px 16px;
+                font-size: 16px; /* Prevent zoom on iOS */
+            }
+            
+            .form-mockup {
+                padding: 20px 16px;
+            }
+            
+            /* Button improvements for touch */
+            .add-btn, .btn-primary, .btn-secondary {
+                padding: 14px 20px;
+                font-size: 16px;
+                min-height: 44px; /* Apple's recommended touch target */
+            }
+            
+            .add-btn {
+                width: 100%;
+                justify-content: center;
+                margin-bottom: 16px;
+            }
+            
+            /* Events table improvements */
+            .events-table-controls {
+                flex-direction: column;
+                gap: 12px;
+                align-items: stretch;
+            }
+            
+            .events-sort {
+                flex-wrap: wrap;
+                gap: 8px;
+            }
+            
+            .sort-label {
+                width: 100%;
+                margin-bottom: 4px;
+            }
+            
+            /* Make table horizontally scrollable on mobile */
+            .events-list-container .table-container {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+            
+            .events-list-container .table-header,
+            .events-list-container .table-row {
+                min-width: 800px; /* Force horizontal scrolling on mobile */
+            }
+            
+            /* Section headers */
+            .section-header {
+                flex-direction: column;
+                gap: 16px;
+                align-items: stretch;
+            }
+            
+            .section-title {
+                font-size: 1.5rem;
+                text-align: center;
+            }
+            
+            /* Modal improvements */
+            #eventModal .modal-content,
+            #availabilityModal .modal-content {
+                max-width: calc(100vw - 32px);
+                margin: 16px;
+                padding: 24px 16px;
+            }
+            
+            /* File upload */
+            .file-upload {
+                padding: 32px 16px;
+            }
+            
+            .upload-icon {
+                font-size: 36px;
+            }
+            
+            /* Filter buttons */
+            .events-table-controls button {
+                padding: 10px 12px;
+                font-size: 14px;
+                min-height: 44px;
+            }
+            
+            /* Show dropdown for pagination */
+            .events-table-controls > div:last-child {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 8px;
+                align-items: center;
+            }
+            
+            .events-table-controls > div:last-child button {
+                flex: 1;
+                min-width: 50px;
+            }
+            
+            /* Mobile-specific drill management controls */
+            .control-buttons {
+                flex-direction: column;
+                gap: 12px;
+            }
+            
+            .control-btn {
+                width: 100%;
+                justify-content: center;
+                padding: 14px 20px;
+                font-size: 16px;
+                min-height: 44px;
+            }
+            
+            .drill-actions {
+                flex-direction: column;
+                gap: 8px;
+            }
+            
+            .action-btn {
+                width: 100%;
+                padding: 10px 12px;
+                font-size: 14px;
+                min-height: 44px;
+            }
+
+            /* Add drill form button container mobile styling */
+            #drill-form > div > div[style*="display: flex"][style*="justify-content: flex-end"] {
+                flex-direction: column !important;
+                align-items: stretch !important;
+            }
+            
+            #drill-form > div > div[style*="display: flex"][style*="justify-content: flex-end"] .btn-secondary,
+            #drill-form > div > div[style*="display: flex"][style*="justify-content: flex-end"] .btn-primary {
+                width: 100% !important;
+                margin: 0 !important;
+            }
+        }
+        
+        /* Tablet improvements */
+        @media (min-width: 769px) and (max-width: 1024px) {
+            .container {
+                padding: 20px;
+            }
+            
+            .mockup-btn {
+                flex: 1;
+            }
+            
+            .calendar-nav {
+                gap: 10px;
+            }
+            
+            .events-table-controls {
+                flex-wrap: wrap;
+                gap: 12px;
+            }
+        }
+        
+        /* Small mobile devices */
+        @media (max-width: 480px) {
+            .container {
+                padding: 12px;
+            }
+            
+            .header {
+                padding: 20px 12px;
+            }
+            
+            .header h1 {
+                font-size: 1.5rem;
+            }
+            
+            .mockup-nav {
+                padding: 12px;
+            }
+            
+            .mockup-btn {
+                flex: 1 1 100%;
+                margin-bottom: 8px;
+            }
+            
+            .calendar-day {
+                min-height: 50px;
+                font-size: 12px;
+            }
+            
+            .event {
+                font-size: 9px;
+                padding: 1px 3px;
+            }
+            
+            .section-title {
+                font-size: 1.25rem;
+            }
+        }
+
+        /* Drill Management Controls Styles */
+        .management-controls {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 32px;
+        }
+
+        .control-buttons {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .control-btn {
+            background: #1e3a8a;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 14px;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .control-btn:hover {
+            background: #1e40af;
+            transform: translateY(-1px);
+        }
+
+        .control-btn.delete-all-btn {
+            background: #dc2626;
+        }
+
+        .control-btn.delete-all-btn:hover {
+            background: #b91c1c;
+        }
+
+        .control-btn.upload-btn {
+            background: #059669;
+        }
+
+        .control-btn.upload-btn:hover {
+            background: #047857;
+        }
+
+        .upload-status {
+            margin-top: 16px;
+            padding: 12px;
+            border-radius: 8px;
+            font-weight: 500;
+        }
+
+        .upload-status.success {
+            background: #d1fae5;
+            color: #065f46;
+            border: 1px solid #a7f3d0;
+        }
+
+        .upload-status.error {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fca5a5;
+        }
+
+        .upload-status.info {
+            background: #dbeafe;
+            color: #1e40af;
+            border: 1px solid #93c5fd;
+        }
+
+        /* Drill row action buttons */
+        .drill-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .action-btn {
+            background: #6b7280;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .action-btn.edit-btn {
+            background: #10b981;
+        }
+
+        .action-btn.edit-btn:hover {
+            background: #059669;
+        }
+
+        .action-btn.delete-btn:hover {
+            background: #dc2626;
+        }
+
+        /* Confirmation Modal Styles */
+        .confirmation-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(30, 58, 138, 0.15);
+            z-index: 1002;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .confirmation-modal.show {
+            display: flex;
+        }
+
+        .confirmation-modal .modal-content {
+            background: white;
+            border-radius: 12px;
+            max-width: 500px;
+            margin: auto;
+            padding: 32px;
+            box-shadow: 0 8px 32px rgba(30, 58, 138, 0.2);
+            position: relative;
+        }
+
+        .confirmation-modal .modal-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .confirmation-modal .modal-header h3 {
+            color: #1e3a8a;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .confirmation-modal .modal-body {
+            color: #374151;
+            line-height: 1.6;
+            margin-bottom: 24px;
+        }
+
+        .confirmation-modal .modal-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+        }
+
+        .modal-btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .modal-btn.cancel {
+            background: #f3f4f6;
+            color: #374151;
+            border: 1px solid #d1d5db;
+        }
+
+        .modal-btn.cancel:hover {
+            background: #e5e7eb;
+        }
+
+        .modal-btn.confirm {
+            background: #dc2626;
+            color: white;
+            border: none;
+        }
+
+        .modal-btn.confirm:hover {
+            background: #b91c1c;
+        }
+
+        .modal-btn.primary {
+            background: #1e3a8a;
+            color: white;
+            border: none;
+        }
+
+        .modal-btn.primary:hover {
+            background: #1e40af;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>Barnes Rugby - Coaching Platform</h1>
+            <p>Professional drill management and practice calendar system</p>
+        </header>
+        
+        <nav class="mockup-nav">
+            <button class="mockup-btn" onclick="showSection('drills')">Drills</button>
+            <button class="mockup-btn active" onclick="showSection('calendar')">Practice Calendar</button>
+            <button class="mockup-btn" onclick="showSection('overview')">System</button>
+            <button class="mockup-btn" onclick="showSection('design-drill')">Design Drill</button>
+        </nav>
+        
+        <!-- Drills Section -->
+        <section id="drills" class="mockup-section">
+            <div class="section-header">
+                <h2 class="section-title">📋 Drills Management</h2>
+                <button class="add-btn" onclick="toggleDrillForm()">
+                    <span>+</span> Add New Drill
+                </button>
+            </div>
+            
+            <div id="drill-success" class="success-message">
+                Drill added successfully!
+            </div>
+            
+            <!-- Upload Section (Initially Hidden) -->
+            <div id="drill-form" style="display: none;">
+                <div class="form-mockup">
+                    <h3 style="margin-bottom: 24px; color: #1e3a8a; font-weight: 600;">Drill Information</h3>
+                    <div class="form-grid">
+                        <div class="form-field">
+                            <label class="form-label" for="drill-name">Drill Name</label>
+                            <input class="form-input" id="drill-name" type="text" placeholder="Enter drill name" required>
+                        </div>
+                        <div class="form-field">
+                            <label class="form-label" for="drill-skill">Skill</label>
+                            <select class="form-input" id="drill-skill" required>
+                                <option value="">Select skill</option>
+                                <option value="Passing">Passing</option>
+                                <option value="Awareness">Awareness</option>
+                                <option value="Defense">Defense</option>
+                            </select>
+                        </div>
+                        <div class="form-field full-width" style="display: flex; flex-direction: row; align-items: flex-end; gap: 12px;">
+                            <div style="flex:1;">
+                                <label class="form-label" for="drill-duration">Duration</label>
+                                <select class="form-input" id="drill-duration" required>
+                                    <option value="">Select duration</option>
+                                    <option value="15 minutes">15 min</option>
+                                    <option value="30 minutes">30 min</option>
+                                    <option value="45 minutes">45 min</option>
+                                    <option value="60 minutes">60 min</option>
+                                </select>
+                            </div>
+                            <a href="try.html">
+                                <button type="button" class="btn-primary" style="margin-bottom:0;">Design Drill</button>
+                            </a>
+                        </div>
+                        <div class="form-field full-width">
+                            <label class="form-label" for="drill-description">Description</label>
+                            <textarea class="form-input" id="drill-description" rows="2" placeholder="Enter drill description" required></textarea>
+                        </div>
+                    </div>
+                    
+                    <div style="margin: 24px 0;">
+                        <label class="form-label" style="margin-bottom: 12px; display: block;">Upload Supporting Document (Optional)</label>
+                        <div class="file-upload" onclick="handleFileUpload()">
+                            <div class="upload-icon">📄</div>
+                            <div class="upload-text">Upload Drill Document</div>
+                            <div class="upload-subtext">Drop your PowerPoint, Word, or PDF document here, or click to browse</div>
+                            <div class="upload-subtext" style="margin-top: 8px;">Supported formats: .pptx, .docx, .pdf (Max 10MB)</div>
+                        </div>
+                    </div>
+                    
+                    <div style="display: flex; gap: 12px; justify-content: flex-end; margin-top: 24px;">
+                        <button class="btn-secondary" onclick="toggleDrillForm()">Cancel</button>
+                        <button class="btn-primary" onclick="addDrillToRepository()">Save Drill</button>
+                    </div>
+                </div>
+            </div>
+
+            <h3 style="margin: 32px 0 24px 0; color: #1e3a8a; font-weight: 600; font-size: 1.5rem;">📊 Drill Repository</h3>
+            
+            <input type="text" class="search-box" placeholder="🔍 Search drills by name, skill, or description..." oninput="filterDrills()">
+            
+            <div class="filters">
+                <button class="filter-btn active" onclick="filterBySkill('all')">All Skills</button>
+                <button class="filter-btn" onclick="filterBySkill('Passing')">Passing</button>
+                <button class="filter-btn" onclick="filterBySkill('Awareness')">Awareness</button>
+                <button class="filter-btn" onclick="filterBySkill('Defense')">Defense</button>
+            </div>
+            
+            <div class="filters">
+                <button class="filter-btn active" onclick="filterByDuration('all')">All Durations</button>
+                <button class="filter-btn" onclick="filterByDuration('15 minutes')">15 min</button>
+                <button class="filter-btn" onclick="filterByDuration('30 minutes')">30 min</button>
+                <button class="filter-btn" onclick="filterByDuration('45 minutes')">45 min</button>
+                <button class="filter-btn" onclick="filterByDuration('60 minutes')">60 min</button>
+            </div>
+            
+            <div class="table-container">
+                <div class="table-header">
+                    <div>Drill Name & Description</div>
+                    <div>Skill</div>
+                    <div>Duration</div>
+                    <div>Actions</div>
+                </div>
+                
+                <div id="drills-table-body">
+                    <!-- Start with no static rows; rows will be rendered dynamically -->
+                </div>
+            </div>
+        </section>
+        
+        <!-- Calendar Section -->
+        <section id="calendar" class="mockup-section active">
+            <div class="section-header">
+                <h2 class="section-title">📅 Practice Calendar</h2>
+            </div>
+            
+            <div class="calendar-container">
+                <div class="calendar-header">
+                    <div class="calendar-title" id="calendar-title">January 2025</div>
+                    <div class="calendar-nav">
+                        <button class="calendar-btn" onclick="changeMonth(-1)">← Prev</button>
+                        <button class="calendar-btn" onclick="goToToday()">Today</button>
+                        <button class="calendar-btn" onclick="changeMonth(1)">Next →</button>
+                        <button class="calendar-btn active">Month</button>
+                    </div>
+                </div>
+                
+                <div class="calendar-grid">
+                    <div class="calendar-day-header">Sun</div>
+                    <div class="calendar-day-header">Mon</div>
+                    <div class="calendar-day-header">Tue</div>
+                    <div class="calendar-day-header">Wed</div>
+                    <div class="calendar-day-header">Thu</div>
+                    <div class="calendar-day-header">Fri</div>
+                    <div class="calendar-day-header">Sat</div>
+                    
+                    <!-- January 2025 Calendar Days -->
+                    <div class="calendar-day">
+                        <div class="day-number">29</div>
+                    </div>
+                    <div class="calendar-day">
+                        <div class="day-number">30</div>
+                    </div>
+                    <div class="calendar-day">
+                        <div class="day-number">31</div>
+                    </div>
+                    <div class="calendar-day today">
+                        <div class="day-number today">1</div>
+                    </div>
+                    <div class="calendar-day">
+                        <div class="day-number">2</div>
+                        <div class="event practice">Practice</div>
+                    </div>
+                    <div class="calendar-day">
+                        <div class="day-number">3</div>
+                    </div>
+                    <div class="calendar-day">
+                        <div class="day-number">4</div>
+                    </div>
+                    
+                    <div class="calendar-day">
+                        <div class="day-number">5</div>
+                        <div class="event practice">Training</div>
+                    </div>
+                    <div class="calendar-day">
+                        <div class="day-number">6</div>
+                    </div>
+                    <div class="calendar-day">
+                        <div class="day-number">7</div>
+                    </div>
+                    <div class="calendar-day">
+                        <div class="day-number">8</div>
+                        <div class="event festival">Festival</div>
+                    </div>
+                    <div class="calendar-day">
+                        <div class="day-number">9</div>
+                    </div>
+                    <div class="calendar-day">
+                        <div class="day-number">10</div>
+                    </div>
+                    <div class="calendar-day">
+                        <div class="day-number">11</div>
+                    </div>
+                    
+                    <div class="calendar-day">
+                        <div class="day-number">12</div>
+                    </div>
+                    <div class="calendar-day">
+                        <div class="day-number">13</div>
+                        <div class="event practice">Practice</div>
+                    </div>
+                    <div class="calendar-day">
+                        <div class="day-number">14</div>
+                    </div>
+                    <div class="calendar-day">
+                        <div class="day-number">15</div>
+                        <div class="event match">Championship</div>
+                    </div>
+                    <div class="calendar-day">
+                        <div class="day-number">16</div>
+                    </div>
+                    <div class="calendar-day">
+                        <div class="day-number">17</div>
+                    </div>
+                    <div class="calendar-day">
+                        <div class="day-number">18</div>
+                    </div>
+                    
+                    <div class="calendar-day">
+                        <div class="day-number">19</div>
+                    </div>
+                    <div class="calendar-day">
+                        <div class="day-number">20</div>
+                        <div class="event practice">Training</div>
+                    </div>
+                    <div class="calendar-day">
+                        <div class="day-number">21</div>
+                    </div>
+                    <div class="calendar-day">
+                        <div class="day-number">22</div>
+                        <div class="event festival">Surrey Cup</div>
+                    </div>
+                    <div class="calendar-day">
+                        <div class="day-number">23</div>
+                    </div>
+                    <div class="calendar-day">
+                        <div class="day-number">24</div>
+                    </div>
+                    <div class="calendar-day">
+                        <div class="day-number">25</div>
+                    </div>
+                    
+                    <div class="calendar-day">
+                        <div class="day-number">26</div>
+                    </div>
+                    <div class="calendar-day">
+                        <div class="day-number">27</div>
+                        <div class="event practice">Match Day</div>
+                    </div>
+                    <div class="calendar-day">
+                        <div class="day-number">28</div>
+                    </div>
+                    <div class="calendar-day">
+                        <div class="day-number">29</div>
+                        <div class="event festival">Spring Festival</div>
+                    </div>
+                    <div class="calendar-day">
+                        <div class="day-number">30</div>
+                    </div>
+                    <div class="calendar-day">
+                        <div class="day-number">31</div>
+                    </div>
+                    <div class="calendar-day">
+                        <div class="day-number">1</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Add Event Button and Attendee Filter -->
+            <div style="display:flex; align-items:center; gap:16px; margin-bottom:16px;">
+                <button class="btn-primary" onclick="openAddEventModal()">+ Add Event</button>
+                <label for="attendeeFilter" style="font-weight:500; color:#1e3a8a;">Show Availability for:</label>
+                <select id="attendeeFilter" onchange="renderEventsTable()" style="padding:6px 12px; border-radius:6px;">
+                    <option value="">All</option>
+                    <option value="manus">Manus</option>
+                    <option value="andy">Andy</option>
+                    <option value="james">James</option>
+                </select>
+            </div>
+
+
+
+            <!-- Add this above the events table, after the attendee filter -->
+            <div style="display:flex; align-items:center; gap:16px; margin-bottom:16px;">
+                <button class="btn-primary" id="toggleAvailabilityBtn" onclick="toggleAvailabilityEdit()">+ Add Availability</button>
+                <label for="availabilityUser" id="availabilityUserLabel" style="font-weight:500; color:#1e3a8a; display:none;">Set Availability as:</label>
+                <select id="availabilityUser" style="padding:6px 12px; border-radius:6px; display:none;">
+                    <option value="manus">Manus</option>
+                    <option value="andy">Andy</option>
+                    <option value="james">James</option>
+                </select>
+            </div>
+            
+            <!-- Column Filter Buttons and Pagination -->
+            <div style="display:flex; flex-wrap:wrap; gap:12px; margin-bottom:16px;">
+                <button class="filter-btn" onclick="filterColumn('name')">Filter Event Name</button>
+                <button class="filter-btn" onclick="filterColumn('location')">Filter Location</button>
+                <button class="filter-btn" onclick="filterColumn('date')">Filter Date</button>
+                <button class="filter-btn" onclick="filterColumn('time')">Filter Time</button>
+                <button class="filter-btn" onclick="filterColumn('type')">Filter Type</button>
+                <button class="filter-btn" onclick="filterColumn('availability')">Filter Availability</button>
+                <span style="margin-left:24px; font-weight:500; color:#1e3a8a;">Show:</span>
+                <button class="filter-btn" onclick="setEventsPageSize(10)">10</button>
+                <button class="filter-btn" onclick="setEventsPageSize(20)">20</button>
+                <button class="filter-btn" onclick="setEventsPageSize(30)">30</button>
+            </div>
+            
+            <!-- Events Table -->
+            <div class="events-list-container">
+                <h3 style="color: #1e3a8a; font-weight: 600; font-size: 1.25rem; margin: 32px 0 16px 0;">📋 Upcoming Events</h3>
+                <div class="table-container" style="max-height:400px; overflow-y:auto;">
+                    <div class="table-header">
+                        <div>Event Name</div>
+                        <div>Location</div>
+                        <div>Date</div>
+                        <div>Time</div>
+                        <div>Type</div>
+                        <div>Availability</div>
+                        <div>Actions</div>
+                    </div>
+                    <div id="events-table-body"></div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Design Drill Section -->
+        <section id="design-drill" class="mockup-section" style="margin-top:32px;">
+            <div class="section-header">
+                <h2 class="section-title">🛠️ Design Drill</h2>
+            </div>
+            <p style="margin-bottom:16px;">Create and design a new drill using our interactive builder.</p>
+            <a href="try.html">
+                <button class="btn-primary">Go to Drill Designer</button>
+            </a>
+        </section>
+        
+        <!-- Overview Section -->
+        <section id="overview" class="mockup-section">
+            <div class="section-header">
+                <h2 class="section-title">🔧 System Administration</h2>
+            </div>
+            
+            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 24px; margin-bottom: 32px;">
+                <h3 style="color: #1e3a8a; font-weight: 600; font-size: 1.5rem; margin-bottom: 24px;">Issue Management</h3>
+                <p style="color: #64748b; margin-bottom: 24px;">Log and track issues within the system. Issues are stored locally for now.</p>
+                
+                <ul style="list-style: none; padding: 0; margin: 0;">
+                    <li style="border-bottom: 1px solid #e2e8f0; padding: 16px 0;">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <h4 style="color: #1e3a8a; font-weight: 600; margin: 0 0 4px 0;">📝 Log an Issue</h4>
+                                <p style="color: #64748b; margin: 0; font-size: 14px;">Report a new issue with title and description</p>
+                            </div>
+                            <button class="btn-primary" onclick="showLogIssueForm()">Log Issue</button>
+                        </div>
+                    </li>
+                    
+                    <li style="padding: 16px 0;">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <h4 style="color: #1e3a8a; font-weight: 600; margin: 0 0 4px 0;">📋 View All Issues</h4>
+                                <p style="color: #64748b; margin: 0; font-size: 14px;">View and manage all logged issues</p>
+                            </div>
+                            <button class="btn-primary" onclick="showIssuesTable()">View Issues</button>
+                        </div>
+                    </li>
+                </ul>
+                
+                <div id="upload-status-issues" class="upload-status" style="display: none; margin-top: 16px;"></div>
+            </div>
+            
+            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 24px; margin-bottom: 32px;">
+                <h3 style="color: #1e3a8a; font-weight: 600; font-size: 1.5rem; margin-bottom: 24px;">Drill Management</h3>
+                <p style="color: #64748b; margin-bottom: 24px;">Administrative tools for managing drill data. These operations require admin privileges.</p>
+                
+                <ul style="list-style: none; padding: 0; margin: 0;">
+                    <li style="border-bottom: 1px solid #e2e8f0; padding: 16px 0;">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <h4 style="color: #1e3a8a; font-weight: 600; margin: 0 0 4px 0;">📥 Download All Drills</h4>
+                                <p style="color: #64748b; margin: 0; font-size: 14px;">Export all drills to a JSON file with metadata and timestamp</p>
+                            </div>
+                            <button class="btn-primary" onclick="downloadAllDrills()">Download</button>
+                        </div>
+                    </li>
+                    
+                    <li style="border-bottom: 1px solid #e2e8f0; padding: 16px 0;">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <h4 style="color: #1e3a8a; font-weight: 600; margin: 0 0 4px 0;">📤 Upload Drills</h4>
+                                <p style="color: #64748b; margin: 0; font-size: 14px;">Import drills from JSON files with options for append, update, or replace</p>
+                            </div>
+                            <div>
+                                <input type="file" id="drills-upload-system" accept=".json" style="display: none;" onchange="uploadDrills(event)">
+                                <button class="btn-primary" onclick="document.getElementById('drills-upload-system').click()" style="background: #059669;">Upload</button>
+                            </div>
+                        </div>
+                    </li>
+                    
+                    <li style="padding: 16px 0;">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <h4 style="color: #1e3a8a; font-weight: 600; margin: 0 0 4px 0;">🗑️ Delete All Drills</h4>
+                                <p style="color: #64748b; margin: 0; font-size: 14px;">Permanently remove all drills from the repository (Admin only)</p>
+                            </div>
+                            <button class="btn-primary" onclick="confirmDeleteAllDrills()" style="background: #dc2626;">Delete All</button>
+                        </div>
+                    </li>
+                </ul>
+                
+                <div id="upload-status-system" class="upload-status" style="display: none; margin-top: 16px;"></div>
+            </div>
+            
+            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 24px; margin-bottom: 32px;">
+                <h3 style="color: #1e3a8a; font-weight: 600; font-size: 1.5rem; margin-bottom: 24px;">Calendar Management</h3>
+                <p style="color: #64748b; margin-bottom: 24px;">Administrative tools for managing calendar event data. These operations require admin privileges.</p>
+                
+                <ul style="list-style: none; padding: 0; margin: 0;">
+                    <li style="border-bottom: 1px solid #e2e8f0; padding: 16px 0;">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <h4 style="color: #1e3a8a; font-weight: 600; margin: 0 0 4px 0;">📥 Download All Calendar Events</h4>
+                                <p style="color: #64748b; margin: 0; font-size: 14px;">Export all calendar events to a JSON file with metadata and timestamp</p>
+                            </div>
+                            <button class="btn-primary" onclick="downloadAllEvents()">Download</button>
+                        </div>
+                    </li>
+                    
+                    <li style="border-bottom: 1px solid #e2e8f0; padding: 16px 0;">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <h4 style="color: #1e3a8a; font-weight: 600; margin: 0 0 4px 0;">📤 Upload Calendar Events</h4>
+                                <p style="color: #64748b; margin: 0; font-size: 14px;">Import calendar events from JSON files with options for append, update, or replace</p>
+                            </div>
+                            <div>
+                                <input type="file" id="events-upload-system" accept=".json" style="display: none;" onchange="uploadEvents(event)">
+                                <button class="btn-primary" onclick="document.getElementById('events-upload-system').click()" style="background: #059669;">Upload</button>
+                            </div>
+                        </div>
+                    </li>
+                    
+                    <li style="padding: 16px 0;">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <h4 style="color: #1e3a8a; font-weight: 600; margin: 0 0 4px 0;">🗑️ Delete All Calendar Events</h4>
+                                <p style="color: #64748b; margin: 0; font-size: 14px;">Permanently remove all calendar events from the repository (Admin only)</p>
+                            </div>
+                            <button class="btn-primary" onclick="confirmDeleteAllEvents()" style="background: #dc2626;">Delete All</button>
+                        </div>
+                    </li>
+                </ul>
+                
+                <div id="upload-status-calendar-system" class="upload-status" style="display: none; margin-top: 16px;"></div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Event Modal -->
+    <div id="eventModal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(30,58,138,0.15); z-index:1000; align-items:center; justify-content:center;">
+        <div style="background:white; border-radius:12px; max-width:400px; margin:auto; padding:32px; box-shadow:0 8px 32px rgba(30,58,138,0.2); position:relative;">
+            <button onclick="closeEventModal()" style="position:absolute; top:12px; right:12px; background:#eee; border:none; border-radius:50%; width:32px; height:32px; font-size:18px; cursor:pointer;">×</button>
+            <div id="eventModalContent"></div>
+        </div>
+    </div>
+
+    <!-- Availability Modal -->
+    <div id="availabilityModal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(30,58,138,0.15); z-index:1001; align-items:center; justify-content:center;">
+        <div style="background:white; border-radius:12px; max-width:350px; margin:auto; padding:24px; box-shadow:0 8px 32px rgba(30,58,138,0.2); position:relative;">
+            <button onclick="closeAvailabilityModal()" style="position:absolute; top:12px; right:12px; background:#eee; border:none; border-radius:50%; width:32px; height:32px; font-size:18px; cursor:pointer;">×</button>
+            <div id="availabilityModalContent"></div>
+        </div>
+    </div>
+
+    <!-- Confirmation Modal -->
+    <div id="confirmationModal" class="confirmation-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span id="modalIcon">⚠️</span>
+                <h3 id="modalTitle">Confirm Action</h3>
+            </div>
+            <div class="modal-body" id="modalMessage">
+                Are you sure you want to proceed?
+            </div>
+            <div class="modal-actions">
+                <button class="modal-btn cancel" onclick="closeConfirmationModal()">Cancel</button>
+                <button class="modal-btn confirm" id="confirmButton" onclick="confirmAction()">Confirm</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Drill Modal -->
+    <div id="editDrillModal" class="confirmation-modal">
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="modal-header">
+                <span>✏️</span>
+                <h3>Edit Drill</h3>
+            </div>
+            <div class="modal-body">
+                <div class="form-grid">
+                    <div class="form-field">
+                        <label class="form-label" for="edit-drill-name">Drill Name</label>
+                        <input class="form-input" id="edit-drill-name" type="text" required>
+                    </div>
+                    <div class="form-field">
+                        <label class="form-label" for="edit-drill-skill">Skill</label>
+                        <select class="form-input" id="edit-drill-skill" required>
+                            <option value="">Select skill</option>
+                            <option value="Passing">Passing</option>
+                            <option value="Awareness">Awareness</option>
+                            <option value="Defense">Defense</option>
+                        </select>
+                    </div>
+                    <div class="form-field">
+                        <label class="form-label" for="edit-drill-duration">Duration</label>
+                        <select class="form-input" id="edit-drill-duration" required>
+                            <option value="">Select duration</option>
+                            <option value="15 minutes">15 min</option>
+                            <option value="30 minutes">30 min</option>
+                            <option value="45 minutes">45 min</option>
+                            <option value="60 minutes">60 min</option>
+                        </select>
+                    </div>
+                    <div class="form-field full-width">
+                        <label class="form-label" for="edit-drill-description">Description</label>
+                        <textarea class="form-input" id="edit-drill-description" rows="3" required></textarea>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button class="modal-btn cancel" onclick="closeEditDrillModal()">Cancel</button>
+                <button class="modal-btn primary" onclick="saveEditedDrill()">Save Changes</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Calendar Event Modal -->
+    <div id="editEventModal" class="confirmation-modal">
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="modal-header">
+                <span>✏️</span>
+                <h3>Edit Calendar Event</h3>
+            </div>
+            <div class="modal-body">
+                <div class="form-grid">
+                    <div class="form-field">
+                        <label class="form-label" for="edit-event-name">Event Name</label>
+                        <input class="form-input" id="edit-event-name" type="text" required>
+                    </div>
+                    <div class="form-field">
+                        <label class="form-label" for="edit-event-location">Location</label>
+                        <input class="form-input" id="edit-event-location" type="text" required>
+                    </div>
+                    <div class="form-field">
+                        <label class="form-label" for="edit-event-date">Date</label>
+                        <input class="form-input" id="edit-event-date" type="date" required>
+                    </div>
+                    <div class="form-field">
+                        <label class="form-label" for="edit-event-time">Time</label>
+                        <input class="form-input" id="edit-event-time" type="text" placeholder="e.g., 6:00 PM - 8:00 PM" required>
+                    </div>
+                    <div class="form-field">
+                        <label class="form-label" for="edit-event-type">Type</label>
+                        <select class="form-input" id="edit-event-type" required>
+                            <option value="">Select type</option>
+                            <option value="practice">Practice</option>
+                            <option value="match">Match</option>
+                            <option value="festival">Festival</option>
+                        </select>
+                    </div>
+                    <div class="form-field full-width">
+                        <label class="form-label" for="edit-event-details">Details</label>
+                        <textarea class="form-input" id="edit-event-details" rows="3"></textarea>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button class="modal-btn cancel" onclick="closeEditEventModal()">Cancel</button>
+                <button class="modal-btn primary" onclick="saveEditedEvent()">Save Changes</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Log Issue Modal -->
+    <div id="logIssueModal" class="confirmation-modal">
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="modal-header">
+                <span>📝</span>
+                <h3>Log an Issue</h3>
+            </div>
+            <div class="modal-body">
+                <div class="form-grid">
+                    <div class="form-field full-width">
+                        <label class="form-label" for="issue-title">Issue Title</label>
+                        <input class="form-input" id="issue-title" type="text" placeholder="Enter a brief title for the issue" required>
+                    </div>
+                    <div class="form-field full-width">
+                        <label class="form-label" for="issue-description">Issue Description</label>
+                        <textarea class="form-input" id="issue-description" rows="5" placeholder="Describe the issue in detail..." required></textarea>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button class="modal-btn cancel" onclick="closeLogIssueModal()">Cancel</button>
+                <button class="modal-btn primary" onclick="saveIssue()">Log Issue</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Issues Table Modal -->
+    <div id="issuesTableModal" class="confirmation-modal">
+        <div class="modal-content" style="max-width: 800px;">
+            <div class="modal-header">
+                <span>📋</span>
+                <h3>All Issues</h3>
+            </div>
+            <div class="modal-body">
+                <div class="table-container" style="max-height: 400px; overflow-y: auto;">
+                    <div class="table-header">
+                        <div style="flex: 2;">Title</div>
+                        <div style="flex: 3;">Description</div>
+                        <div style="flex: 1;">Date</div>
+                        <div style="flex: 1;">Status</div>
+                    </div>
+                    <div id="issues-table-body">
+                        <!-- Issues will be populated here -->
+                    </div>
+                </div>
+                <div id="no-issues-message" style="text-align: center; padding: 32px; color: #64748b; display: none;">
+                    <p>No issues have been logged yet.</p>
+                    <button class="btn-primary" onclick="closeIssuesTableModal(); showLogIssueForm();">Log your first issue</button>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button class="modal-btn cancel" onclick="closeIssuesTableModal()">Close</button>
+                <button class="modal-btn primary" onclick="showLogIssueForm(); closeIssuesTableModal();">Log New Issue</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Store calendar state in variables (memory in HTML)
+        const today = new Date();
+        let currentMonth = today.getMonth();
+        let currentYear = today.getFullYear();
+
+        const monthNames = [
+            'January', 'February', 'March', 'April', 'May', 'June',
+            'July', 'August', 'September', 'October', 'November', 'December'
+        ];
+        
+        // Example events data (now with details, location, attendees)
+        const calendarEvents = [
+            { date: '2025-01-02', time: '6:00 PM - 8:00 PM', type: 'practice', name: 'Practice', location: 'Barnes Rugby Field', details: 'First practice of the year. Focus on passing drills.', attendees: ['Alice', 'Bob', 'Charlie'] },
+            { date: '2025-01-05', time: '7:00 PM - 9:00 PM', type: 'practice', name: 'Training', location: 'Barnes Rugby Field', details: 'Skills training session.', attendees: ['Alice', 'David', 'Eve'] },
+            { date: '2025-01-08', time: '9:00 AM - 4:00 PM', type: 'festival', name: 'Festival', location: 'Surrey Sports Park', details: 'Annual rugby festival.', attendees: ['Team Barnes', 'Team Surrey'] },
+            { date: '2025-01-13', time: '6:30 PM - 8:30 PM', type: 'practice', name: 'Practice', location: 'Barnes Rugby Field', details: 'Defensive drills and positioning.', attendees: ['Bob', 'Charlie', 'Eve'] },
+            { date: '2025-01-15', time: '2:00 PM - 4:00 PM', type: 'match', name: 'Championship', location: 'Twickenham Stadium', details: 'Championship match vs Team Richmond.', attendees: ['Full Squad'] },
+            { date: '2025-01-20', time: '7:00 PM - 9:00 PM', type: 'practice', name: 'Training', location: 'Barnes Rugby Field', details: 'Tactical training session.', attendees: ['Alice', 'Bob', 'Charlie', 'David', 'Eve'] },
+            { date: '2025-01-22', time: '1:00 PM - 5:00 PM', type: 'festival', name: 'Surrey Cup', location: 'Surrey Sports Park', details: 'Surrey Cup Final.', attendees: ['Team Barnes', 'Team Surrey'] },
+            { date: '2025-01-27', time: '3:00 PM - 5:00 PM', type: 'practice', name: 'Match Day', location: 'Barnes Rugby Field', details: 'Friendly match.', attendees: ['Full Squad'] },
+            { date: '2025-01-29', time: '10:00 AM - 4:00 PM', type: 'festival', name: 'Spring Festival', location: 'Barnes Rugby Field', details: 'Spring rugby festival.', attendees: ['All Teams'] }
+        ];
+        
+        // Static attendee options
+        const attendeeOptions = ['manus', 'andy', 'james'];
+
+        // Add this line to fix the error:
+        let isEditingAvailability = false;
+
+        // Issues management data
+        let issues = [];
+
+        // Add availability to each event (initialize as empty object if not present)
+        calendarEvents.forEach(ev => {
+            if (!ev.availability) {
+                ev.availability = { manus: '', andy: '', james: '' };
+            }
+        });
+
+        // Pinch-to-zoom functionality for events table
+        let tableZoomLevel = 1;
+        let isZooming = false;
+        let lastDistance = 0;
+        const minZoom = 0.5;
+        const maxZoom = 2;
+        
+        // Initialize calendar on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            currentMonth = today.getMonth();
+            currentYear = today.getFullYear();
+            updateCalendarTitle();
+            renderCalendar();
+            renderEventsTable();
+            renderDrillsTable();
+            document.getElementById('availabilityUser').style.display = 'none';
+            document.getElementById('availabilityUserLabel').style.display = 'none';
+            document.getElementById('toggleAvailabilityBtn').textContent = '+ Add Availability';
+            isEditingAvailability = false;
+            
+            // Initialize pinch-to-zoom for events table
+            initializePinchZoom();
+        });
+        
+        function renderCalendar() {
+            const calendarGrid = document.querySelector('.calendar-grid');
+            // Remove all day headers and days
+            calendarGrid.innerHTML = '';
+            // Add day headers
+            ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].forEach(day => {
+                const header = document.createElement('div');
+                header.className = 'calendar-day-header';
+                header.textContent = day;
+                calendarGrid.appendChild(header);
+            });
+
+            // Get first day of month and number of days
+            const firstDay = new Date(currentYear, currentMonth, 1);
+            const startDay = firstDay.getDay();
+            const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+
+            // Previous month's last few days (optional, for full grid)
+            const prevMonthDays = startDay;
+            const prevMonth = currentMonth === 0 ? 11 : currentMonth - 1;
+            const prevMonthYear = currentMonth === 0 ? currentYear - 1 : currentYear;
+            const prevMonthLastDay = new Date(prevMonthYear, prevMonth + 1, 0).getDate();
+
+            for (let i = prevMonthLastDay - prevMonthDays + 1; i <= prevMonthLastDay; i++) {
+                const dayDiv = document.createElement('div');
+                dayDiv.className = 'calendar-day other-month';
+                dayDiv.innerHTML = `<div class="day-number">${i}</div>`;
+                calendarGrid.appendChild(dayDiv);
+            }
+
+            // Current month days
+            for (let d = 1; d <= daysInMonth; d++) {
+                const dayDiv = document.createElement('div');
+                dayDiv.className = 'calendar-day';
+                const dateStr = `${currentYear}-${String(currentMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+                // Highlight today
+                if (
+                    d === today.getDate() &&
+                    currentYear === today.getFullYear()
+                ) {
+                    dayDiv.classList.add('today');
+                }
+                dayDiv.innerHTML = `<div class="day-number${dayDiv.classList.contains('today') ? ' today' : ''}">${d}</div>`;
+
+                // Add events for this day
+                const eventList = calendarEvents.filter(ev => ev.date === `${currentYear}-${String(currentMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`);
+                eventList.forEach(ev => {
+                    const eventDiv = document.createElement('div');
+                    eventDiv.className = `event ${ev.type}`;
+                    eventDiv.innerHTML = `${ev.name}`;
+                    // Add click event to open details (stubbed for now)
+                    eventDiv.onclick = function() {
+                        openEventDetails(ev);
+                    };
+                    dayDiv.appendChild(eventDiv);
+                });
+
+                calendarGrid.appendChild(dayDiv);
+            }
+        }
+        
+        function updateCalendarTitle() {
+            const title = document.getElementById('calendar-title');
+            title.innerHTML = `${monthNames[currentMonth]} ${currentYear}`;
+        }
+        
+        function changeMonth(delta) {
+            currentMonth += delta;
+            if (currentMonth < 0) {
+                currentMonth = 11;
+                currentYear--;
+            } else if (currentMonth > 11) {
+                currentMonth = 0;
+                currentYear++;
+            }
+            updateCalendarTitle();
+            renderCalendar();
+        }
+        
+        function goToToday() {
+            currentMonth = today.getMonth();
+            currentYear = today.getFullYear();
+            updateCalendarTitle();
+            renderCalendar();
+        }
+        
+        function showSection(section) {
+            // Hide all sections
+            document.querySelectorAll('.mockup-section').forEach(sec => {
+                sec.classList.remove('active');
+            });
+            // Remove active class from all buttons
+            document.querySelectorAll('.mockup-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            // Show the selected section
+            document.getElementById(section).classList.add('active');
+            // Add active class to the corresponding button
+            document.querySelector(`.mockup-btn[onclick="showSection('${section}')"]`).classList.add('active');
+        }
+        window.showSection = showSection;
+
+        function renderEventsTable() {
+            const tableBody = document.getElementById('events-table-body');
+            tableBody.innerHTML = '';
+
+            let filteredEvents = calendarEvents;
+
+            // Apply column filter if set
+            if (columnFilter.key && columnFilter.value) {
+                filteredEvents = filteredEvents.filter(ev => {
+                    let val = '';
+                    switch (columnFilter.key) {
+                        case 'name': val = ev.name; break;
+                        case 'location': val = ev.location; break;
+                        case 'date': val = ev.date; break;
+                        case 'time': val = ev.time; break;
+                        case 'type': val = ev.type; break;
+                        case 'availability': val = Object.values(ev.availability).join(','); break;
+                    }
+                    return val && val.toLowerCase().includes(columnFilter.value);
+                });
+            }
+
+            // Pagination
+            const startIdx = (eventsPage - 1) * eventsPageSize;
+            const endIdx = startIdx + eventsPageSize;
+            const pagedEvents = filteredEvents.slice(startIdx, endIdx);
+
+            pagedEvents.forEach((ev, idx) => {
+                const attending = Object.entries(ev.availability)
+                    .filter(([user, val]) => val === 'yes')
+                    .map(([user]) => user.charAt(0).toUpperCase() + user.slice(1));
+                const availabilityCell = attending.length ? attending.join(', ') : '<span style="color:#64748b;">No one attending</span>';
+
+                // Find the actual index in calendarEvents array
+                const actualEventIndex = calendarEvents.findIndex(event => 
+                    event.name === ev.name && event.date === ev.date && event.time === ev.time
+                );
+
+                const row = document.createElement('div');
+                row.className = 'table-row';
+                row.innerHTML = `
+                    <div>
+                        <div class="event-title">${ev.name}</div>
+                    </div>
+                    <div>${ev.location || ''}</div>
+                    <div>${new Date(ev.date).toLocaleDateString()}</div>
+                    <div>${ev.time}</div>
+                    <div><span class="event-type-badge ${ev.type}">${ev.type.charAt(0).toUpperCase() + ev.type.slice(1)}</span></div>
+                    <div>${availabilityCell}</div>
+                    <div>
+                        <button class="action-btn edit-btn" onclick="editCalendarEvent(${actualEventIndex})">Edit</button>
+                    </div>
+                `;
+                tableBody.appendChild(row);
+            });
+
+            // Add pagination controls if needed
+            const totalPages = Math.ceil(filteredEvents.length / eventsPageSize);
+            if (totalPages > 1) {
+                const paginationDiv = document.createElement('div');
+                paginationDiv.innerHTML = `
+                    <span style="font-weight:500;">Page ${eventsPage} of ${totalPages}</span>
+                    <button class="filter-btn" ${eventsPage === totalPages ? 'disabled' : ''} onclick="eventsPage++; renderEventsTable();">Next</button>
+                    <button class="filter-btn" onclick="clearColumnFilter()">Clear Filter</button>
+                `;
+                tableBody.appendChild(paginationDiv);
+            }
+
+            // Re-apply zoom after rendering
+            setTimeout(() => {
+                const eventsTableContainer = document.querySelector('.events-list-container .table-container');
+                if (eventsTableContainer && tableZoomLevel !== 1) {
+                    const header = eventsTableContainer.querySelector('.table-header');
+                    const rows = eventsTableContainer.querySelectorAll('.table-row');
+                    
+                    if (header) {
+                        header.style.fontSize = (14 * tableZoomLevel) + 'px';
+                        header.style.padding = Math.max(8, 16 * tableZoomLevel) + 'px 20px';
+                    }
+                    
+                    rows.forEach(row => {
+                        const eventTitle = row.querySelector('.event-title');
+                        const otherCells = row.querySelectorAll('div:not(.event-title)');
+                        
+                        if (eventTitle) {
+                            eventTitle.style.fontSize = (15 * tableZoomLevel) + 'px';
+                        }
+                        
+                        otherCells.forEach(cell => {
+                            cell.style.fontSize = (14 * tableZoomLevel) + 'px';
+                        });
+                        
+                        const badges = row.querySelectorAll('.event-type-badge');
+                        badges.forEach(badge => {
+                            badge.style.fontSize = (12 * tableZoomLevel) + 'px';
+                        });
+                        
+                        row.style.padding = Math.max(8, 16 * tableZoomLevel) + 'px 20px';
+                    });
+                }
+            }, 10);
+        }
+        
+        function toggleAvailability(eventIdx, user, checked) {
+            calendarEvents[eventIdx].availability[user] = checked ? 'yes' : '';
+            renderEventsTable();
+            renderCalendar();
+        }
+
+        function toggleDrillForm() {
+            const form = document.getElementById('drill-form');
+            if (form.style.display === 'none' || form.style.display === '') {
+                form.style.display = 'block';
+            } else {
+                form.style.display = 'none';
+            }
+        }
+        
+        function addDrillToRepository() {
+            // Get form values
+            const name = document.getElementById('drill-name').value;
+            const skill = document.getElementById('drill-skill').value;
+            const duration = document.getElementById('drill-duration').value;
+            const description = document.getElementById('drill-description').value;
+            
+            // Basic validation
+            if (!name || !skill || !duration || !description) {
+                alert('Please fill in all required fields.');
+                return;
+            }
+            
+            // Create new drill object
+            const newDrill = {
+                name,
+                skill,
+                duration,
+                description,
+                id: Date.now() // Simple unique id
+            };
+            
+            // Add to drills array
+            drills.push(newDrill);
+            
+            // Show success message
+            const successMessage = document.getElementById('drill-success');
+            successMessage.style.display = 'block';
+            setTimeout(() => {
+                successMessage.style.display = 'none';
+            }, 3000);
+            
+            // Reset form
+            document.getElementById('drill-name').value = '';
+            document.getElementById('drill-skill').value = '';
+            document.getElementById('drill-duration').value = '';
+            document.getElementById('drill-description').value = '';
+            
+            // Re-render drills table
+            renderDrillsTable();
+
+            // Hide the add drill form
+            toggleDrillForm();
+        }
+        
+        function renderDrillsTable() {
+            const tableBody = document.getElementById('drills-table-body');
+            tableBody.innerHTML = '';
+            drills.forEach(drill => {
+                const row = document.createElement('div');
+                row.className = 'table-row';
+                row.setAttribute('data-skill', drill.skill);
+                row.setAttribute('data-duration', drill.duration);
+                row.innerHTML = `
+                    <div>
+                        <span class="drill-name">${drill.name}</span>
+                        <div class="drill-description">${drill.description}</div>
+                    </div>
+                    <div><span class="skill-badge skill-${drill.skill.toLowerCase()}">${drill.skill}</span></div>
+                    <div><span class="duration-badge">${drill.duration}</span></div>
+                    <div class="drill-actions">
+                        <button class="action-btn edit-btn" onclick="editDrill(${drill.id})">Edit</button>
+                        <button class="action-btn delete-btn" onclick="confirmDeleteDrill(${drill.id})">Delete</button>
+                    </div>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+        
+        function filterDrills() {
+            const query = document.querySelector('.search-box').value.toLowerCase();
+            const rows = document.querySelectorAll('.table-row');
+            rows.forEach(row => {
+                const name = row.querySelector('.drill-name').innerText.toLowerCase();
+                const description = row.querySelector('.drill-description').innerText.toLowerCase();
+                if (name.includes(query) || description.includes(query)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        }
+        
+        function filterBySkill(skill) {
+            const rows = document.querySelectorAll('.table-row');
+            rows.forEach(row => {
+                if (skill === 'all') {
+                    row.style.display = '';
+                } else {
+                    const rowSkill = row.getAttribute('data-skill');
+                    if (rowSkill === skill) {
+                        row.style.display = '';
+                    } else {
+                        row.style.display = 'none';
+                    }
+                }
+            });
+        }
+        
+        function filterByDuration(duration) {
+            const rows = document.querySelectorAll('.table-row');
+            rows.forEach(row => {
+                if (duration === 'all') {
+                    row.style.display = '';
+                } else {
+                    const rowDuration = row.getAttribute('data-duration');
+                    if (rowDuration === duration) {
+                        row.style.display = '';
+                    } else {
+                        row.style.display = 'none';
+                    }
+                }
+            });
+        }
+
+        // Re-render table when user changes
+        document.getElementById('availabilityUser').addEventListener('change', renderEventsTable);
+
+        // Add this near the top of your <script> section, before using drills
+        const drills = [
+            {
+                name: "Passing Drill",
+                skill: "Passing",
+                duration: "30 minutes",
+                description: "Improve passing accuracy and speed.",
+                id: 1
+            },
+            {
+                name: "Defensive Line Drill",
+                skill: "Defense",
+                duration: "45 minutes",
+                description: "Work on defensive line structure and communication.",
+                id: 2
+            },
+            {
+                name: "Awareness Game",
+                skill: "Awareness",
+                duration: "15 minutes",
+                description: "Enhance spatial awareness with small-sided games.",
+                id: 3
+            },
+            {
+                name: "Long Passing",
+                skill: "Passing",
+                duration: "60 minutes",
+                description: "Focus on long-range passing under pressure.",
+                id: 4
+            },
+            {
+                name: "Tackle Technique",
+                skill: "Defense",
+                duration: "30 minutes",
+                description: "Refine tackle technique and safety.",
+                id: 5
+            },
+            {
+                name: "Vision Drill",
+                skill: "Awareness",
+                duration: "45 minutes",
+                description: "Develop vision and decision-making skills.",
+                id: 6
+            },
+            {
+                name: "Quick Hands",
+                skill: "Passing",
+                duration: "15 minutes",
+                description: "Increase hand speed and reaction time.",
+                id: 7
+            }
+        ];
+
+        let eventsPageSize = 10;
+        let eventsPage = 1;
+        let columnFilter = { key: '', value: '' };
+        
+        // User role simulation (in a real app this would come from authentication)
+        let currentUserRole = 'admin'; // or 'user'
+        
+        // Variables for confirmation modal
+        let confirmationAction = null;
+        let currentEditingDrillId = null;
+        let currentEditingEventIndex = null;
+
+        // Drill management functions
+        function downloadAllDrills() {
+            const drillsData = {
+                version: "1.0",
+                exported: new Date().toISOString(),
+                drills: drills
+            };
+            
+            const json = JSON.stringify(drillsData, null, 2);
+            const blob = new Blob([json], { type: "application/json" });
+            const url = URL.createObjectURL(blob);
+            
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `drills_export_${new Date().toISOString().split('T')[0]}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            showUploadStatus('success', `Downloaded ${drills.length} drills to JSON file.`);
+        }
+
+        function uploadDrills(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    let importedDrills = data.drills || data; // Handle both wrapped and direct array formats
+                    
+                    if (!Array.isArray(importedDrills)) {
+                        throw new Error('Invalid file format: expected array of drills');
+                    }
+                    
+                    // Validate drill structure
+                    const requiredFields = ['name', 'skill', 'duration', 'description'];
+                    for (let drill of importedDrills) {
+                        for (let field of requiredFields) {
+                            if (!drill[field]) {
+                                throw new Error(`Invalid drill structure: missing field '${field}'`);
+                            }
+                        }
+                    }
+                    
+                    // Show confirmation modal for import options
+                    showImportConfirmation(importedDrills);
+                    
+                } catch (error) {
+                    showUploadStatus('error', `Error reading file: ${error.message}`);
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        function showImportConfirmation(importedDrills) {
+            const existingCount = drills.length;
+            const importCount = importedDrills.length;
+            
+            document.getElementById('modalIcon').textContent = '📤';
+            document.getElementById('modalTitle').textContent = 'Import Drills';
+            document.getElementById('modalMessage').innerHTML = `
+                <p>Found ${importCount} drills to import.</p>
+                <p>Current repository contains ${existingCount} drills.</p>
+                <p><strong>Choose import mode:</strong></p>
+                <div style="margin-top: 12px;">
+                    <label style="display: block; margin-bottom: 8px;">
+                        <input type="radio" name="importMode" value="append" checked> 
+                        <strong>Append:</strong> Add new drills to existing ones
+                    </label>
+                    <label style="display: block; margin-bottom: 8px;">
+                        <input type="radio" name="importMode" value="update"> 
+                        <strong>Update:</strong> Replace drills with matching names
+                    </label>
+                    <label style="display: block;">
+                        <input type="radio" name="importMode" value="replace"> 
+                        <strong>Replace All:</strong> Delete existing and import new drills
+                    </label>
+                </div>
+            `;
+            
+            const confirmButton = document.getElementById('confirmButton');
+            confirmButton.textContent = 'Import';
+            confirmButton.className = 'modal-btn primary';
+            
+            confirmationAction = () => {
+                const mode = document.querySelector('input[name="importMode"]:checked').value;
+                processImport(importedDrills, mode);
+            };
+            
+            showConfirmationModal();
+        }
+
+        function processImport(importedDrills, mode) {
+            let added = 0, updated = 0, replaced = 0;
+            
+            try {
+                switch (mode) {
+                    case 'append':
+                        importedDrills.forEach(drill => {
+                            drill.id = Date.now() + Math.random(); // Ensure unique ID
+                            drills.push(drill);
+                            added++;
+                        });
+                        break;
+                        
+                    case 'update':
+                        importedDrills.forEach(importDrill => {
+                            const existingIndex = drills.findIndex(d => d.name === importDrill.name);
+                            if (existingIndex >= 0) {
+                                importDrill.id = drills[existingIndex].id; // Keep existing ID
+                                drills[existingIndex] = importDrill;
+                                updated++;
+                            } else {
+                                importDrill.id = Date.now() + Math.random();
+                                drills.push(importDrill);
+                                added++;
+                            }
+                        });
+                        break;
+                        
+                    case 'replace':
+                        drills.length = 0; // Clear existing drills
+                        importedDrills.forEach(drill => {
+                            drill.id = Date.now() + Math.random();
+                            drills.push(drill);
+                            replaced++;
+                        });
+                        break;
+                }
+                
+                renderDrillsTable();
+                
+                let message = '';
+                if (mode === 'replace') {
+                    message = `Replaced all drills with ${replaced} imported drills.`;
+                } else {
+                    message = `Import complete: ${added} added, ${updated} updated.`;
+                }
+                showUploadStatus('success', message);
+                
+            } catch (error) {
+                showUploadStatus('error', `Error importing drills: ${error.message}`);
+            }
+        }
+
+        function showUploadStatus(type, message) {
+            // Update both status divs if they exist
+            const statusDiv = document.getElementById('upload-status');
+            const systemStatusDiv = document.getElementById('upload-status-system');
+            
+            [statusDiv, systemStatusDiv].forEach(div => {
+                if (div) {
+                    div.className = `upload-status ${type}`;
+                    div.textContent = message;
+                    div.style.display = 'block';
+                }
+            });
+            
+            setTimeout(() => {
+                [statusDiv, systemStatusDiv].forEach(div => {
+                    if (div) {
+                        div.style.display = 'none';
+                    }
+                });
+            }, 5000);
+        }
+
+        function confirmDeleteAllDrills() {
+            if (currentUserRole !== 'admin') {
+                showUploadStatus('error', 'Only administrators can delete all drills.');
+                return;
+            }
+            
+            document.getElementById('modalIcon').textContent = '🗑️';
+            document.getElementById('modalTitle').textContent = 'Delete All Drills';
+            document.getElementById('modalMessage').innerHTML = `
+                <p><strong>⚠️ WARNING: This action cannot be undone!</strong></p>
+                <p>This will permanently delete all ${drills.length} drills in the repository.</p>
+                <p>Consider downloading a backup first.</p>
+            `;
+            
+            const confirmButton = document.getElementById('confirmButton');
+            confirmButton.textContent = 'Delete All';
+            confirmButton.className = 'modal-btn confirm';
+            
+            confirmationAction = () => {
+                drills.length = 0; // Clear all drills
+                renderDrillsTable();
+                showUploadStatus('success', 'All drills have been deleted.');
+            };
+            
+            showConfirmationModal();
+        }
+
+        function editDrill(drillId) {
+            const drill = drills.find(d => d.id === drillId);
+            if (!drill) {
+                showUploadStatus('error', 'Drill not found.');
+                return;
+            }
+            
+            currentEditingDrillId = drillId;
+            
+            // Populate edit form
+            document.getElementById('edit-drill-name').value = drill.name;
+            document.getElementById('edit-drill-skill').value = drill.skill;
+            document.getElementById('edit-drill-duration').value = drill.duration;
+            document.getElementById('edit-drill-description').value = drill.description;
+            
+            showEditDrillModal();
+        }
+
+        function saveEditedDrill() {
+            const name = document.getElementById('edit-drill-name').value;
+            const skill = document.getElementById('edit-drill-skill').value;
+            const duration = document.getElementById('edit-drill-duration').value;
+            const description = document.getElementById('edit-drill-description').value;
+            
+            if (!name || !skill || !duration || !description) {
+                alert('Please fill in all required fields.');
+                return;
+            }
+            
+            const drill = drills.find(d => d.id === currentEditingDrillId);
+            if (drill) {
+                drill.name = name;
+                drill.skill = skill;
+                drill.duration = duration;
+                drill.description = description;
+                
+                renderDrillsTable();
+                closeEditDrillModal();
+                showUploadStatus('success', `Drill "${name}" has been updated.`);
+            }
+        }
+
+        function confirmDeleteDrill(drillId) {
+            if (currentUserRole !== 'admin') {
+                showUploadStatus('error', 'Only administrators can delete drills.');
+                return;
+            }
+            
+            const drill = drills.find(d => d.id === drillId);
+            if (!drill) {
+                showUploadStatus('error', 'Drill not found.');
+                return;
+            }
+            
+            document.getElementById('modalIcon').textContent = '🗑️';
+            document.getElementById('modalTitle').textContent = 'Delete Drill';
+            document.getElementById('modalMessage').innerHTML = `
+                <p>Are you sure you want to delete the drill:</p>
+                <p><strong>"${drill.name}"</strong></p>
+                <p>This action cannot be undone.</p>
+            `;
+            
+            const confirmButton = document.getElementById('confirmButton');
+            confirmButton.textContent = 'Delete';
+            confirmButton.className = 'modal-btn confirm';
+            
+            confirmationAction = () => {
+                const index = drills.findIndex(d => d.id === drillId);
+                if (index >= 0) {
+                    drills.splice(index, 1);
+                    renderDrillsTable();
+                    showUploadStatus('success', `Drill "${drill.name}" has been deleted.`);
+                }
+            };
+            
+            showConfirmationModal();
+        }
+
+        // Calendar Event management functions
+        function downloadAllEvents() {
+            const eventsData = {
+                version: "1.0",
+                exported: new Date().toISOString(),
+                events: calendarEvents
+            };
+            
+            const json = JSON.stringify(eventsData, null, 2);
+            const blob = new Blob([json], { type: "application/json" });
+            const url = URL.createObjectURL(blob);
+            
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `calendar_events_export_${new Date().toISOString().split('T')[0]}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            showCalendarUploadStatus('success', `Downloaded ${calendarEvents.length} calendar events to JSON file.`);
+        }
+
+        function uploadEvents(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    let importedEvents = data.events || data; // Handle both wrapped and direct array formats
+                    
+                    if (!Array.isArray(importedEvents)) {
+                        throw new Error('Invalid file format: expected array of calendar events');
+                    }
+                    
+                    // Validate calendar event structure
+                    const requiredFields = ['date', 'time', 'type', 'name', 'location', 'details'];
+                    for (let calEvent of importedEvents) {
+                        for (let field of requiredFields) {
+                            if (!calEvent[field]) {
+                                throw new Error(`Invalid calendar event structure: missing field '${field}'`);
+                            }
+                        }
+                        // Ensure attendees array exists
+                        if (!calEvent.attendees) {
+                            calEvent.attendees = [];
+                        }
+                        // Ensure availability object exists
+                        if (!calEvent.availability) {
+                            calEvent.availability = { manus: '', andy: '', james: '' };
+                        }
+                    }
+                    
+                    // Show confirmation modal for import options
+                    showEventImportConfirmation(importedEvents);
+                    
+                } catch (error) {
+                    showCalendarUploadStatus('error', `Error reading file: ${error.message}`);
+                }
+                
+                // Clear the file input for next upload
+                event.target.value = '';
+            };
+            reader.readAsText(file);
+        }
+
+        function showEventImportConfirmation(importedEvents) {
+            const existingCount = calendarEvents.length;
+            const importCount = importedEvents.length;
+            
+            document.getElementById('modalIcon').textContent = '📤';
+            document.getElementById('modalTitle').textContent = 'Import Calendar Events';
+            document.getElementById('modalMessage').innerHTML = `
+                <p>Found ${importCount} calendar events to import.</p>
+                <p>Current calendar contains ${existingCount} events.</p>
+                <p><strong>Choose import mode:</strong></p>
+                <div style="margin-top: 12px;">
+                    <label style="display: block; margin-bottom: 8px;">
+                        <input type="radio" name="importMode" value="append" checked> 
+                        <strong>Append:</strong> Add new events to existing ones
+                    </label>
+                    <label style="display: block; margin-bottom: 8px;">
+                        <input type="radio" name="importMode" value="update"> 
+                        <strong>Update:</strong> Replace events with matching names and dates
+                    </label>
+                    <label style="display: block;">
+                        <input type="radio" name="importMode" value="replace"> 
+                        <strong>Replace All:</strong> Delete existing and import new events
+                    </label>
+                </div>
+            `;
+            
+            const confirmButton = document.getElementById('confirmButton');
+            confirmButton.textContent = 'Import';
+            confirmButton.className = 'modal-btn primary';
+            
+            confirmationAction = () => {
+                const mode = document.querySelector('input[name="importMode"]:checked').value;
+                processEventImport(importedEvents, mode);
+            };
+            
+            showConfirmationModal();
+        }
+
+        function processEventImport(importedEvents, mode) {
+            let added = 0, updated = 0, replaced = 0;
+            
+            try {
+                switch (mode) {
+                    case 'append':
+                        importedEvents.forEach(calEvent => {
+                            calendarEvents.push(calEvent);
+                            added++;
+                        });
+                        break;
+                        
+                    case 'update':
+                        importedEvents.forEach(importEvent => {
+                            const existingIndex = calendarEvents.findIndex(e => e.name === importEvent.name && e.date === importEvent.date);
+                            if (existingIndex >= 0) {
+                                calendarEvents[existingIndex] = importEvent;
+                                updated++;
+                            } else {
+                                calendarEvents.push(importEvent);
+                                added++;
+                            }
+                        });
+                        break;
+                        
+                    case 'replace':
+                        calendarEvents.length = 0; // Clear existing events
+                        importedEvents.forEach(calEvent => {
+                            calendarEvents.push(calEvent);
+                            replaced++;
+                        });
+                        break;
+                }
+                
+                renderEventsTable();
+                renderCalendar();
+                
+                let message = '';
+                if (mode === 'replace') {
+                    message = `Replaced all events with ${replaced} imported events.`;
+                } else {
+                    message = `Import complete: ${added} added, ${updated} updated.`;
+                }
+                showCalendarUploadStatus('success', message);
+                
+            } catch (error) {
+                showCalendarUploadStatus('error', `Error importing calendar events: ${error.message}`);
+            }
+        }
+
+        function showCalendarUploadStatus(type, message) {
+            // Update calendar status div (if it exists in calendar section)
+            const calendarStatusDiv = document.getElementById('upload-status-calendar');
+            
+            if (calendarStatusDiv) {
+                calendarStatusDiv.className = `upload-status ${type}`;
+                calendarStatusDiv.textContent = message;
+                calendarStatusDiv.style.display = 'block';
+            }
+            
+            // Update system calendar status div (in admin section)
+            const calendarSystemStatusDiv = document.getElementById('upload-status-calendar-system');
+            
+            if (calendarSystemStatusDiv) {
+                calendarSystemStatusDiv.className = `upload-status ${type}`;
+                calendarSystemStatusDiv.textContent = message;
+                calendarSystemStatusDiv.style.display = 'block';
+            }
+            
+            // Also use the general showUploadStatus for consistency
+            showUploadStatus(type, message);
+            
+            setTimeout(() => {
+                if (calendarStatusDiv) {
+                    calendarStatusDiv.style.display = 'none';
+                }
+                if (calendarSystemStatusDiv) {
+                    calendarSystemStatusDiv.style.display = 'none';
+                }
+            }, 5000);
+        }
+
+        function confirmDeleteAllEvents() {
+            if (currentUserRole !== 'admin') {
+                showCalendarUploadStatus('error', 'Only administrators can delete all calendar events.');
+                return;
+            }
+            
+            document.getElementById('modalIcon').textContent = '🗑️';
+            document.getElementById('modalTitle').textContent = 'Delete All Calendar Events';
+            document.getElementById('modalMessage').innerHTML = `
+                <p><strong>⚠️ WARNING: This action cannot be undone!</strong></p>
+                <p>This will permanently delete all ${calendarEvents.length} calendar events in the repository.</p>
+                <p>Consider downloading a backup first.</p>
+            `;
+            
+            const confirmButton = document.getElementById('confirmButton');
+            confirmButton.textContent = 'Delete All';
+            confirmButton.className = 'modal-btn confirm';
+            
+            confirmationAction = () => {
+                calendarEvents.length = 0; // Clear all calendar events
+                renderEventsTable();
+                renderCalendar();
+                showCalendarUploadStatus('success', 'All calendar events have been deleted.');
+            };
+            
+            showConfirmationModal();
+        }
+
+        // Modal management functions
+        function showConfirmationModal() {
+            document.getElementById('confirmationModal').classList.add('show');
+        }
+
+        function closeConfirmationModal() {
+            document.getElementById('confirmationModal').classList.remove('show');
+            confirmationAction = null;
+        }
+
+        function confirmAction() {
+            if (confirmationAction) {
+                confirmationAction();
+                closeConfirmationModal();
+            }
+        }
+
+        function showEditDrillModal() {
+            document.getElementById('editDrillModal').classList.add('show');
+        }
+
+        function closeEditDrillModal() {
+            document.getElementById('editDrillModal').classList.remove('show');
+            currentEditingDrillId = null;
+        }
+
+        // Calendar Event editing functions
+        function editCalendarEvent(eventIndex) {
+            currentEditingEventIndex = eventIndex;
+            const event = calendarEvents[eventIndex];
+            
+            if (!event) {
+                alert('Event not found.');
+                return;
+            }
+            
+            // Populate form fields
+            document.getElementById('edit-event-name').value = event.name;
+            document.getElementById('edit-event-location').value = event.location || '';
+            document.getElementById('edit-event-date').value = event.date;
+            document.getElementById('edit-event-time').value = event.time;
+            document.getElementById('edit-event-type').value = event.type;
+            document.getElementById('edit-event-details').value = event.details || '';
+            
+            showEditEventModal();
+        }
+
+        function saveEditedEvent() {
+            const name = document.getElementById('edit-event-name').value;
+            const location = document.getElementById('edit-event-location').value;
+            const date = document.getElementById('edit-event-date').value;
+            const time = document.getElementById('edit-event-time').value;
+            const type = document.getElementById('edit-event-type').value;
+            const details = document.getElementById('edit-event-details').value;
+            
+            if (!name || !date || !time || !type) {
+                alert('Please fill in all required fields.');
+                return;
+            }
+            
+            // Update the event
+            const event = calendarEvents[currentEditingEventIndex];
+            event.name = name;
+            event.location = location;
+            event.date = date;
+            event.time = time;
+            event.type = type;
+            event.details = details;
+            
+            // Re-render both table and calendar
+            renderEventsTable();
+            renderCalendar();
+            closeEditEventModal();
+        }
+
+        function showEditEventModal() {
+            document.getElementById('editEventModal').classList.add('show');
+        }
+
+        function closeEditEventModal() {
+            document.getElementById('editEventModal').classList.remove('show');
+            currentEditingEventIndex = null;
+        }
+
+        // Pinch-to-zoom functionality for events table
+        function initializePinchZoom() {
+            const eventsTableContainer = document.querySelector('.events-list-container .table-container');
+            if (!eventsTableContainer) return;
+
+            let initialDistance = 0;
+            let initialZoom = tableZoomLevel;
+
+            function getDistance(touches) {
+                const dx = touches[0].clientX - touches[1].clientX;
+                const dy = touches[0].clientY - touches[1].clientY;
+                return Math.sqrt(dx * dx + dy * dy);
+            }
+
+            function applyZoom(zoomLevel) {
+                tableZoomLevel = Math.max(minZoom, Math.min(maxZoom, zoomLevel));
+                
+                // Apply zoom by scaling font sizes
+                const header = eventsTableContainer.querySelector('.table-header');
+                const rows = eventsTableContainer.querySelectorAll('.table-row');
+                
+                if (header) {
+                    header.style.fontSize = (14 * tableZoomLevel) + 'px';
+                }
+                
+                rows.forEach(row => {
+                    const eventTitle = row.querySelector('.event-title');
+                    const otherCells = row.querySelectorAll('div:not(.event-title)');
+                    
+                    if (eventTitle) {
+                        eventTitle.style.fontSize = (15 * tableZoomLevel) + 'px';
+                    }
+                    
+                    otherCells.forEach(cell => {
+                        cell.style.fontSize = (14 * tableZoomLevel) + 'px';
+                    });
+                    
+                    // Scale badges as well
+                    const badges = row.querySelectorAll('.event-type-badge');
+                    badges.forEach(badge => {
+                        badge.style.fontSize = (12 * tableZoomLevel) + 'px';
+                    });
+                });
+                
+                // Also scale the table container padding for better touch targets
+                const scaledPadding = Math.max(8, 16 * tableZoomLevel);
+                header.style.padding = scaledPadding + 'px 20px';
+                rows.forEach(row => {
+                    row.style.padding = scaledPadding + 'px 20px';
+                });
+            }
+
+            eventsTableContainer.addEventListener('touchstart', function(e) {
+                if (e.touches.length === 2) {
+                    e.preventDefault();
+                    isZooming = true;
+                    initialDistance = getDistance(e.touches);
+                    initialZoom = tableZoomLevel;
+                }
+            }, { passive: false });
+
+            eventsTableContainer.addEventListener('touchmove', function(e) {
+                if (e.touches.length === 2 && isZooming) {
+                    e.preventDefault();
+                    const currentDistance = getDistance(e.touches);
+                    const scale = currentDistance / initialDistance;
+                    const newZoom = initialZoom * scale;
+                    
+                    applyZoom(newZoom);
+                }
+            }, { passive: false });
+
+            eventsTableContainer.addEventListener('touchend', function(e) {
+                if (e.touches.length < 2) {
+                    isZooming = false;
+                }
+            });
+
+            // Apply initial zoom
+            applyZoom(tableZoomLevel);
+        }
+
+        // Issue Management Functions
+        function showLogIssueForm() {
+            document.getElementById('logIssueModal').style.display = 'flex';
+            // Clear form fields
+            document.getElementById('issue-title').value = '';
+            document.getElementById('issue-description').value = '';
+        }
+
+        function closeLogIssueModal() {
+            document.getElementById('logIssueModal').style.display = 'none';
+        }
+
+        function saveIssue() {
+            const title = document.getElementById('issue-title').value.trim();
+            const description = document.getElementById('issue-description').value.trim();
+            
+            if (!title || !description) {
+                showIssueStatus('Please fill in both title and description.', 'error');
+                return;
+            }
+            
+            // Create new issue object
+            const issue = {
+                id: Date.now(), // Simple ID generation for frontend-only storage
+                title: title,
+                description: description,
+                dateLogged: new Date().toISOString().split('T')[0], // YYYY-MM-DD format
+                status: 'Open' // Default status
+            };
+            
+            // Add to issues array
+            issues.unshift(issue); // Add to beginning for newest first
+            
+            // Close modal and show success message
+            closeLogIssueModal();
+            showIssueStatus('Issue logged successfully!', 'success');
+            
+            // If issues table is open, refresh it
+            if (document.getElementById('issuesTableModal').style.display === 'flex') {
+                renderIssuesTable();
+            }
+        }
+
+        function showIssuesTable() {
+            document.getElementById('issuesTableModal').style.display = 'flex';
+            renderIssuesTable();
+        }
+
+        function closeIssuesTableModal() {
+            document.getElementById('issuesTableModal').style.display = 'none';
+        }
+
+        function renderIssuesTable() {
+            const tableBody = document.getElementById('issues-table-body');
+            const noIssuesMessage = document.getElementById('no-issues-message');
+            
+            if (issues.length === 0) {
+                tableBody.style.display = 'none';
+                noIssuesMessage.style.display = 'block';
+                return;
+            }
+            
+            tableBody.style.display = 'block';
+            noIssuesMessage.style.display = 'none';
+            
+            tableBody.innerHTML = '';
+            
+            issues.forEach(issue => {
+                const row = document.createElement('div');
+                row.className = 'table-row';
+                row.innerHTML = `
+                    <div style="flex: 2; font-weight: 600;">${issue.title}</div>
+                    <div style="flex: 3;">
+                        <div style="max-height: 60px; overflow: hidden; text-overflow: ellipsis;">
+                            ${issue.description}
+                        </div>
+                    </div>
+                    <div style="flex: 1;">${issue.dateLogged}</div>
+                    <div style="flex: 1;">
+                        <span class="status-badge status-${issue.status.toLowerCase()}">${issue.status}</span>
+                    </div>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+
+        function showIssueStatus(message, type) {
+            const statusDiv = document.getElementById('upload-status-issues');
+            statusDiv.className = `upload-status ${type}`;
+            statusDiv.textContent = message;
+            statusDiv.style.display = 'block';
+            
+            // Hide after 3 seconds
+            setTimeout(() => {
+                statusDiv.style.display = 'none';
+            }, 3000);
+        }
+
+        window.showSection = showSection;
+    </script>
+</body>
         console.log('🏉 Barnes Rugby - Secure Authentication Ready');
     </script>
 </body>
