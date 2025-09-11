@@ -376,12 +376,33 @@
                 <p>Professional drill management and practice calendar system</p>
             </header>
             
-            <!-- Your existing app content goes here -->
-            <p style="color: white; text-align: center; padding: 40px; font-size: 18px;">
-                🎉 <strong>Authentication successful!</strong><br>
-                Your full Barnes Rugby coaching platform will be displayed here.<br>
-                <em>(Add your existing drills and calendar content)</em>
-            </p>
+            <nav class="mockup-nav">
+                <button class="mockup-btn active" onclick="showMockup('drills')">Drills</button>
+                <button class="mockup-btn" onclick="showMockup('calendar')">Practice Calendar</button>
+                <button class="mockup-btn" onclick="showMockup('overview')">System Overview</button>
+            </nav>
+            
+            <!-- Drills Section -->
+            <section id="drills" class="mockup-section active">
+                <div class="section-header">
+                    <h2 class="section-title">📋 Drills Management</h2>
+                    <button class="add-btn" onclick="toggleDrillForm()">
+                        <span>+</span> Add New Drill
+                    </button>
+                </div>
+                
+                <!-- Upload Section (Initially Hidden) -->
+                <div id="drill-form" style="display: none;">
+                    <div class="file-upload">
+                        <div class="upload-icon">📄</div>
+                        <div class="upload-text">Upload Drill Document</div>
+                        <div class="upload-subtext">Drop your PowerPoint, Word, or PDF document here, or click to browse</div>
+                        <div class="upload-subtext" style="margin-top: 8px;">Supported formats: .pptx, .docx, .pdf (Max 10MB)</div>
+                    </div>
+                    
+                    <div class="form-mockup">
+                        <h3 style="margin-bottom: 24px; color: #1e3a8a; font-weight: 600;">Drill Information</h3>
+                        
         </div>
     </div>
 
