@@ -377,11 +377,408 @@
             </header>
             
             <!-- Your existing app content goes here -->
-            <p style="color: white; text-align: center; padding: 40px; font-size: 18px;">
-                🎉 <strong>Authentication successful!</strong><br>
-                Your full Barnes Rugby coaching platform will be displayed here.<br>
-                <em>(Add your existing drills and calendar content)</em>
-            </p>
+        <nav class="mockup-nav">
+            <button class="mockup-btn" onclick="showSection('drills')">Drills</button>
+            <button class="mockup-btn active" onclick="showSection('calendar')">Practice Calendar</button>
+            <button class="mockup-btn" onclick="showSection('overview')">System</button>
+            <button class="mockup-btn" onclick="showSection('design-drill')">Design Drill</button>
+        </nav>
+        
+        <!-- Drills Section -->
+        <section id="drills" class="mockup-section">
+            <div class="section-header">
+                <h2 class="section-title">📋 Drills Management</h2>
+                <button class="add-btn" onclick="toggleDrillForm()">
+                    <span>+</span> Add New Drill
+                </button>
+            </div>
+            
+            <div id="drill-success" class="success-message">
+                Drill added successfully!
+            </div>
+            
+            <!-- Upload Section (Initially Hidden) -->
+            <div id="drill-form" style="display: none;">
+                <div class="form-mockup">
+                    <h3 style="margin-bottom: 24px; color: #1e3a8a; font-weight: 600;">Drill Information</h3>
+                    <div class="form-grid">
+                        <div class="form-field">
+                            <label class="form-label" for="drill-name">Drill Name</label>
+                            <input class="form-input" id="drill-name" type="text" placeholder="Enter drill name" required>
+                        </div>
+                        <div class="form-field">
+                            <label class="form-label" for="drill-skill">Skill</label>
+                            <select class="form-input" id="drill-skill" required>
+                                <option value="">Select skill</option>
+                                <option value="Passing">Passing</option>
+                                <option value="Awareness">Awareness</option>
+                                <option value="Defense">Defense</option>
+                            </select>
+                        </div>
+                        <div class="form-field full-width" style="display: flex; flex-direction: row; align-items: flex-end; gap: 12px;">
+                            <div style="flex:1;">
+                                <label class="form-label" for="drill-duration">Duration</label>
+                                <select class="form-input" id="drill-duration" required>
+                                    <option value="">Select duration</option>
+                                    <option value="15 minutes">15 min</option>
+                                    <option value="30 minutes">30 min</option>
+                                    <option value="45 minutes">45 min</option>
+                                    <option value="60 minutes">60 min</option>
+                                </select>
+                            </div>
+                            <a href="try.html">
+                                <button type="button" class="btn-primary" style="margin-bottom:0;">Design Drill</button>
+                            </a>
+                        </div>
+                        <div class="form-field full-width">
+                            <label class="form-label" for="drill-description">Description</label>
+                            <textarea class="form-input" id="drill-description" rows="2" placeholder="Enter drill description" required></textarea>
+                        </div>
+                        <div class="form-field full-width">
+                            <label class="form-label" for="drill-instructions">Instructions</label>
+                            <textarea class="form-input" id="drill-instructions" rows="3" placeholder="Enter detailed instructions..."></textarea>
+                        </div>
+                        <div class="form-field full-width">
+                            <label class="form-label" for="drill-equipment">Equipment</label>
+                            <input class="form-input" id="drill-equipment" type="text" placeholder="Enter required equipment (comma separated)">
+                        </div>
+                        <div class="form-field">
+                            <button type="button" onclick="saveDrill()" class="btn-primary">Save Drill</button>
+                            <button type="button" onclick="toggleDrillForm()" class="btn-secondary">Cancel</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Display Section -->
+            <div class="drills-table">
+                <div class="table-header">
+                    <div style="flex: 1;">Name</div>
+                    <div style="flex: 1;">Skill</div>
+                    <div style="flex: 1;">Duration</div>
+                    <div style="flex: 2;">Description</div>
+                </div>
+                <div id="drills-list">
+                    <!-- Drills will be populated here -->
+                </div>
+                <div id="upload-status" class="upload-status error" style="display: none;">
+                    <!-- Status messages will appear here -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Practice Calendar Section -->
+        <section id="calendar" class="mockup-section active">
+            <div class="section-header">
+                <h2 class="section-title">📅 Practice Calendar</h2>
+                <div style="display: flex; gap: 16px;">
+                    <button class="add-btn" onclick="showEventsTable()">
+                        📋 View All Events
+                    </button>
+                    <button class="add-btn" onclick="showAddEventForm()">
+                        <span>+</span> Add Event
+                    </button>
+                </div>
+            </div>
+            
+            <div class="calendar-controls">
+                <button onclick="prevMonth()" class="calendar-nav-btn">&lt;</button>
+                <span id="month-year" class="month-year">Month Year</span>
+                <button onclick="nextMonth()" class="calendar-nav-btn">&gt;</button>
+            </div>
+            
+            <div class="calendar-header">
+                <div class="calendar-day-header">Sun</div>
+                <div class="calendar-day-header">Mon</div>
+                <div class="calendar-day-header">Tue</div>
+                <div class="calendar-day-header">Wed</div>
+                <div class="calendar-day-header">Thu</div>
+                <div class="calendar-day-header">Fri</div>
+                <div class="calendar-day-header">Sat</div>
+            </div>
+            
+            <div id="calendar-grid" class="calendar-grid">
+                <!-- Calendar days will be populated by JavaScript -->
+            </div>
+        </section>
+
+        <!-- System Overview Section -->
+        <section id="overview" class="mockup-section">
+            <div class="section-header">
+                <h2 class="section-title">⚙️ System Overview</h2>
+                <div style="display: flex; gap: 12px;">
+                    <button class="add-btn" onclick="showIssuesTable()">
+                        🐛 View Issues
+                    </button>
+                    <button class="add-btn" onclick="showLogIssueForm()">
+                        <span>+</span> Log Issue
+                    </button>
+                </div>
+            </div>
+            
+            <div class="overview-grid">
+                <div class="overview-card">
+                    <h3>📋 Drills Database</h3>
+                    <div class="stat-number" id="drills-count">0</div>
+                    <p>Total drills available</p>
+                </div>
+                <div class="overview-card">
+                    <h3>📅 Upcoming Events</h3>
+                    <div class="stat-number" id="events-count">0</div>
+                    <p>Events this month</p>
+                </div>
+                <div class="overview-card">
+                    <h3>👥 Squad Management</h3>
+                    <div class="stat-number">25</div>
+                    <p>Active players</p>
+                </div>
+                <div class="overview-card">
+                    <h3>📊 Performance</h3>
+                    <div class="stat-number">92%</div>
+                    <p>Training attendance</p>
+                </div>
+            </div>
+            
+            <!-- Quick Actions -->
+            <div class="quick-actions">
+                <h3>Quick Actions</h3>
+                <div class="actions-grid">
+                    <button class="action-btn" onclick="showSection('drills')">
+                        <span class="action-icon">📋</span>
+                        <span>Add Drill</span>
+                    </button>
+                    <button class="action-btn" onclick="showSection('calendar')">
+                        <span class="action-icon">📅</span>
+                        <span>Schedule Practice</span>
+                    </button>
+                    <button class="action-btn" onclick="alert('Feature coming soon!')">
+                        <span class="action-icon">👥</span>
+                        <span>Manage Squad</span>
+                    </button>
+                    <button class="action-btn" onclick="alert('Feature coming soon!')">
+                        <span class="action-icon">📊</span>
+                        <span>View Reports</span>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Design Drill Section -->
+        <section id="design-drill" class="mockup-section">
+            <div class="section-header">
+                <h2 class="section-title">🎯 Design Custom Drill</h2>
+                <a href="try.html" class="add-btn" target="_blank">
+                    <span>🚀</span> Open Drill Designer
+                </a>
+            </div>
+            
+            <div class="design-preview">
+                <h3>Interactive Drill Designer</h3>
+                <p>Create custom drills with our visual designer tool. Set up players, cones, and movement patterns to design the perfect training session.</p>
+                
+                <div class="feature-grid">
+                    <div class="feature-card">
+                        <span class="feature-icon">👥</span>
+                        <h4>Player Positioning</h4>
+                        <p>Drag and drop players to set initial positions</p>
+                    </div>
+                    <div class="feature-card">
+                        <span class="feature-icon">🔸</span>
+                        <h4>Equipment Setup</h4>
+                        <p>Add cones, balls, and other training equipment</p>
+                    </div>
+                    <div class="feature-card">
+                        <span class="feature-icon">➡️</span>
+                        <h4>Movement Patterns</h4>
+                        <p>Draw arrows to show player movements</p>
+                    </div>
+                    <div class="feature-card">
+                        <span class="feature-icon">💾</span>
+                        <h4>Save & Share</h4>
+                        <p>Export drills as images or animated GIFs</p>
+                    </div>
+                </div>
+                
+                <div class="cta-section">
+                    <p><strong>Ready to design your custom drill?</strong></p>
+                    <a href="try.html" class="cta-button" target="_blank">
+                        Launch Drill Designer →
+                    </a>
+                </div>
+            </div>
+        </section>
+
+    <!-- Add Event Modal -->
+    <div id="addEventModal" class="modal">
+        <div class="modal-content">
+            <h3>Add New Event</h3>
+            <div class="form-grid">
+                <div class="form-field">
+                    <label class="form-label" for="event-name">Event Name</label>
+                    <input class="form-input" id="event-name" type="text" placeholder="Enter event name" required>
+                </div>
+                <div class="form-field">
+                    <label class="form-label" for="event-type">Event Type</label>
+                    <select class="form-input" id="event-type" required>
+                        <option value="">Select type</option>
+                        <option value="practice">Practice</option>
+                        <option value="match">Match</option>
+                        <option value="meeting">Meeting</option>
+                    </select>
+                </div>
+                <div class="form-field">
+                    <label class="form-label" for="event-date">Date</label>
+                    <input class="form-input" id="event-date" type="date" required>
+                </div>
+                <div class="form-field">
+                    <label class="form-label" for="event-time">Time</label>
+                    <input class="form-input" id="event-time" type="time" required>
+                </div>
+                <div class="form-field full-width">
+                    <label class="form-label" for="event-location">Location</label>
+                    <input class="form-input" id="event-location" type="text" placeholder="Enter location">
+                </div>
+                <div class="form-field full-width">
+                    <label class="form-label" for="event-description">Description</label>
+                    <textarea class="form-input" id="event-description" rows="3" placeholder="Enter event description"></textarea>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button class="modal-btn cancel" onclick="closeAddEventModal()">Cancel</button>
+                <button class="modal-btn primary" onclick="saveEvent()">Save Event</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Events Table Modal -->
+    <div id="eventsTableModal" class="modal">
+        <div class="modal-content large">
+            <div class="section-header" style="margin-bottom: 24px;">
+                <h3>📋 All Events</h3>
+                <button class="add-btn" onclick="closeEventsTableModal(); showAddEventForm();">
+                    <span>+</span> Add Event
+                </button>
+            </div>
+            
+            <!-- Search and Filter Controls -->
+            <div class="table-controls">
+                <div class="search-container">
+                    <input type="text" id="event-search" placeholder="Search events..." class="search-input" oninput="filterEvents()">
+                </div>
+                <div class="filter-container">
+                    <select id="event-type-filter" class="filter-select" onchange="filterEvents()">
+                        <option value="">All Types</option>
+                        <option value="practice">Practice</option>
+                        <option value="match">Match</option>
+                        <option value="meeting">Meeting</option>
+                    </select>
+                    <select id="event-month-filter" class="filter-select" onchange="filterEvents()">
+                        <option value="">All Months</option>
+                        <option value="0">January</option>
+                        <option value="1">February</option>
+                        <option value="2">March</option>
+                        <option value="3">April</option>
+                        <option value="4">May</option>
+                        <option value="5">June</option>
+                        <option value="6">July</option>
+                        <option value="7">August</option>
+                        <option value="8">September</option>
+                        <option value="9">October</option>
+                        <option value="10">November</option>
+                        <option value="11">December</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="events-table-container" id="eventsTableContainer">
+                <div class="events-table">
+                    <div class="table-header">
+                        <div style="flex: 2;">Event Name</div>
+                        <div style="flex: 1;">Type</div>
+                        <div style="flex: 1;">Location</div>
+                        <div style="flex: 1;">Date</div>
+                        <div style="flex: 1;">Time</div>
+                        <div style="flex: 1;">Attendance</div>
+                        <div style="flex: 1;">Actions</div>
+                    </div>
+                    <div id="events-table-body"></div>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button class="modal-btn cancel" onclick="closeEventsTableModal()">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Event Details Modal -->
+    <div id="eventDetailsModal" class="modal">
+        <div class="modal-content">
+            <h3 id="event-details-title">Event Details</h3>
+            <div id="event-details-content">
+                <!-- Event details will be populated here -->
+            </div>
+            <div class="modal-actions">
+                <button class="modal-btn cancel" onclick="closeEventDetailsModal()">Close</button>
+                <button class="modal-btn primary" onclick="editEvent()">Edit Event</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Log Issue Modal -->
+    <div id="logIssueModal" class="modal">
+        <div class="modal-content">
+            <h3>Log New Issue</h3>
+            <div class="form-grid">
+                <div class="form-field full-width">
+                    <label class="form-label" for="issue-title">Issue Title</label>
+                    <input class="form-input" id="issue-title" type="text" placeholder="Brief description of the issue" required>
+                </div>
+                <div class="form-field full-width">
+                    <label class="form-label" for="issue-description">Detailed Description</label>
+                    <textarea class="form-input" id="issue-description" rows="5" placeholder="Provide as much detail as possible about the issue..." required></textarea>
+                </div>
+            </div>
+            <div id="upload-status-issues" class="upload-status error" style="display: none;">
+                <!-- Status messages will appear here -->
+            </div>
+            <div class="modal-actions">
+                <button class="modal-btn cancel" onclick="closeLogIssueModal()">Cancel</button>
+                <button class="modal-btn primary" onclick="saveIssue()">Log Issue</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Issues Table Modal -->
+    <div id="issuesTableModal" class="modal">
+        <div class="modal-content large">
+            <div class="section-header" style="margin-bottom: 24px;">
+                <h3>🐛 System Issues</h3>
+                <button class="add-btn" onclick="closeIssuesTableModal(); showLogIssueForm();">
+                    <span>+</span> Log Issue
+                </button>
+            </div>
+            
+            <div class="issues-table">
+                <div class="table-header">
+                    <div style="flex: 2;">Title</div>
+                    <div style="flex: 3;">Description</div>
+                    <div style="flex: 1;">Date</div>
+                    <div style="flex: 1;">Status</div>
+                </div>
+                <div id="issues-table-body">
+                    <!-- Issues will be populated here -->
+                </div>
+                <div id="no-issues-message" style="text-align: center; padding: 32px; color: #64748b;">
+                    <p>No issues logged yet.</p>
+                    <button class="btn-primary" onclick="closeIssuesTableModal(); showLogIssueForm();">Log your first issue</button>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button class="modal-btn cancel" onclick="closeIssuesTableModal()">Close</button>
+                <button class="modal-btn primary" onclick="showLogIssueForm(); closeIssuesTableModal();">Log New Issue</button>
+            </div>
+        </div>
+    </div>
         </div>
     </div>
 
@@ -618,6 +1015,670 @@
 
         // ====== YOUR EXISTING APP FUNCTIONS ======
         // Add your existing drill management and calendar JavaScript here
+
+        // ====== APPLICATION FUNCTIONALITY ======
+        
+        // Store calendar state in variables (memory in HTML)
+        const today = new Date();
+        let currentMonth = today.getMonth();
+        let currentYear = today.getFullYear();
+
+        const monthNames = [
+            'January', 'February', 'March', 'April', 'May', 'June',
+            'July', 'August', 'September', 'October', 'November', 'December'
+        ];
+        
+        // Example events data (now with details, location, attendees)
+        const calendarEvents = [
+            { date: '2025-01-02', time: '6:00 PM - 8:00 PM', type: 'practice', name: 'Practice', location: 'Barnes Rugby Field', details: 'First practice of the year. Focus on passing drills.', attendees: ['Alice', 'Bob', 'Charlie'] },
+            { date: '2025-01-05', time: '7:00 PM - 9:00 PM', type: 'practice', name: 'Training', location: 'Barnes Rugby Field', details: 'Skills training session.', attendees: ['Alice', 'David', 'Eve'] },
+            { date: '2025-01-08', time: '9:00 AM - 4:00 PM', type: 'festival', name: 'Festival', location: 'Surrey Sports Park', details: 'Annual rugby festival.', attendees: ['Team Barnes', 'Team Surrey'] },
+            { date: '2025-01-13', time: '6:30 PM - 8:30 PM', type: 'practice', name: 'Practice', location: 'Barnes Rugby Field', details: 'Defensive drills and positioning.', attendees: ['Bob', 'Charlie', 'Eve'] },
+            { date: '2025-01-15', time: '2:00 PM - 4:00 PM', type: 'match', name: 'Championship', location: 'Twickenham Stadium', details: 'Championship match vs Team Richmond.', attendees: ['Full Squad'] },
+            { date: '2025-01-20', time: '7:00 PM - 9:00 PM', type: 'practice', name: 'Training', location: 'Barnes Rugby Field', details: 'Tactical training session.', attendees: ['Alice', 'Bob', 'Charlie', 'David', 'Eve'] },
+            { date: '2025-01-22', time: '1:00 PM - 5:00 PM', type: 'festival', name: 'Surrey Cup', location: 'Surrey Sports Park', details: 'Surrey Cup Final.', attendees: ['Team Barnes', 'Team Surrey'] },
+            { date: '2025-01-27', time: '3:00 PM - 5:00 PM', type: 'practice', name: 'Match Day', location: 'Barnes Rugby Field', details: 'Friendly match.', attendees: ['Full Squad'] },
+            { date: '2025-01-29', time: '10:00 AM - 4:00 PM', type: 'festival', name: 'Spring Festival', location: 'Barnes Rugby Field', details: 'Spring rugby festival.', attendees: ['All Teams'] }
+        ];
+        
+        // Static attendee options
+        const attendeeOptions = ['manus', 'andy', 'james'];
+
+        // Add this line to fix the error:
+        let isEditingAvailability = false;
+
+        // Issues management data
+        let issues = [];
+
+        // Add availability to each event (initialize as empty object if not present)
+        calendarEvents.forEach(ev => {
+            if (!ev.availability) {
+                ev.availability = { manus: '', andy: '', james: '' };
+            }
+        });
+
+        // Pinch-to-zoom functionality for events table
+        let tableZoomLevel = 1;
+        let isZooming = false;
+        let lastDistance = 0;
+        const minZoom = 0.5;
+        const maxZoom = 2;
+        
+        // Initialize calendar on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            currentMonth = today.getMonth();
+            currentYear = today.getFullYear();
+            renderCalendar();
+            updateEventsCount();
+            updateDrillsCount();
+            setupPinchToZoom();
+        });
+
+        // Calendar functionality
+        function renderCalendar() {
+            const calendarGrid = document.getElementById('calendar-grid');
+            const monthYearDisplay = document.getElementById('month-year');
+            
+            if (!calendarGrid || !monthYearDisplay) return;
+            
+            calendarGrid.innerHTML = '';
+            monthYearDisplay.textContent = `${monthNames[currentMonth]} ${currentYear}`;
+            
+            const firstDay = new Date(currentYear, currentMonth, 1);
+            const lastDay = new Date(currentYear, currentMonth + 1, 0);
+            const daysInMonth = lastDay.getDate();
+            const startDay = firstDay.getDay(); // 0 = Sunday
+            
+            // Previous month's last few days (optional, for full grid)
+            const prevMonthDays = startDay;
+            const prevMonth = currentMonth === 0 ? 11 : currentMonth - 1;
+            const prevMonthYear = currentMonth === 0 ? currentYear - 1 : currentYear;
+            const prevMonthLastDay = new Date(prevMonthYear, prevMonth + 1, 0).getDate();
+
+            for (let i = prevMonthLastDay - prevMonthDays + 1; i <= prevMonthLastDay; i++) {
+                const dayDiv = document.createElement('div');
+                dayDiv.className = 'calendar-day other-month';
+                dayDiv.innerHTML = `<div class="day-number">${i}</div>`;
+                calendarGrid.appendChild(dayDiv);
+            }
+
+            // Current month days
+            for (let d = 1; d <= daysInMonth; d++) {
+                const dayDiv = document.createElement('div');
+                dayDiv.className = 'calendar-day';
+                const dateStr = `${currentYear}-${String(currentMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+                // Highlight today
+                if (
+                    d === today.getDate() &&
+                    currentYear === today.getFullYear()
+                ) {
+                    dayDiv.classList.add('today');
+                }
+                dayDiv.innerHTML = `<div class="day-number${dayDiv.classList.contains('today') ? ' today' : ''}">${d}</div>`;
+
+                // Add events for this day
+                const eventList = calendarEvents.filter(ev => ev.date === `${currentYear}-${String(currentMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`);
+                eventList.forEach(ev => {
+                    const eventDiv = document.createElement('div');
+                    eventDiv.className = `event ${ev.type}`;
+                    eventDiv.innerHTML = `${ev.name}`;
+                    // Add click event to open details (stubbed for now)
+                    eventDiv.onclick = function() {
+                        openEventDetails(ev);
+                    };
+                    dayDiv.appendChild(eventDiv);
+                });
+
+                calendarGrid.appendChild(dayDiv);
+            }
+
+            // Next month's first few days (to fill the grid)
+            const totalCells = calendarGrid.children.length;
+            const remainingCells = 42 - totalCells; // 6 rows x 7 days = 42
+            for (let i = 1; i <= remainingCells; i++) {
+                const dayDiv = document.createElement('div');
+                dayDiv.className = 'calendar-day other-month';
+                dayDiv.innerHTML = `<div class="day-number">${i}</div>`;
+                calendarGrid.appendChild(dayDiv);
+            }
+        }
+
+        function prevMonth() {
+            currentMonth--;
+            if (currentMonth < 0) {
+                currentMonth = 11;
+                currentYear--;
+            }
+            renderCalendar();
+        }
+
+        function nextMonth() {
+            currentMonth++;
+            if (currentMonth > 11) {
+                currentMonth = 0;
+                currentYear++;
+            }
+            renderCalendar();
+        }
+
+        // Section Navigation
+        function showSection(section) {
+            // Hide all sections
+            document.querySelectorAll('.mockup-section').forEach(sec => {
+                sec.classList.remove('active');
+            });
+            // Remove active class from all buttons
+            document.querySelectorAll('.mockup-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Show selected section
+            document.getElementById(section).classList.add('active');
+            // Add active class to the corresponding button
+            document.querySelector(`.mockup-btn[onclick="showSection('${section}')"]`).classList.add('active');
+        }
+        window.showSection = showSection;
+
+        function renderEventsTable() {
+            const tableBody = document.getElementById('events-table-body');
+            tableBody.innerHTML = '';
+
+            let filteredEvents = calendarEvents;
+
+            // Apply search filter
+            const searchTerm = document.getElementById('event-search').value.toLowerCase();
+            if (searchTerm) {
+                filteredEvents = filteredEvents.filter(ev => 
+                    ev.name.toLowerCase().includes(searchTerm) ||
+                    ev.location.toLowerCase().includes(searchTerm) ||
+                    ev.details.toLowerCase().includes(searchTerm)
+                );
+            }
+
+            // Apply type filter
+            const typeFilter = document.getElementById('event-type-filter').value;
+            if (typeFilter) {
+                filteredEvents = filteredEvents.filter(ev => ev.type === typeFilter);
+            }
+
+            // Apply month filter
+            const monthFilter = document.getElementById('event-month-filter').value;
+            if (monthFilter !== '') {
+                filteredEvents = filteredEvents.filter(ev => {
+                    const eventMonth = new Date(ev.date).getMonth();
+                    return eventMonth === parseInt(monthFilter);
+                });
+            }
+
+            filteredEvents.forEach(ev => {
+                const row = document.createElement('div');
+                row.className = 'table-row';
+                
+                // Create availability cell
+                let availabilityCell = '';
+                if (ev.availability) {
+                    const user = document.getElementById('availabilityUser')?.value || 'manus';
+                    const status = ev.availability[user] || '';
+                    availabilityCell = `
+                        <select onchange="updateAvailability('${ev.date}', '${user}', this.value)" 
+                                style="width: 100%; padding: 4px; border: 1px solid #ccc; border-radius: 4px;">
+                            <option value="" ${status === '' ? 'selected' : ''}>-</option>
+                            <option value="available" ${status === 'available' ? 'selected' : ''}>✓</option>
+                            <option value="unavailable" ${status === 'unavailable' ? 'selected' : ''}>✗</option>
+                            <option value="maybe" ${status === 'maybe' ? 'selected' : ''}>?</option>
+                        </select>
+                    `;
+                } else {
+                    availabilityCell = '-';
+                }
+                
+                row.innerHTML = `
+                    <div style="flex: 2; font-weight: 600;">${ev.name}</div>
+                    <div style="flex: 1;">
+                        <span class="badge ${ev.type}">${ev.type}</span>
+                    </div>
+                    <div>${ev.location || ''}</div>
+                    <div>${new Date(ev.date).toLocaleDateString()}</div>
+                    <div>${ev.time}</div>
+                    <div style="flex: 1;">
+                        ${availabilityCell}
+                    </div>
+                    <div style="flex: 1;">
+                        <button onclick="openEventDetails(calendarEvents.find(e => e.date === '${ev.date}' && e.name === '${ev.name}'))" 
+                                style="background: #3b82f6; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer;">
+                            View
+                        </button>
+                    </div>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+
+        // Re-render table when user changes
+        document.getElementById('availabilityUser').addEventListener('change', renderEventsTable);
+
+        // Add this near the top of your <script> section, before using drills
+        const drills = [
+            {
+                name: "Passing Drill",
+                skill: "Passing",
+                duration: "30 minutes",
+                description: "Improve passing accuracy and speed.",
+                id: 1
+            },
+            {
+                name: "Defensive Line Drill",
+                skill: "Defense",
+                duration: "45 minutes",
+                description: "Work on defensive line structure and communication.",
+                id: 2
+            },
+            {
+                name: "Awareness Drill",
+                skill: "Awareness",
+                duration: "15 minutes",
+                description: "Enhance field awareness and decision making.",
+                id: 3
+            }
+        ];
+
+        // Drill Management Functions
+        function toggleDrillForm() {
+            const form = document.getElementById('drill-form');
+            if (form.style.display === 'none' || form.style.display === '') {
+                form.style.display = 'block';
+                // Clear form fields
+                document.getElementById('drill-name').value = '';
+                document.getElementById('drill-skill').value = '';
+                document.getElementById('drill-duration').value = '';
+                document.getElementById('drill-description').value = '';
+                document.getElementById('drill-instructions').value = '';
+                document.getElementById('drill-equipment').value = '';
+            } else {
+                form.style.display = 'none';
+            }
+        }
+
+        function saveDrill() {
+            const name = document.getElementById('drill-name').value.trim();
+            const skill = document.getElementById('drill-skill').value;
+            const duration = document.getElementById('drill-duration').value;
+            const description = document.getElementById('drill-description').value.trim();
+            const instructions = document.getElementById('drill-instructions').value.trim();
+            const equipment = document.getElementById('drill-equipment').value.trim();
+
+            if (!name || !skill || !duration || !description) {
+                showDrillStatus('Please fill in all required fields.', 'error');
+                return;
+            }
+
+            // Create new drill object
+            const newDrill = {
+                id: Date.now(),
+                name: name,
+                skill: skill,
+                duration: duration,
+                description: description,
+                instructions: instructions,
+                equipment: equipment ? equipment.split(',').map(item => item.trim()) : []
+            };
+
+            // Add to drills array
+            drills.push(newDrill);
+
+            // Hide form and show success message
+            toggleDrillForm();
+            showDrillStatus('Drill saved successfully!', 'success');
+
+            // Update displays
+            renderDrillsList();
+            updateDrillsCount();
+        }
+
+        function renderDrillsList() {
+            const drillsList = document.getElementById('drills-list');
+            drillsList.innerHTML = '';
+
+            drills.forEach(drill => {
+                const row = document.createElement('div');
+                row.className = 'table-row';
+                row.innerHTML = `
+                    <div style="flex: 1; font-weight: 600;">${drill.name}</div>
+                    <div style="flex: 1;">
+                        <span class="badge ${drill.skill.toLowerCase()}">${drill.skill}</span>
+                    </div>
+                    <div style="flex: 1;">${drill.duration}</div>
+                    <div style="flex: 2;">${drill.description}</div>
+                `;
+                drillsList.appendChild(row);
+            });
+        }
+
+        function showDrillStatus(message, type) {
+            const statusDiv = document.getElementById('upload-status');
+            statusDiv.className = `upload-status ${type}`;
+            statusDiv.textContent = message;
+            statusDiv.style.display = 'block';
+            
+            // Hide after 3 seconds
+            setTimeout(() => {
+                statusDiv.style.display = 'none';
+            }, 3000);
+        }
+
+        // Initialize drills list
+        document.addEventListener('DOMContentLoaded', function() {
+            renderDrillsList();
+        });
+
+        // Event Management Functions
+        function showAddEventForm() {
+            document.getElementById('addEventModal').style.display = 'flex';
+            // Clear form fields
+            document.getElementById('event-name').value = '';
+            document.getElementById('event-type').value = '';
+            document.getElementById('event-date').value = '';
+            document.getElementById('event-time').value = '';
+            document.getElementById('event-location').value = '';
+            document.getElementById('event-description').value = '';
+        }
+
+        function closeAddEventModal() {
+            document.getElementById('addEventModal').style.display = 'none';
+        }
+
+        function saveEvent() {
+            const name = document.getElementById('event-name').value.trim();
+            const type = document.getElementById('event-type').value;
+            const date = document.getElementById('event-date').value;
+            const time = document.getElementById('event-time').value;
+            const location = document.getElementById('event-location').value.trim();
+            const description = document.getElementById('event-description').value.trim();
+
+            if (!name || !type || !date || !time) {
+                alert('Please fill in all required fields.');
+                return;
+            }
+
+            // Create time range (assuming 2-hour duration for simplicity)
+            const startTime = new Date(`2000-01-01T${time}`);
+            const endTime = new Date(startTime.getTime() + 2 * 60 * 60 * 1000); // Add 2 hours
+            const timeRange = `${startTime.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})} - ${endTime.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`;
+
+            // Create new event object
+            const newEvent = {
+                date: date,
+                time: timeRange,
+                type: type,
+                name: name,
+                location: location,
+                details: description,
+                attendees: [],
+                availability: { manus: '', andy: '', james: '' }
+            };
+
+            // Add to events array
+            calendarEvents.push(newEvent);
+
+            // Close modal and refresh displays
+            closeAddEventModal();
+            renderCalendar();
+            updateEventsCount();
+            
+            // If events table is open, refresh it
+            if (document.getElementById('eventsTableModal').style.display === 'flex') {
+                renderEventsTable();
+            }
+        }
+
+        function showEventsTable() {
+            document.getElementById('eventsTableModal').style.display = 'flex';
+            renderEventsTable();
+        }
+
+        function closeEventsTableModal() {
+            document.getElementById('eventsTableModal').style.display = 'none';
+        }
+
+        function filterEvents() {
+            renderEventsTable();
+        }
+
+        function openEventDetails(event) {
+            const modal = document.getElementById('eventDetailsModal');
+            const title = document.getElementById('event-details-title');
+            const content = document.getElementById('event-details-content');
+            
+            title.textContent = event.name;
+            content.innerHTML = `
+                <div style="margin-bottom: 16px;">
+                    <strong>Type:</strong> <span class="badge ${event.type}">${event.type}</span>
+                </div>
+                <div style="margin-bottom: 16px;">
+                    <strong>Date:</strong> ${new Date(event.date).toLocaleDateString()}
+                </div>
+                <div style="margin-bottom: 16px;">
+                    <strong>Time:</strong> ${event.time}
+                </div>
+                <div style="margin-bottom: 16px;">
+                    <strong>Location:</strong> ${event.location || 'Not specified'}
+                </div>
+                <div style="margin-bottom: 16px;">
+                    <strong>Details:</strong> ${event.details || 'No additional details'}
+                </div>
+                <div style="margin-bottom: 16px;">
+                    <strong>Attendees:</strong> ${event.attendees && event.attendees.length > 0 ? event.attendees.join(', ') : 'None specified'}
+                </div>
+            `;
+            
+            modal.style.display = 'flex';
+        }
+
+        function closeEventDetailsModal() {
+            document.getElementById('eventDetailsModal').style.display = 'none';
+        }
+
+        function editEvent() {
+            // Placeholder for edit functionality
+            alert('Edit functionality coming soon!');
+        }
+
+        function updateAvailability(eventDate, user, status) {
+            const event = calendarEvents.find(ev => ev.date === eventDate);
+            if (event && event.availability) {
+                event.availability[user] = status;
+            }
+        }
+
+        // Update counts in overview section
+        function updateEventsCount() {
+            const currentMonthEvents = calendarEvents.filter(ev => {
+                const eventDate = new Date(ev.date);
+                return eventDate.getMonth() === currentMonth && eventDate.getFullYear() === currentYear;
+            });
+            const countElement = document.getElementById('events-count');
+            if (countElement) {
+                countElement.textContent = currentMonthEvents.length;
+            }
+        }
+
+        function updateDrillsCount() {
+            const countElement = document.getElementById('drills-count');
+            if (countElement) {
+                countElement.textContent = drills.length;
+            }
+        }
+
+        // Pinch-to-zoom setup for events table
+        function setupPinchToZoom() {
+            const eventsTableContainer = document.getElementById('eventsTableContainer');
+            if (!eventsTableContainer) return;
+
+            let initialDistance = 0;
+            let initialZoom = tableZoomLevel;
+
+            function getDistance(touches) {
+                const dx = touches[0].clientX - touches[1].clientX;
+                const dy = touches[0].clientY - touches[1].clientY;
+                return Math.sqrt(dx * dx + dy * dy);
+            }
+
+            function applyZoom(zoomLevel) {
+                tableZoomLevel = Math.max(minZoom, Math.min(maxZoom, zoomLevel));
+                
+                const table = eventsTableContainer.querySelector('.events-table');
+                const header = table.querySelector('.table-header');
+                const rows = table.querySelectorAll('.table-row');
+                
+                // Apply zoom to font sizes and dimensions
+                header.style.fontSize = (14 * tableZoomLevel) + 'px';
+                rows.forEach(row => {
+                    row.style.fontSize = (14 * tableZoomLevel) + 'px';
+                    
+                    // Also scale any badges
+                    const badges = row.querySelectorAll('.badge');
+                    badges.forEach(badge => {
+                        badge.style.fontSize = (12 * tableZoomLevel) + 'px';
+                    });
+                });
+                
+                // Also scale the table container padding for better touch targets
+                const scaledPadding = Math.max(8, 16 * tableZoomLevel);
+                header.style.padding = scaledPadding + 'px 20px';
+                rows.forEach(row => {
+                    row.style.padding = scaledPadding + 'px 20px';
+                });
+            }
+
+            eventsTableContainer.addEventListener('touchstart', function(e) {
+                if (e.touches.length === 2) {
+                    e.preventDefault();
+                    isZooming = true;
+                    initialDistance = getDistance(e.touches);
+                    initialZoom = tableZoomLevel;
+                }
+            }, { passive: false });
+
+            eventsTableContainer.addEventListener('touchmove', function(e) {
+                if (e.touches.length === 2 && isZooming) {
+                    e.preventDefault();
+                    const currentDistance = getDistance(e.touches);
+                    const scale = currentDistance / initialDistance;
+                    const newZoom = initialZoom * scale;
+                    
+                    applyZoom(newZoom);
+                }
+            }, { passive: false });
+
+            eventsTableContainer.addEventListener('touchend', function(e) {
+                if (e.touches.length < 2) {
+                    isZooming = false;
+                }
+            });
+
+            // Apply initial zoom
+            applyZoom(tableZoomLevel);
+        }
+
+        // Issue Management Functions
+        function showLogIssueForm() {
+            document.getElementById('logIssueModal').style.display = 'flex';
+            // Clear form fields
+            document.getElementById('issue-title').value = '';
+            document.getElementById('issue-description').value = '';
+        }
+
+        function closeLogIssueModal() {
+            document.getElementById('logIssueModal').style.display = 'none';
+        }
+
+        function saveIssue() {
+            const title = document.getElementById('issue-title').value.trim();
+            const description = document.getElementById('issue-description').value.trim();
+            
+            if (!title || !description) {
+                showIssueStatus('Please fill in both title and description.', 'error');
+                return;
+            }
+            
+            // Create new issue object
+            const issue = {
+                id: Date.now(), // Simple ID generation for frontend-only storage
+                title: title,
+                description: description,
+                dateLogged: new Date().toISOString().split('T')[0], // YYYY-MM-DD format
+                status: 'Open' // Default status
+            };
+            
+            // Add to issues array
+            issues.unshift(issue); // Add to beginning for newest first
+            
+            // Close modal and show success message
+            closeLogIssueModal();
+            showIssueStatus('Issue logged successfully!', 'success');
+            
+            // If issues table is open, refresh it
+            if (document.getElementById('issuesTableModal').style.display === 'flex') {
+                renderIssuesTable();
+            }
+        }
+
+        function showIssuesTable() {
+            document.getElementById('issuesTableModal').style.display = 'flex';
+            renderIssuesTable();
+        }
+
+        function closeIssuesTableModal() {
+            document.getElementById('issuesTableModal').style.display = 'none';
+        }
+
+        function renderIssuesTable() {
+            const tableBody = document.getElementById('issues-table-body');
+            const noIssuesMessage = document.getElementById('no-issues-message');
+            
+            if (issues.length === 0) {
+                tableBody.style.display = 'none';
+                noIssuesMessage.style.display = 'block';
+                return;
+            }
+            
+            tableBody.style.display = 'block';
+            noIssuesMessage.style.display = 'none';
+            
+            tableBody.innerHTML = '';
+            
+            issues.forEach(issue => {
+                const row = document.createElement('div');
+                row.className = 'table-row';
+                row.innerHTML = `
+                    <div style="flex: 2; font-weight: 600;">${issue.title}</div>
+                    <div style="flex: 3;">
+                        <div style="max-height: 60px; overflow: hidden; text-overflow: ellipsis;">
+                            ${issue.description}
+                        </div>
+                    </div>
+                    <div style="flex: 1;">${issue.dateLogged}</div>
+                    <div style="flex: 1;">
+                        <span class="status-badge status-${issue.status.toLowerCase()}">${issue.status}</span>
+                    </div>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+
+        function showIssueStatus(message, type) {
+            const statusDiv = document.getElementById('upload-status-issues');
+            statusDiv.className = `upload-status ${type}`;
+            statusDiv.textContent = message;
+            statusDiv.style.display = 'block';
+            
+            // Hide after 3 seconds
+            setTimeout(() => {
+                statusDiv.style.display = 'none';
+            }, 3000);
+        }
+
+        window.showSection = showSection;
     </script>
 </body>
 </html>
