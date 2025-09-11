@@ -4,6 +4,625 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Barnes Rugby - Coaching Management Platform</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            color: #0f172a;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            min-height: 100vh;
+        }
+        
+        /* === LOGIN STYLES === */
+        #loginContainer {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 24px;
+        }
+        
+        .login-card {
+            background: white;
+            padding: 48px;
+            border-radius: 16px;
+            box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.5);
+            width: 100%;
+            max-width: 420px;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .login-header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+        
+        .login-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #1e3a8a;
+            margin-bottom: 8px;
+        }
+        
+        .login-subtitle {
+            color: #64748b;
+            font-size: 1rem;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #1e3a8a;
+            font-size: 14px;
+        }
+        
+        .form-input-login {
+            width: 100%;
+            padding: 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 16px;
+            background: white;
+            transition: all 0.2s ease;
+            color: #374151;
+        }
+        
+        .form-input-login:focus {
+            outline: none;
+            border-color: #1e3a8a;
+            box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.1);
+        }
+        
+        .btn-login {
+            width: 100%;
+            padding: 16px;
+            background: #1e3a8a;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin-bottom: 12px;
+        }
+        
+        .btn-login:hover:not(:disabled) {
+            background: #3730a3;
+            transform: translateY(-1px);
+        }
+        
+        .btn-login:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .btn-signup {
+            width: 100%;
+            padding: 16px;
+            background: white;
+            color: #1e3a8a;
+            border: 2px solid #1e3a8a;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .btn-signup:hover:not(:disabled) {
+            background: #1e3a8a;
+            color: white;
+        }
+        
+        .btn-signup:disabled {
+            background: #f3f4f6;
+            color: #9ca3af;
+            border-color: #d1d5db;
+            cursor: not-allowed;
+        }
+        
+        .auth-message {
+            margin-top: 16px;
+        }
+        
+        .error-message {
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            color: #dc2626;
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        
+        .success-message {
+            background: #f0fdf4;
+            border: 1px solid #bbf7d0;
+            color: #16a34a;
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        
+        .loading-message {
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
+            color: #1d4ed8;
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        
+        /* === USER INFO BAR === */
+        .user-info-bar {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: white;
+            padding: 12px 24px;
+            margin-bottom: 24px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 14px;
+        }
+        
+        .user-details {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        
+        .logout-btn {
+            background: rgba(239, 68, 68, 0.8);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+        
+        .logout-btn:hover {
+            background: rgba(239, 68, 68, 1);
+        }
+        
+        .hidden {
+            display: none !important;
+        }
+        
+        /* Loading spinner */
+        .spinner {
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #1e3a8a;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            margin-right: 8px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* === EXISTING STYLES (keeping your original styles) === */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 24px;
+            background: transparent;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #0f172a, #1e293b);
+            color: white;
+            padding: 32px;
+            border-radius: 12px;
+            margin-bottom: 32px;
+            box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.4), 0 10px 10px -5px rgba(15, 23, 42, 0.06);
+        }
+        
+        .header h1 {
+            font-size: 2.25rem;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 8px;
+        }
+        
+        .header p {
+            text-align: center;
+            font-size: 1.125rem;
+            font-weight: 500;
+            opacity: 0.9;
+        }
+        
+        .mockup-nav {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 32px;
+            flex-wrap: wrap;
+            background: white;
+            padding: 8px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(15, 23, 42, 0.2);
+            border: 1px solid #334155;
+        }
+        
+        .mockup-btn {
+            background: transparent;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            color: #64748b;
+            transition: all 0.2s ease;
+            font-size: 14px;
+        }
+        
+        .mockup-btn:hover {
+            background: #f1f5f9;
+            color: #1e3a8a;
+        }
+        
+        .mockup-btn.active {
+            background: #1e3a8a;
+            color: white;
+        }
+        
+        .mockup-section {
+            display: none;
+            background: white;
+            border-radius: 12px;
+            padding: 32px;
+            box-shadow: 0 4px 6px -1px rgba(30, 58, 138, 0.1), 0 2px 4px -1px rgba(30, 58, 138, 0.06);
+            border: 1px solid #e2e8f0;
+        }
+        
+        .mockup-section.active {
+            display: block;
+            animation: fadeIn 0.3s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 32px;
+            padding-bottom: 16px;
+            border-bottom: 2px solid #e2e8f0;
+        }
+        
+        .section-title {
+            color: #1e3a8a;
+            font-size: 1.875rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        /* [Rest of your existing styles - truncated for brevity but they remain the same] */
+        /* ... keeping all your drill management, calendar, and other existing styles ... */
+    </style>
+</head>
+<body>
+    <!-- Login Screen -->
+    <div id="loginContainer">
+        <div class="login-card">
+            <div class="login-header">
+                <h1 class="login-title">Barnes Rugby</h1>
+                <p class="login-subtitle">Coaching Management Platform</p>
+            </div>
+            
+            <form id="loginForm">
+                <div class="form-group">
+                    <label class="form-label" for="email">Email Address</label>
+                    <input type="email" id="email" class="form-input-login" placeholder="Enter your email" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="password">Password</label>
+                    <input type="password" id="password" class="form-input-login" placeholder="Enter your password" required>
+                </div>
+                
+                <button type="submit" id="loginBtn" class="btn-login">Sign In</button>
+                <button type="button" id="signupBtn" class="btn-signup">Create Account</button>
+            </form>
+            
+            <div id="authMessage" class="auth-message"></div>
+        </div>
+    </div>
+
+    <!-- Main Application (Hidden until authenticated) -->
+    <div id="appContainer" class="hidden">
+        <!-- User Info Bar -->
+        <div class="user-info-bar">
+            <div class="user-details">
+                <span>🏉 Welcome, <strong id="userEmailDisplay"></strong></span>
+                <span>•</span>
+                <span>ID: <span id="userIdDisplay"></span></span>
+            </div>
+            <button id="logoutBtn" class="logout-btn">Sign Out</button>
+        </div>
+
+        <div class="container">
+            <header class="header">
+                <h1>Barnes Rugby - Coaching Platform</h1>
+                <p>Professional drill management and practice calendar system</p>
+            </header>
+            
+            <!-- Your existing app content goes here -->
+            <p style="color: white; text-align: center; padding: 40px; font-size: 18px;">
+                🎉 <strong>Authentication successful!</strong><br>
+                Your full Barnes Rugby coaching platform will be displayed here.<br>
+                <em>(Add your existing drills and calendar content)</em>
+            </p>
+        </div>
+    </div>
+
+    <script>
+        // ====== SECURE AUTHENTICATION SYSTEM ======
+        // No Firebase keys - all authentication goes through Vercel APIs
+        
+        // DOM elements
+        const loginContainer = document.getElementById('loginContainer');
+        const appContainer = document.getElementById('appContainer');
+        const loginForm = document.getElementById('loginForm');
+        const loginBtn = document.getElementById('loginBtn');
+        const signupBtn = document.getElementById('signupBtn');
+        const logoutBtn = document.getElementById('logoutBtn');
+        const authMessage = document.getElementById('authMessage');
+        const userEmailDisplay = document.getElementById('userEmailDisplay');
+        const userIdDisplay = document.getElementById('userIdDisplay');
+
+        // Loading state
+        let isLoading = false;
+
+        // Show/hide content based on authentication state
+        function toggleContent(isAuthenticated) {
+            if (isAuthenticated) {
+                loginContainer.classList.add('hidden');
+                appContainer.classList.remove('hidden');
+            } else {
+                loginContainer.classList.remove('hidden');
+                appContainer.classList.add('hidden');
+            }
+        }
+
+        // Show message with different types
+        function showMessage(message, type = 'error') {
+            const className = type === 'error' ? 'error-message' : 
+                            type === 'success' ? 'success-message' : 'loading-message';
+            
+            const spinner = type === 'loading' ? '<div class="spinner"></div>' : '';
+            authMessage.innerHTML = `<div class="${className}">${spinner}${message}</div>`;
+        }
+
+        // Clear messages
+        function clearMessage() {
+            authMessage.innerHTML = '';
+        }
+
+        // Set loading state
+        function setLoading(loading) {
+            isLoading = loading;
+            loginBtn.disabled = loading;
+            signupBtn.disabled = loading;
+            
+            if (loading) {
+                loginBtn.innerHTML = '<div class="spinner"></div>Signing In...';
+                signupBtn.innerHTML = '<div class="spinner"></div>Creating Account...';
+            } else {
+                loginBtn.innerHTML = 'Sign In';
+                signupBtn.innerHTML = 'Create Account';
+            }
+        }
+
+        // Login function - calls your Vercel API
+        async function loginUser(email, password) {
+            try {
+                setLoading(true);
+                showMessage('Signing in...', 'loading');
+
+                const response = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ email, password }),
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    // Success - update UI with user info
+                    userEmailDisplay.textContent = data.user.email;
+                    userIdDisplay.textContent = data.user.uid;
+                    showMessage('Login successful!', 'success');
+                    
+                    setTimeout(() => {
+                        toggleContent(true);
+                        clearMessage();
+                    }, 1000);
+                } else {
+                    // Error from API
+                    showMessage(data.error || 'Login failed');
+                }
+
+            } catch (error) {
+                console.error('Login error:', error);
+                showMessage('Network error. Please try again.');
+            } finally {
+                setLoading(false);
+            }
+        }
+
+        // Signup function - calls your Vercel API
+        async function signupUser(email, password) {
+            try {
+                setLoading(true);
+                showMessage('Creating account...', 'loading');
+
+                const response = await fetch('/api/auth/signup', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ email, password }),
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    // Success - update UI with user info
+                    userEmailDisplay.textContent = data.user.email;
+                    userIdDisplay.textContent = data.user.uid;
+                    showMessage('Account created successfully!', 'success');
+                    
+                    setTimeout(() => {
+                        toggleContent(true);
+                        clearMessage();
+                    }, 1000);
+                } else {
+                    // Error from API
+                    showMessage(data.error || 'Account creation failed');
+                }
+
+            } catch (error) {
+                console.error('Signup error:', error);
+                showMessage('Network error. Please try again.');
+            } finally {
+                setLoading(false);
+            }
+        }
+
+        // Logout function - calls your Vercel API
+        async function logoutUser() {
+            try {
+                const response = await fetch('/api/auth/logout', {
+                    method: 'POST',
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    showMessage('Logged out successfully', 'success');
+                    toggleContent(false);
+                    loginForm.reset();
+                    setTimeout(clearMessage, 2000);
+                } else {
+                    console.error('Logout error:', data.error);
+                    // Even if logout API fails, clear the UI
+                    toggleContent(false);
+                    loginForm.reset();
+                }
+
+            } catch (error) {
+                console.error('Logout error:', error);
+                // Even if network fails, clear the UI
+                toggleContent(false);
+                loginForm.reset();
+            }
+        }
+
+        // Verify authentication status on page load
+        async function checkAuthStatus() {
+            try {
+                const response = await fetch('/api/auth/verify');
+                const data = await response.json();
+
+                if (response.ok && data.authenticated) {
+                    // User is authenticated - show app
+                    userEmailDisplay.textContent = data.user.email;
+                    userIdDisplay.textContent = data.user.uid;
+                    toggleContent(true);
+                } else {
+                    // User is not authenticated - show login
+                    toggleContent(false);
+                }
+
+            } catch (error) {
+                console.error('Auth check error:', error);
+                // On error, assume not authenticated
+                toggleContent(false);
+            }
+        }
+
+        // Event listeners
+        loginForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            if (isLoading) return;
+            
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+            
+            if (!email || !password) {
+                showMessage('Please enter both email and password.');
+                return;
+            }
+            
+            loginUser(email, password);
+        });
+
+        signupBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            if (isLoading) return;
+            
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+            
+            if (!email || !password) {
+                showMessage('Please enter both email and password.');
+                return;
+            }
+            
+            if (password.length < 6) {
+                showMessage('Password should be at least 6 characters.');
+                return;
+            }
+            
+            signupUser(email, password);
+        });
+
+        logoutBtn.addEventListener('click', logoutUser);
+
+        // Check authentication status when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            checkAuthStatus();
+        });
+
+        // ====== YOUR EXISTING APP FUNCTIONS ======
+        // Add your existing drill management and calendar JavaScript here
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Barnes Rugby - Coaching Management Platform</title>
 
     <style>
         * {
