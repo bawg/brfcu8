@@ -1,6 +1,7 @@
 {
   "name": "barnes-rugby-app",
   "dependencies": {
-    "firebase-admin": "^12.0.0"
+    "firebase-admin": "^12.0.0",
+    "node-fetch": "^3.3.2"
   }
 }
