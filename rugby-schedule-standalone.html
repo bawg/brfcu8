@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rugby Practice Schedule Generator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #f9fafb;
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 24px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .title {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #166534;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+        }
+
+        @media (max-width: 768px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        .label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            color: #374151;
+            margin-bottom: 8px;
+        }
+
+        .sub-label {
+            display: block;
+            font-size: 12px;
+            color: #6b7280;
+            margin-bottom: 4px;
+        }
+
+        .select, .input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        .select:focus, .input:focus {
+            outline: none;
+            ring: 2px solid #10b981;
+            border-color: #10b981;
+        }
+
+        .drill-item {
+            margin-bottom: 12px;
+        }
+
+        .drill-description {
+            font-size: 12px;
+            color: #6b7280;
+            margin-top: 4px;
+            padding-left: 12px;
+        }
+
+        .button {
+            padding: 12px 24px;
+            border-radius: 6px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .button-primary {
+            background-color: #059669;
+            color: white;
+        }
+
+        .button-primary:hover {
+            background-color: #047857;
+        }
+
+        .button-secondary {
+            background-color: #6b7280;
+            color: white;
+        }
+
+        .button-secondary:hover {
+            background-color: #4b5563;
+        }
+
+        .button-blue {
+            background-color: #2563eb;
+            color: white;
+        }
+
+        .button-blue:hover {
+            background-color: #1d4ed8;
+        }
+
+        .button:disabled {
+            background-color: #d1d5db;
+            color: #6b7280;
+            cursor: not-allowed;
+        }
+
+        .button-full {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .theme-banner {
+            background-color: #ecfdf5;
+            border-left: 4px solid #10b981;
+            padding: 16px;
+            margin-bottom: 24px;
+        }
+
+        .theme-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #166534;
+            margin-bottom: 8px;
+        }
+
+        .timestamp {
+            font-size: 14px;
+            color: #6b7280;
+        }
+
+        .schedule-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 4px 0;
+            border-bottom: 1px solid #f3f4f6;
+        }
+
+        .schedule-item:last-child {
+            border-bottom: none;
+        }
+
+        .schedule-time {
+            font-weight: 500;
+        }
+
+        .rotation-details {
+            padding-left: 16px;
+            margin-top: 8px;
+        }
+
+        .rotation-header {
+            font-weight: 500;
+            color: #4b5563;
+            margin-bottom: 4px;
+            font-size: 12px;
+        }
+
+        .rotation-item {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            margin-bottom: 2px;
+            padding-left: 8px;
+        }
+
+        .group-blue { color: #2563eb; }
+        .group-red { color: #dc2626; }
+        .group-green { color: #059669; }
+
+        .coach-section {
+            margin-bottom: 16px;
+        }
+
+        .coach-section h4 {
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+
+        .coach-assignment {
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+            margin-bottom: 4px;
+            padding-left: 16px;
+        }
+
+        .coach-name {
+            font-weight: 500;
+        }
+
+        .tag {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 12px;
+            background-color: #ecfdf5;
+            color: #166534;
+            border-radius: 20px;
+            font-size: 14px;
+            margin: 2px;
+        }
+
+        .tag-remove {
+            margin-left: 8px;
+            color: #059669;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .tag-remove:hover {
+            color: #166534;
+        }
+
+        .tags-container {
+            display: flex;
+            flex-wrap: wrap;
+            margin-top: 8px;
+        }
+
+        .section-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .error-text {
+            font-size: 14px;
+            color: #6b7280;
+            text-align: center;
+            margin-top: 8px;
+        }
+
+        .header-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .drill-explanation {
+            margin-bottom: 8px;
+        }
+
+        .drill-name {
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="app">
+            <!-- Form will be inserted here -->
+        </div>
+    </div>
+
+    <script>
+        class RugbyScheduleApp {
+            constructor() {
+                this.state = {
+                    theme: '',
+                    warmup: '',
+                    drills: ['', '', ''],
+                    drillCoaches: ['', '', ''],
+                    groupCoaches: ['', '', ''],
+                    rotationCoaches: [],
+                    schedule: null
+                };
+
+                this.themes = [
+                    'Defensive Awareness and Resetting',
+                    'Passing and Movement',
+                    'Tackling Techniques',
+                    'Ball Handling Skills',
+                    'Team Communication',
+                    'Speed and Agility'
+                ];
+
+                this.warmupActivities = [
+                    'Group races',
+                    'Obstacle course',
+                    'Dynamic stretching',
+                    'Tag games',
+                    'Ball passing circle'
+                ];
+
+                this.availableDrills = [
+                    { name: 'Bulldog', description: 'Three in the middle, rest cross the pitch' },
+                    { name: 'Sharks and Fishes (1v1)', description: 'Start 1 attacker vs 1 defender' },
+                    { name: 'Sharks and Fishes (1v2)', description: 'Start 2 attackers vs 1 defender, progress to 3v2' },
+                    { name: 'Space Gates', description: 'Kids positioned in gates, focus on movement/passing/awareness' },
+                    { name: 'Donuts', description: 'Circular passing and movement drill' },
+                    { name: 'Rucking Practice', description: 'Focus on proper rucking technique and body position' },
+                    { name: 'Lineout Basics', description: 'Simple lineout throwing and catching practice' }
+                ];
+
+                this.coaches = ['Kim', 'James', 'Andy', 'Manus', 'Paul', 'Charlie', 'Rich', 'Sev', 'Jannnes'];
+                this.groups = ['Blue', 'Red', 'Green'];
+                this.stations = ['Station A', 'Station B', 'Station C'];
+
+                this.init();
+            }
+
+            init() {
+                this.render();
+            }
+
+            getUsedCoaches() {
+                const used = new Set();
+                this.state.drillCoaches.forEach(coach => coach && used.add(coach));
+                this.state.groupCoaches.forEach(coach => coach && used.add(coach));
+                this.state.rotationCoaches.forEach(coach => coach && used.add(coach));
+                return used;
+            }
+
+            getAvailableCoaches() {
+                const used = this.getUsedCoaches();
+                return this.coaches.filter(coach => !used.has(coach));
+            }
+
+            getDrillDescription(drillName) {
+                const drill = this.availableDrills.find(d => d.name === drillName);
+                return drill ? drill.description : '';
+            }
+
+            updateState(field, value, index = null) {
+                if (index !== null) {
+                    const newArray = [...this.state[field]];
+                    newArray[index] = value;
+                    this.state[field] = newArray;
+                } else {
+                    this.state[field] = value;
+                }
+                this.render();
+            }
+
+            addRotationCoach(coach) {
+                if (!this.state.rotationCoaches.includes(coach)) {
+                    this.state.rotationCoaches.push(coach);
+                    this.render();
+                }
+            }
+
+            removeRotationCoach(coachToRemove) {
+                this.state.rotationCoaches = this.state.rotationCoaches.filter(coach => coach !== coachToRemove);
+                this.render();
+            }
+
+            generateSchedule() {
+                const rotations = [
+                    { Blue: 'Station A', Red: 'Station B', Green: 'Station C' },
+                    { Blue: 'Station B', Red: 'Station C', Green: 'Station A' },
+                    { Blue: 'Station C', Red: 'Station A', Green: 'Station B' }
+                ];
+
+                this.state.schedule = {
+                    ...this.state,
+                    rotations,
+                    timestamp: new Date().toLocaleString()
+                };
+
+                this.render();
+            }
+
+            resetForm() {
+                this.state = {
+                    theme: '',
+                    warmup: '',
+                    drills: ['', '', ''],
+                    drillCoaches: ['', '', ''],
+                    groupCoaches: ['', '', ''],
+                    rotationCoaches: [],
+                    schedule: null
+                };
+                this.render();
+            }
+
+            copyToClipboard() {
+                if (!this.state.schedule) return;
+
+                const schedule = this.state.schedule;
+                const scheduleText = `
+RUGBY PRACTICE SCHEDULE - ${schedule.timestamp}
+
+THEME: ${schedule.theme}
+
+TIME SCHEDULE:
+• 9:15 - Coaches briefing
+• 9:30 – 9:35 - Warm up: ${schedule.warmup}
+• 9:35 – 10:05 - Skills training (30 minutes)
+
+DRILL ROTATIONS:
+
+Rotation 1 (9:35 – 9:45):
+• Blue → Station A (${schedule.drills[0]})
+• Red → Station B (${schedule.drills[1]})
+• Green → Station C (${schedule.drills[2]})
+
+Rotation 2 (9:45 – 9:55):
+• Blue → Station B (${schedule.drills[1]})
+• Red → Station C (${schedule.drills[2]})
+• Green → Station A (${schedule.drills[0]})
+
+Rotation 3 (9:55 – 10:05):
+• Blue → Station C (${schedule.drills[2]})
+• Red → Station A (${schedule.drills[0]})
+• Green → Station B (${schedule.drills[1]})
+
+• 10:05 – 10:15 - Snack break (shortened to keep matches at 30 minutes)
+• 10:15 – 10:45 - Mini matches (one rotation only)
+• 10:45 – 10:50 - Stuck in the mud (quick finisher)
+• 10:50 – 11:00 - Medal awards and feedback - Medal theme: ${schedule.theme}
+
+COACH ASSIGNMENTS:
+Group Coaches:
+• Blue Group: ${schedule.groupCoaches[0]}
+• Red Group: ${schedule.groupCoaches[1]}
+• Green Group: ${schedule.groupCoaches[2]}
+
+Drill Station Coaches:
+• Station A (${schedule.drills[0]}): ${schedule.drillCoaches[0]}
+• Station B (${schedule.drills[1]}): ${schedule.drillCoaches[1]}
+• Station C (${schedule.drills[2]}): ${schedule.drillCoaches[2]}
+
+Rotation Coaches: ${schedule.rotationCoaches.join(', ')}
+
+DRILL EXPLANATIONS:
+${schedule.drills.map((drill, i) => `• ${drill}: ${this.getDrillDescription(drill)}`).join('\n')}
+                `.trim();
+
+                navigator.clipboard.writeText(scheduleText).then(() => {
+                    alert('Schedule copied to clipboard!');
+                }).catch(() => {
+                    // Fallback for older browsers
+                    const textArea = document.createElement('textarea');
+                    textArea.value = scheduleText;
+                    document.body.appendChild(textArea);
+                    textArea.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(textArea);
+                    alert('Schedule copied to clipboard!');
+                });
+            }
+
+            isFormValid() {
+                return this.state.theme &&
+                       this.state.warmup &&
+                       this.state.drills.every(drill => drill) &&
+                       this.state.drillCoaches.every(coach => coach) &&
+                       this.state.groupCoaches.every(coach => coach) &&
+                       this.state.rotationCoaches.length > 0;
+            }
+
+            renderSchedule() {
+                const schedule = this.state.schedule;
+                
+                return `
+                    <div class="header">
+                        <h1 class="title">🏉 Rugby Practice Schedule</h1>
+                        <div class="header-buttons">
+                            <button class="button button-blue" onclick="app.copyToClipboard()">
+                                📋 Copy Schedule
+                            </button>
+                            <button class="button button-secondary" onclick="app.resetForm()">
+                                🔄 New Schedule
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="theme-banner">
+                        <h2 class="theme-title">Theme: ${schedule.theme}</h2>
+                        <p class="timestamp">Generated: ${schedule.timestamp}</p>
+                    </div>
+
+                    <div class="grid">
+                        <div>
+                            <div class="card">
+                                <h3 class="section-title">🕒 Time Schedule</h3>
+                                <div>
+                                    <div class="schedule-item">
+                                        <span class="schedule-time">9:15</span>
+                                        <span>Coaches briefing</span>
+                                    </div>
+                                    <div class="schedule-item">
+                                        <span class="schedule-time">9:30 – 9:35</span>
+                                        <span>Warm up: ${schedule.warmup}</span>
+                                    </div>
+                                    <div class="schedule-item" style="border-bottom: none;">
+                                        <div style="width: 100%;">
+                                            <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                                                <span class="schedule-time">9:35 – 10:05</span>
+                                                <span>Skills training (30 minutes)</span>
+                                            </div>
+                                            <div class="rotation-details">
+                                                ${schedule.rotations.map((rotation, index) => `
+                                                    <div style="margin-bottom: 8px;">
+                                                        <div class="rotation-header">
+                                                            Rotation ${index + 1} (9:${35 + index * 10} – 9:${45 + index * 10})
+                                                        </div>
+                                                        <div style="padding-left: 8px;">
+                                                            ${this.groups.map(group => {
+                                                                const stationLetter = rotation[group].slice(-1);
+                                                                const drillIndex = stationLetter === 'A' ? 0 : stationLetter === 'B' ? 1 : 2;
+                                                                return `
+                                                                    <div class="rotation-item">
+                                                                        <span class="group-${group.toLowerCase()}">${group}</span>
+                                                                        <span>→ ${rotation[group]} (${schedule.drills[drillIndex]})</span>
+                                                                    </div>
+                                                                `;
+                                                            }).join('')}
+                                                        </div>
+                                                    </div>
+                                                `).join('')}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="schedule-item">
+                                        <span class="schedule-time">10:05 – 10:15</span>
+                                        <span>Snack break</span>
+                                    </div>
+                                    <div class="schedule-item">
+                                        <span class="schedule-time">10:15 – 10:45</span>
+                                        <span>Mini matches</span>
+                                    </div>
+                                    <div class="schedule-item">
+                                        <span class="schedule-time">10:45 – 10:50</span>
+                                        <span>Stuck in the mud</span>
+                                    </div>
+                                    <div class="schedule-item">
+                                        <span class="schedule-time">10:50 – 11:00</span>
+                                        <span>Medal awards</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <div class="card">
+                                <h3 class="section-title">👥 Coach Assignments</h3>
+                                
+                                <div class="coach-section">
+                                    <h4>Group Coaches:</h4>
+                                    ${this.groups.map((group, index) => `
+                                        <div class="coach-assignment">
+                                            <span class="group-${group.toLowerCase()}">${group} Group:</span>
+                                            <span class="coach-name">${schedule.groupCoaches[index]}</span>
+                                        </div>
+                                    `).join('')}
+                                </div>
+
+                                <div class="coach-section">
+                                    <h4>Drill Station Coaches:</h4>
+                                    ${this.stations.map((station, index) => `
+                                        <div class="coach-assignment">
+                                            <span>${station} (${schedule.drills[index]}):</span>
+                                            <span class="coach-name">${schedule.drillCoaches[index]}</span>
+                                        </div>
+                                    `).join('')}
+                                </div>
+
+                                <div class="coach-section">
+                                    <h4>Rotation Coaches:</h4>
+                                    <div style="padding-left: 16px;">
+                                        <span class="coach-name">${schedule.rotationCoaches.join(', ')}</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="card">
+                                <h3 class="section-title">📋 Drill Explanations</h3>
+                                ${schedule.drills.map((drill, index) => `
+                                    <div class="drill-explanation">
+                                        <span class="drill-name">${drill}:</span> ${this.getDrillDescription(drill)}
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            renderForm() {
+                const usedCoaches = this.getUsedCoaches();
+                const availableCoaches = this.getAvailableCoaches();
+
+                return `
+                    <div class="card">
+                        <h1 class="title">🏉 Rugby Practice Schedule Generator</h1>
+
+                        <div class="grid">
+                            <div>
+                                <div class="form-group">
+                                    <label class="label">Practice Theme</label>
+                                    <select class="select" onchange="app.updateState('theme', this.value)">
+                                        <option value="">Select a theme...</option>
+                                        ${this.themes.map(theme => `
+                                            <option value="${theme}" ${this.state.theme === theme ? 'selected' : ''}>${theme}</option>
+                                        `).join('')}
+                                    </select>
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="label">Warm-up Activity</label>
+                                    <select class="select" onchange="app.updateState('warmup', this.value)">
+                                        <option value="">Select warm-up...</option>
+                                        ${this.warmupActivities.map(activity => `
+                                            <option value="${activity}" ${this.state.warmup === activity ? 'selected' : ''}>${activity}</option>
+                                        `).join('')}
+                                    </select>
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="label">Drills (Select 3)</label>
+                                    ${this.state.drills.map((drill, index) => `
+                                        <div class="drill-item">
+                                            <select class="select" onchange="app.updateState('drills', this.value, ${index})">
+                                                <option value="">Select drill ${index + 1}...</option>
+                                                ${this.availableDrills
+                                                    .filter(d => !this.state.drills.includes(d.name) || d.name === drill)
+                                                    .map(drillOption => `
+                                                        <option value="${drillOption.name}" ${drill === drillOption.name ? 'selected' : ''}>${drillOption.name}</option>
+                                                    `).join('')}
+                                            </select>
+                                            ${drill ? `<div class="drill-description">${this.getDrillDescription(drill)}</div>` : ''}
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+
+                            <div>
+                                <div class="form-group">
+                                    <label class="label">Drill Station Coaches</label>
+                                    ${this.stations.map((station, index) => `
+                                        <div class="drill-item">
+                                            <label class="sub-label">${station} ${this.state.drills[index] ? `(${this.state.drills[index]})` : ''}</label>
+                                            <select class="select" onchange="app.updateState('drillCoaches', this.value, ${index})">
+                                                <option value="">Select coach...</option>
+                                                ${this.coaches
+                                                    .filter(coach => !usedCoaches.has(coach) || coach === this.state.drillCoaches[index])
+                                                    .map(coach => `
+                                                        <option value="${coach}" ${this.state.drillCoaches[index] === coach ? 'selected' : ''}>${coach}</option>
+                                                    `).join('')}
+                                            </select>
+                                        </div>
+                                    `).join('')}
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="label">Group Coaches</label>
+                                    ${this.groups.map((group, index) => `
+                                        <div class="drill-item">
+                                            <label class="sub-label">${group} Group</label>
+                                            <select class="select" onchange="app.updateState('groupCoaches', this.value, ${index})">
+                                                <option value="">Select coach...</option>
+                                                ${this.coaches
+                                                    .filter(coach => !usedCoaches.has(coach) || coach === this.state.groupCoaches[index])
+                                                    .map(coach => `
+                                                        <option value="${coach}" ${this.state.groupCoaches[index] === coach ? 'selected' : ''}>${coach}</option>
+                                                    `).join('')}
+                                            </select>
+                                        </div>
+                                    `).join('')}
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="label">Rotation Coaches</label>
+                                    ${availableCoaches.length > 0 ? `
+                                        <div class="drill-item">
+                                            <select class="select" onchange="if(this.value) { app.addRotationCoach(this.value); this.value = ''; }">
+                                                <option value="">Add rotation coach...</option>
+                                                ${availableCoaches.map(coach => `
+                                                    <option value="${coach}">${coach}</option>
+                                                `).join('')}
+                                            </select>
+                                        </div>
+                                    ` : ''}
+                                    ${this.state.rotationCoaches.length > 0 ? `
+                                        <div class="tags-container">
+                                            ${this.state.rotationCoaches.map(coach => `
+                                                <span class="tag">
+                                                    ${coach}
+                                                    <span class="tag-remove" onclick="app.removeRotationCoach('${coach}')">×</span>
+                                                </span>
+                                            `).join('')}
+                                        </div>
+                                    ` : ''}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div style="margin-top: 32px; padding-top: 24px; border-top: 1px solid #e5e7eb;">
+                            <button 
+                                class="button button-primary button-full ${!this.isFormValid() ? 'button:disabled' : ''}"
+                                onclick="app.generateSchedule()"
+                                ${!this.isFormValid() ? 'disabled' : ''}
+                            >
+                                Generate Practice Schedule
+                            </button>
+                            ${!this.isFormValid() ? '<p class="error-text">Please complete all fields to generate the schedule</p>' : ''}
+                        </div>
+                    </div>
+                `;
+            }
+
+            render() {
+                const appElement = document.getElementById('app');
+                if (this.state.schedule) {
+                    appElement.innerHTML = this.renderSchedule();
+                } else {
+                    appElement.innerHTML = this.renderForm();
+                }
+            }
+        }
+
+        // Initialize the app when the page loads
+        let app;
+        document.addEventListener('DOMContentLoaded', function() {
+            app = new RugbyScheduleApp();
+        });
+    </script>
+</body>
+</html>
