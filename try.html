@@ -123,6 +123,11 @@
             z-index: 18 !important;
         }
 
+        .waypoint-pass-line.incomplete {
+            background: #dc3545 !important;
+            opacity: 0.4;
+        }
+
         .setup-controls {
             text-align: center;
             margin: 20px 0;
@@ -465,6 +470,12 @@
             fill: none;
             z-index: 3;
             opacity: 0.8;
+        }
+
+        .pass-line.incomplete {
+            stroke: #dc3545;
+            opacity: 0.6;
+            stroke-dasharray: 4,4;
         }
 
         /* Eraser selection styling */
@@ -1877,13 +1888,17 @@
                 }
                 
                 // Reset pass execution flags
-                this.passes.forEach(pass => pass.executed = false);
+                this.passes.forEach(pass => {
+                    pass.executed = false;
+                    pass.incomplete = false;
+                });
                 
                 const animate = () => {
                     if (!this.isPlaying) return;
                     
                     const elapsed = Date.now() - startTime;
                     const progress = Math.min(elapsed / this.totalTime, 1);
+                    this.currentProgress = progress; // Store current progress for position checks
                     
                     this.players.forEach((player, index) => {
                         const movement = this.currentDrill.movements[index];
@@ -1914,26 +1929,45 @@
                                         const passerProgress = this.getMovementProgress(passerMovement, progress);
                                         
                                         if (passerProgress >= 0.8) {
-                                            pass.executed = true;
+                                            // Check if receiver (last waypoint owner) is at the last waypoint
+                                            const lastWaypoint = pass.waypoints[pass.waypoints.length - 1];
+                                            const receiver = lastWaypoint.ownerPlayer;
+                                            const targetX = parseInt(lastWaypoint.style.left) + 8;
+                                            const targetY = parseInt(lastWaypoint.style.top) + 8;
                                             
-                                            // Set flag to prevent ball position updates during animation
-                                            this.ballAnimatingAlongPass = true;
-                                            
-                                            // Create path from waypoints
-                                            const ballPath = pass.waypoints.map(waypoint => ({
-                                                x: parseInt(waypoint.style.left) + 8, // Center of waypoint
-                                                y: parseInt(waypoint.style.top) + 8
-                                            }));
-                                            
-                                            // Animate ball along the path
-                                            this.animateBallAlongPath(ballPath, 880).then(() => {
-                                                // Transfer ball to the last waypoint's owner (receiver)
-                                                const lastWaypoint = pass.waypoints[pass.waypoints.length - 1];
-                                                this.ballCarrier = lastWaypoint.ownerPlayer;
+                                            if (this.isPlayerAtPosition(receiver, targetX, targetY)) {
+                                                // Clear incomplete flag if receiver has arrived
+                                                if (pass.incomplete) {
+                                                    pass.incomplete = false;
+                                                    this.drawPasses(); // Redraw to clear incomplete state
+                                                }
                                                 
-                                                // Clear flag after animation completes
-                                                this.ballAnimatingAlongPass = false;
-                                            });
+                                                pass.executed = true;
+                                                
+                                                // Set flag to prevent ball position updates during animation
+                                                this.ballAnimatingAlongPass = true;
+                                                
+                                                // Create path from waypoints
+                                                const ballPath = pass.waypoints.map(waypoint => ({
+                                                    x: parseInt(waypoint.style.left) + 8, // Center of waypoint
+                                                    y: parseInt(waypoint.style.top) + 8
+                                                }));
+                                                
+                                                // Animate ball along the path
+                                                this.animateBallAlongPath(ballPath, 880).then(() => {
+                                                    // Transfer ball to the last waypoint's owner (receiver)
+                                                    this.ballCarrier = receiver;
+                                                    
+                                                    // Clear flag after animation completes
+                                                    this.ballAnimatingAlongPass = false;
+                                                });
+                                            } else {
+                                                // Mark pass as incomplete
+                                                if (!pass.incomplete) {
+                                                    pass.incomplete = true;
+                                                    this.drawPasses(); // Redraw to show incomplete state
+                                                }
+                                            }
                                         }
                                     }
                                 }
@@ -1944,37 +1978,52 @@
                                     const passerProgress = this.getMovementProgress(passerMovement, progress);
                                     
                                     if (passerProgress >= 0.8) {
-                                        pass.executed = true;
-                                        
-                                        // Set flag to prevent ball position updates during animation
-                                        this.ballAnimatingAlongPass = true;
-                                        
-                                        // Use consistent pass origin - same as in drawPasses
-                                        let passerStartX, passerStartY;
-                                        
-                                        if (pass.passer.waypoints && pass.passer.waypoints.length > 0) {
-                                            // Use the last waypoint as the pass origin
-                                            const lastWaypoint = pass.passer.waypoints[pass.passer.waypoints.length - 1];
-                                            passerStartX = lastWaypoint.x;
-                                            passerStartY = lastWaypoint.y;
-                                        } else {
-                                            // Use start position if no waypoints
-                                            passerStartX = parseFloat(pass.passer.dataset.startX);
-                                            passerStartY = parseFloat(pass.passer.dataset.startY);
-                                        }
-                                        
-                                        // Animate ball from passer's pass origin to receiver's target
-                                        this.animateBallToWaypoint(
-                                            passerStartX + 6, passerStartY + 6,
-                                            pass.targetX + 6, pass.targetY + 6,
-                                            880
-                                        ).then(() => {
-                                            // Transfer ball to receiver
-                                            this.ballCarrier = pass.receiver;
+                                        // Check if receiver is at the target position
+                                        if (this.isPlayerAtPosition(pass.receiver, pass.targetX, pass.targetY)) {
+                                            // Clear incomplete flag if receiver has arrived
+                                            if (pass.incomplete) {
+                                                pass.incomplete = false;
+                                                this.drawPasses(); // Redraw to clear incomplete state
+                                            }
                                             
-                                            // Clear flag after animation completes
-                                            this.ballAnimatingAlongPass = false;
-                                        });
+                                            pass.executed = true;
+                                            
+                                            // Set flag to prevent ball position updates during animation
+                                            this.ballAnimatingAlongPass = true;
+                                            
+                                            // Use consistent pass origin - same as in drawPasses
+                                            let passerStartX, passerStartY;
+                                            
+                                            if (pass.passer.waypoints && pass.passer.waypoints.length > 0) {
+                                                // Use the last waypoint as the pass origin
+                                                const lastWaypoint = pass.passer.waypoints[pass.passer.waypoints.length - 1];
+                                                passerStartX = lastWaypoint.x;
+                                                passerStartY = lastWaypoint.y;
+                                            } else {
+                                                // Use start position if no waypoints
+                                                passerStartX = parseFloat(pass.passer.dataset.startX);
+                                                passerStartY = parseFloat(pass.passer.dataset.startY);
+                                            }
+                                            
+                                            // Animate ball from passer's pass origin to receiver's target
+                                            this.animateBallToWaypoint(
+                                                passerStartX + 6, passerStartY + 6,
+                                                pass.targetX + 6, pass.targetY + 6,
+                                                880
+                                            ).then(() => {
+                                                // Transfer ball to receiver
+                                                this.ballCarrier = pass.receiver;
+                                                
+                                                // Clear flag after animation completes
+                                                this.ballAnimatingAlongPass = false;
+                                            });
+                                        } else {
+                                            // Mark pass as incomplete
+                                            if (!pass.incomplete) {
+                                                pass.incomplete = true;
+                                                this.drawPasses(); // Redraw to show incomplete state
+                                            }
+                                        }
                                     }
                                 }
                             }
@@ -2054,6 +2103,21 @@
                 return { x: pathPoints[pathPoints.length - 1].x, y: pathPoints[pathPoints.length - 1].y };
             }
 
+            isPlayerAtPosition(player, targetX, targetY, tolerance = 20) {
+                // Get the player's current position from their current movement
+                const playerIndex = this.players.indexOf(player);
+                if (playerIndex === -1) return false;
+                
+                const movement = this.currentDrill.movements[playerIndex];
+                const position = this.getPositionAlongPath(movement, this.currentProgress);
+                
+                const dx = position.x - targetX;
+                const dy = position.y - targetY;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                
+                return distance <= tolerance;
+            }
+
             pauseMovement() {
                 this.isPlaying = false;
                 if (this.animationFrame) {
@@ -2078,7 +2142,10 @@
                     this.ballAnimatingAlongPass = false;
                     this.updateBallPosition();
                 }
-                this.passes.forEach(pass => pass.executed = false);
+                this.passes.forEach(pass => {
+                    pass.executed = false;
+                    pass.incomplete = false;
+                });
             }
 
             clearAll() {
@@ -2404,7 +2471,7 @@
                                 const line = document.createElementNS('http://www.w3.org/2000/svg', 'path');
                                 const d = `M ${fromX} ${fromY} L ${toX} ${toY}`;
                                 line.setAttribute('d', d);
-                                line.setAttribute('class', 'pass-line');
+                                line.setAttribute('class', pass.incomplete ? 'pass-line incomplete' : 'pass-line');
                                 
                                 this.pathsSvg.appendChild(line);
                             }
@@ -2428,7 +2495,7 @@
                         const line = document.createElementNS('http://www.w3.org/2000/svg', 'path');
                         const d = `M ${passerX} ${passerY} L ${pass.targetX + 6} ${pass.targetY + 6}`;
                         line.setAttribute('d', d);
-                        line.setAttribute('class', 'pass-line');
+                        line.setAttribute('class', pass.incomplete ? 'pass-line incomplete' : 'pass-line');
                         
                         this.pathsSvg.appendChild(line);
                     }
