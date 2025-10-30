@@ -2524,9 +2524,6 @@
 
         // Function to fetch calendar events from API
         async function fetchCalendarEvents() {
-            // Ensure calendarEvents is initialized
-            if (!calendarEvents) calendarEvents = [];
-            
             try {
                 const response = await fetch('/api/calendar/list');
                 const data = await response.json();
