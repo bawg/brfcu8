@@ -2315,11 +2315,62 @@
         </section>
     </div>
 
-    <!-- Event Modal -->
+    <!-- Event Modal (for viewing details) -->
     <div id="eventModal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(30,58,138,0.15); z-index:1000; align-items:center; justify-content:center;">
         <div style="background:white; border-radius:12px; max-width:400px; margin:auto; padding:32px; box-shadow:0 8px 32px rgba(30,58,138,0.2); position:relative;">
             <button onclick="closeEventModal()" style="position:absolute; top:12px; right:12px; background:#eee; border:none; border-radius:50%; width:32px; height:32px; font-size:18px; cursor:pointer;">×</button>
             <div id="eventModalContent"></div>
+        </div>
+    </div>
+
+    <!-- Add Event Modal (for creating new events) -->
+    <div id="addEventModal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(30,58,138,0.15); z-index:1000; align-items:center; justify-content:center;">
+        <div style="background:white; border-radius:12px; max-width:500px; margin:auto; padding:32px; box-shadow:0 8px 32px rgba(30,58,138,0.2); position:relative;">
+            <button onclick="closeAddEventForm()" style="position:absolute; top:12px; right:12px; background:#eee; border:none; border-radius:50%; width:32px; height:32px; font-size:18px; cursor:pointer;">×</button>
+            <h2 style="color: #1e3a8a; margin-bottom: 24px;">Add New Event</h2>
+            <form id="addEventForm" onsubmit="submitNewEvent(event)">
+                <div class="form-grid">
+                    <div class="form-field">
+                        <label class="form-label" for="new-event-name">Event Name *</label>
+                        <input class="form-input" id="new-event-name" type="text" required>
+                    </div>
+                    <div class="form-field">
+                        <label class="form-label" for="new-event-type">Type *</label>
+                        <select class="form-input" id="new-event-type" required>
+                            <option value="">Select type</option>
+                            <option value="practice">Practice</option>
+                            <option value="match">Match</option>
+                            <option value="festival">Festival</option>
+                            <option value="vacation">Vacation</option>
+                        </select>
+                    </div>
+                    <div class="form-field">
+                        <label class="form-label" for="new-event-date">Date *</label>
+                        <input class="form-input" id="new-event-date" type="date" required>
+                    </div>
+                    <div class="form-field">
+                        <label class="form-label" for="new-event-time">Time *</label>
+                        <input class="form-input" id="new-event-time" type="text" placeholder="e.g., 6:00 PM - 8:00 PM" required>
+                    </div>
+                    <div class="form-field">
+                        <label class="form-label" for="new-event-location">Location</label>
+                        <input class="form-input" id="new-event-location" type="text" placeholder="e.g., Main Field">
+                    </div>
+                    <div class="form-field">
+                        <label class="form-label" for="new-event-duration">Duration</label>
+                        <input class="form-input" id="new-event-duration" type="text" placeholder="e.g., 2 hours">
+                    </div>
+                    <div class="form-field full-width">
+                        <label class="form-label" for="new-event-notes">Notes</label>
+                        <textarea class="form-input" id="new-event-notes" rows="3" placeholder="Additional details about the event..."></textarea>
+                    </div>
+                </div>
+                <div id="addEventStatus" style="margin: 16px 0; display: none;"></div>
+                <div style="display: flex; gap: 12px; margin-top: 24px;">
+                    <button type="button" class="btn-secondary" onclick="closeAddEventForm()">Cancel</button>
+                    <button type="submit" class="btn-primary" id="submitEventBtn">Create Event</button>
+                </div>
+            </form>
         </div>
     </div>
 
@@ -3825,6 +3876,103 @@
         function closeAvailabilityModal() {
             const modal = document.getElementById('availabilityModal');
             modal.style.display = 'none';
+        }
+
+        // Add Event Form Functions
+        function openAddEventForm() {
+            const modal = document.getElementById('addEventModal');
+            modal.style.display = 'flex';
+            
+            // Clear form
+            document.getElementById('addEventForm').reset();
+            document.getElementById('addEventStatus').style.display = 'none';
+        }
+
+        function closeAddEventForm() {
+            const modal = document.getElementById('addEventModal');
+            modal.style.display = 'none';
+        }
+
+        async function submitNewEvent(event) {
+            event.preventDefault();
+            
+            const submitBtn = document.getElementById('submitEventBtn');
+            const statusDiv = document.getElementById('addEventStatus');
+            
+            // Get form values
+            const name = document.getElementById('new-event-name').value.trim();
+            const type = document.getElementById('new-event-type').value;
+            const date = document.getElementById('new-event-date').value;
+            const time = document.getElementById('new-event-time').value.trim();
+            const location = document.getElementById('new-event-location').value.trim();
+            const duration = document.getElementById('new-event-duration').value.trim();
+            const notes = document.getElementById('new-event-notes').value.trim();
+            
+            // Validate required fields
+            if (!name || !type || !date || !time) {
+                statusDiv.className = 'error-message';
+                statusDiv.textContent = 'Please fill in all required fields.';
+                statusDiv.style.display = 'block';
+                return;
+            }
+            
+            // Disable submit button and show loading state
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Creating...';
+            statusDiv.className = 'loading-message';
+            statusDiv.textContent = 'Creating event...';
+            statusDiv.style.display = 'block';
+            
+            try {
+                // Call the API to create the event
+                const response = await fetch('/api/calendar/create', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        name,
+                        type,
+                        date,
+                        time,
+                        location,
+                        duration,
+                        notes
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok && data.success) {
+                    // Success!
+                    statusDiv.className = 'success-message';
+                    statusDiv.textContent = 'Event created successfully!';
+                    
+                    // Refresh calendar events from API
+                    await fetchCalendarEvents();
+                    
+                    // Re-render calendar and events table
+                    renderCalendar();
+                    renderEventsTable();
+                    
+                    // Close modal after a short delay
+                    setTimeout(() => {
+                        closeAddEventForm();
+                    }, 1500);
+                } else {
+                    // Error from API
+                    statusDiv.className = 'error-message';
+                    statusDiv.textContent = data.error || 'Failed to create event. Please try again.';
+                }
+            } catch (error) {
+                console.error('Error creating event:', error);
+                statusDiv.className = 'error-message';
+                statusDiv.textContent = 'Network error. Please check your connection and try again.';
+            } finally {
+                // Re-enable submit button
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Create Event';
+            }
         }
 
         window.showSection = showSection;
