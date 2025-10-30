@@ -19,13 +19,28 @@
             min-height: 100vh;
         }
         
+        body.login-active {
+            overflow: hidden;
+            height: 100vh;
+            position: fixed;
+            width: 100%;
+        }
+        
         /* === LOGIN STYLES === */
         #loginContainer {
             display: flex;
             align-items: center;
             justify-content: center;
             min-height: 100vh;
+            height: 100vh;
             padding: 24px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            overflow: auto;
+            z-index: 1000;
         }
         
         .login-card {
@@ -395,9 +410,11 @@
             if (isAuthenticated) {
                 loginContainer.classList.add('hidden');
                 appContainer.classList.remove('hidden');
+                document.body.classList.remove('login-active');
             } else {
                 loginContainer.classList.remove('hidden');
                 appContainer.classList.add('hidden');
+                document.body.classList.add('login-active');
             }
         }
 
