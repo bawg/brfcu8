@@ -1392,6 +1392,10 @@
             background: rgba(30, 58, 138, 0.3);
             backdrop-filter: blur(4px);
             z-index: 1002;
+        }
+        
+        #addEventModal.show {
+            display: flex;
             align-items: center;
             justify-content: center;
         }
@@ -3919,7 +3923,7 @@
         // Open the Add Event modal
         function openAddEventModal() {
             const modal = document.getElementById('addEventModal');
-            modal.style.display = 'flex';
+            modal.classList.add('show');
             
             // Reset form
             document.getElementById('addEventForm').reset();
@@ -3937,7 +3941,7 @@
         // Close the Add Event modal
         function closeAddEventModal() {
             const modal = document.getElementById('addEventModal');
-            modal.style.display = 'none';
+            modal.classList.remove('show');
             
             // Reset form
             document.getElementById('addEventForm').reset();
