@@ -3281,8 +3281,12 @@
                 // Convert JSON to CSV format
                 const csv = convertEventsToCSV(events);
                 
+                // Add UTF-8 BOM for Excel compatibility
+                const BOM = '\uFEFF';
+                const csvWithBOM = BOM + csv;
+                
                 // Create and download CSV file
-                const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+                const blob = new Blob([csvWithBOM], { type: 'text/csv;charset=utf-8;' });
                 const url = URL.createObjectURL(blob);
                 
                 const a = document.createElement('a');
@@ -3312,8 +3316,8 @@
             // CSV Headers as specified in requirements
             const headers = ['name', 'type', 'date', 'time', 'location', 'duration', 'notes'];
             
-            // Start with header row
-            let csv = headers.join(',') + '\n';
+            // Start with header row using Windows line endings for Excel compatibility
+            let csv = headers.join(',') + '\r\n';
             
             // If no events, return just headers
             if (!events || events.length === 0) {
@@ -3342,7 +3346,8 @@
                     return value;
                 });
                 
-                csv += row.join(',') + '\n';
+                // Use Windows line endings for Excel compatibility
+                csv += row.join(',') + '\r\n';
             });
             
             return csv;
