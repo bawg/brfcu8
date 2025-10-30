@@ -1727,6 +1727,12 @@
             color: #1e40af;
             border: 1px solid #93c5fd;
         }
+        
+        .upload-status.loading {
+            background: #eff6ff;
+            color: #1e40af;
+            border: 1px solid #bfdbfe;
+        }
 
         /* Drill row action buttons */
         .drill-actions {
@@ -3240,26 +3246,89 @@
         }
 
         // Calendar Event management functions
-        function downloadAllEvents() {
-            const eventsData = {
-                version: "1.0",
-                exported: new Date().toISOString(),
-                events: calendarEvents
-            };
+        async function downloadAllEvents() {
+            try {
+                // Show loading message
+                showCalendarUploadStatus('loading', 'Fetching calendar events...');
+                
+                // Fetch events from the API
+                const response = await fetch('/api/calendar/list');
+                
+                if (!response.ok) {
+                    throw new Error('Unable to fetch events from server');
+                }
+                
+                const data = await response.json();
+                
+                if (!data.success || !data.events) {
+                    throw new Error('Invalid response from server');
+                }
+                
+                const events = data.events;
+                
+                // Convert JSON to CSV format
+                const csv = convertEventsToCSV(events);
+                
+                // Create and download CSV file
+                const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+                const url = URL.createObjectURL(blob);
+                
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `calendar_events_export_${new Date().toISOString().split('T')[0]}.csv`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                
+                // Show success message
+                showCalendarUploadStatus('success', `Successfully downloaded ${events.length} calendar event${events.length !== 1 ? 's' : ''} to CSV file.`);
+                
+            } catch (error) {
+                console.error('Error downloading calendar events:', error);
+                showCalendarUploadStatus('error', error.message || 'Unable to fetch events. Please try again.');
+            }
+        }
+        
+        // Helper function to convert events JSON to CSV format
+        function convertEventsToCSV(events) {
+            // CSV Headers as specified in requirements
+            const headers = ['name', 'type', 'date', 'time', 'location', 'duration', 'notes'];
             
-            const json = JSON.stringify(eventsData, null, 2);
-            const blob = new Blob([json], { type: "application/json" });
-            const url = URL.createObjectURL(blob);
+            // Start with header row
+            let csv = headers.join(',') + '\n';
             
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `calendar_events_export_${new Date().toISOString().split('T')[0]}.json`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
+            // If no events, return just headers
+            if (!events || events.length === 0) {
+                return csv;
+            }
             
-            showCalendarUploadStatus('success', `Downloaded ${calendarEvents.length} calendar events to JSON file.`);
+            // Add each event as a row
+            events.forEach(event => {
+                const row = headers.map(header => {
+                    let value = event[header] || '';
+                    
+                    // Handle 'notes' field - it might be stored as 'details' in the data
+                    if (header === 'notes' && !value && event.details) {
+                        value = event.details;
+                    }
+                    
+                    // Convert value to string
+                    value = String(value);
+                    
+                    // Escape CSV special characters
+                    // If value contains comma, newline, or quotes, wrap in quotes and escape quotes
+                    if (value.includes(',') || value.includes('\n') || value.includes('"')) {
+                        value = '"' + value.replace(/"/g, '""') + '"';
+                    }
+                    
+                    return value;
+                });
+                
+                csv += row.join(',') + '\n';
+            });
+            
+            return csv;
         }
 
         function uploadEvents(event) {
