@@ -21,6 +21,7 @@ export default async function handler(req, res) {
   }
 
   try {
+console.log('req body', typeof req.body, req.body);
     const { name, type, date, time, location, duration, notes } = req.body;
 
     if (!name || !type || !date) {
