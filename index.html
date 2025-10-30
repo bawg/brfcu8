@@ -2562,13 +2562,11 @@
                     renderEventsTable();
                 } else {
                     console.error('Failed to fetch calendar events:', data);
-                    // Keep empty array if fetch fails
-                    calendarEvents = [];
+                    // Keep empty array if no valid data is returned
                 }
             } catch (error) {
                 console.error('Error fetching calendar events:', error);
-                // Keep empty array if fetch fails
-                calendarEvents = [];
+                // Preserve existing data on error - don't clear calendarEvents
             }
         }
 
@@ -2580,15 +2578,15 @@
         const maxZoom = 2;
         
         // Initialize calendar on page load
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', async function() {
             currentMonth = today.getMonth();
             currentYear = today.getFullYear();
             updateCalendarTitle();
             
-            // Fetch calendar events from API first
-            fetchCalendarEvents();
+            // Fetch calendar events from API first, then render
+            await fetchCalendarEvents();
             
-            // Render with initial empty state (will be updated after fetch)
+            // Render after fetch completes
             renderCalendar();
             renderEventsTable();
             renderDrillsTable();
@@ -3329,7 +3327,7 @@
                         if (!calEvent.location) calEvent.location = '';
                         if (!calEvent.duration) calEvent.duration = '';
                         if (!calEvent.notes) calEvent.notes = '';
-                        if (!calEvent.details) calEvent.details = calEvent.notes; // Alias
+                        if (!calEvent.details) calEvent.details = calEvent.notes || ''; // Alias, ensure always string
                         if (!calEvent.attendees) calEvent.attendees = [];
                         if (!calEvent.availability) calEvent.availability = { manus: '', andy: '', james: '' };
                         if (!calEvent.createdAt) calEvent.createdAt = null;
