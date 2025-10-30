@@ -1380,6 +1380,109 @@
         #availabilityModalContent {
             margin-top: 16px;
         }
+
+        /* Add Event Modal Styles */
+        #addEventModal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(30, 58, 138, 0.3);
+            backdrop-filter: blur(4px);
+            z-index: 1002;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        #addEventModal .modal-content {
+            background: white;
+            border-radius: 12px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            margin: auto;
+            padding: 32px;
+            box-shadow: 0 20px 60px rgba(30, 58, 138, 0.3);
+            position: relative;
+        }
+        
+        #addEventModal .modal-title {
+            color: #1e3a8a;
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 24px;
+            padding-right: 40px;
+        }
+        
+        #addEventModal .close-btn {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            background: #f1f5f9;
+            border: none;
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            font-size: 20px;
+            cursor: pointer;
+            color: #64748b;
+            transition: all 0.2s ease;
+        }
+        
+        #addEventModal .close-btn:hover {
+            background: #e2e8f0;
+            color: #1e3a8a;
+        }
+
+        .form-field-error {
+            border-color: #dc2626 !important;
+            box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1) !important;
+        }
+
+        .field-error-message {
+            color: #dc2626;
+            font-size: 12px;
+            margin-top: 4px;
+            display: none;
+        }
+
+        .field-error-message.show {
+            display: block;
+        }
+
+        .modal-message {
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            font-size: 14px;
+            display: none;
+        }
+
+        .modal-message.success {
+            background: #dcfce7;
+            border: 1px solid #16a34a;
+            color: #15803d;
+            display: block;
+        }
+
+        .modal-message.error {
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            color: #dc2626;
+            display: block;
+        }
+
+        .modal-message.loading {
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
+            color: #1d4ed8;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
         
         /* Responsive Design - Mobile First */
         @media (max-width: 768px) {
@@ -2328,6 +2431,98 @@
         <div style="background:white; border-radius:12px; max-width:350px; margin:auto; padding:24px; box-shadow:0 8px 32px rgba(30,58,138,0.2); position:relative;">
             <button onclick="closeAvailabilityModal()" style="position:absolute; top:12px; right:12px; background:#eee; border:none; border-radius:50%; width:32px; height:32px; font-size:18px; cursor:pointer;">×</button>
             <div id="availabilityModalContent"></div>
+        </div>
+    </div>
+
+    <!-- Add Event Modal -->
+    <div id="addEventModal">
+        <div class="modal-content">
+            <button class="close-btn" onclick="closeAddEventModal()">×</button>
+            <h2 class="modal-title">+ Add New Event</h2>
+            
+            <div id="addEventMessage" class="modal-message"></div>
+            
+            <form id="addEventForm" onsubmit="submitAddEvent(event)">
+                <div class="form-grid">
+                    <div class="form-field full-width">
+                        <label class="form-label" for="add-event-name">Event Name <span style="color: #dc2626;">*</span></label>
+                        <input 
+                            class="form-input" 
+                            id="add-event-name" 
+                            type="text" 
+                            placeholder="e.g., Practice Session, Championship Match"
+                            required>
+                        <div class="field-error-message" id="add-event-name-error">Event name is required</div>
+                    </div>
+                    
+                    <div class="form-field">
+                        <label class="form-label" for="add-event-type">Event Type <span style="color: #dc2626;">*</span></label>
+                        <select class="form-input" id="add-event-type" required>
+                            <option value="">Select type</option>
+                            <option value="practice">Practice</option>
+                            <option value="match">Match</option>
+                            <option value="festival">Festival</option>
+                            <option value="vacation">Vacation</option>
+                        </select>
+                        <div class="field-error-message" id="add-event-type-error">Event type is required</div>
+                    </div>
+                    
+                    <div class="form-field">
+                        <label class="form-label" for="add-event-date">Date <span style="color: #dc2626;">*</span></label>
+                        <input 
+                            class="form-input" 
+                            id="add-event-date" 
+                            type="date" 
+                            required>
+                        <div class="field-error-message" id="add-event-date-error">Date is required</div>
+                    </div>
+                    
+                    <div class="form-field">
+                        <label class="form-label" for="add-event-time">Time</label>
+                        <input 
+                            class="form-input" 
+                            id="add-event-time" 
+                            type="text" 
+                            placeholder="e.g., 6:00 PM - 8:00 PM">
+                    </div>
+                    
+                    <div class="form-field">
+                        <label class="form-label" for="add-event-location">Location</label>
+                        <input 
+                            class="form-input" 
+                            id="add-event-location" 
+                            type="text" 
+                            placeholder="e.g., Barnes Rugby Field">
+                    </div>
+                    
+                    <div class="form-field">
+                        <label class="form-label" for="add-event-duration">Duration (minutes)</label>
+                        <input 
+                            class="form-input" 
+                            id="add-event-duration" 
+                            type="number" 
+                            min="1"
+                            placeholder="e.g., 120">
+                    </div>
+                    
+                    <div class="form-field full-width">
+                        <label class="form-label" for="add-event-notes">Notes</label>
+                        <textarea 
+                            class="form-input" 
+                            id="add-event-notes" 
+                            rows="3" 
+                            placeholder="Additional details or reminders..."></textarea>
+                    </div>
+                </div>
+                
+                <div style="display: flex; gap: 12px; margin-top: 24px;">
+                    <button type="button" class="btn-secondary" onclick="closeAddEventModal()">Cancel</button>
+                    <button type="submit" class="btn-primary" id="saveEventBtn">
+                        <span id="saveEventBtnText">Save Event</span>
+                        <span id="saveEventBtnSpinner" style="display: none;"><div class="spinner"></div>Saving...</span>
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 
@@ -3717,6 +3912,287 @@
             setTimeout(() => {
                 statusDiv.style.display = 'none';
             }, 3000);
+        }
+
+        // ====== ADD EVENT MODAL FUNCTIONS ======
+        
+        // Open the Add Event modal
+        function openAddEventModal() {
+            const modal = document.getElementById('addEventModal');
+            modal.style.display = 'flex';
+            
+            // Reset form
+            document.getElementById('addEventForm').reset();
+            
+            // Clear any previous messages or errors
+            clearAddEventErrors();
+            document.getElementById('addEventMessage').className = 'modal-message';
+            document.getElementById('addEventMessage').textContent = '';
+            
+            // Set default date to today
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('add-event-date').value = today;
+        }
+        
+        // Close the Add Event modal
+        function closeAddEventModal() {
+            const modal = document.getElementById('addEventModal');
+            modal.style.display = 'none';
+            
+            // Reset form
+            document.getElementById('addEventForm').reset();
+            clearAddEventErrors();
+        }
+        
+        // Clear all validation errors
+        function clearAddEventErrors() {
+            const errorMessages = document.querySelectorAll('.field-error-message');
+            errorMessages.forEach(msg => msg.classList.remove('show'));
+            
+            const inputs = document.querySelectorAll('#addEventForm .form-input');
+            inputs.forEach(input => input.classList.remove('form-field-error'));
+        }
+        
+        // Validate form fields
+        function validateAddEventForm() {
+            let isValid = true;
+            clearAddEventErrors();
+            
+            // Validate name
+            const name = document.getElementById('add-event-name');
+            if (!name.value.trim()) {
+                name.classList.add('form-field-error');
+                document.getElementById('add-event-name-error').classList.add('show');
+                isValid = false;
+            }
+            
+            // Validate type
+            const type = document.getElementById('add-event-type');
+            if (!type.value) {
+                type.classList.add('form-field-error');
+                document.getElementById('add-event-type-error').classList.add('show');
+                isValid = false;
+            }
+            
+            // Validate date
+            const date = document.getElementById('add-event-date');
+            if (!date.value) {
+                date.classList.add('form-field-error');
+                document.getElementById('add-event-date-error').classList.add('show');
+                isValid = false;
+            }
+            
+            return isValid;
+        }
+        
+        // Show message in modal
+        function showAddEventMessage(message, type) {
+            const messageDiv = document.getElementById('addEventMessage');
+            messageDiv.className = `modal-message ${type}`;
+            
+            if (type === 'loading') {
+                messageDiv.innerHTML = `<div class="spinner"></div>${message}`;
+            } else {
+                messageDiv.textContent = message;
+            }
+        }
+        
+        // Set loading state for save button
+        function setAddEventLoading(loading) {
+            const btn = document.getElementById('saveEventBtn');
+            const btnText = document.getElementById('saveEventBtnText');
+            const btnSpinner = document.getElementById('saveEventBtnSpinner');
+            
+            btn.disabled = loading;
+            
+            if (loading) {
+                btnText.style.display = 'none';
+                btnSpinner.style.display = 'flex';
+                btnSpinner.style.alignItems = 'center';
+                btnSpinner.style.gap = '8px';
+            } else {
+                btnText.style.display = 'inline';
+                btnSpinner.style.display = 'none';
+            }
+        }
+        
+        // Submit the Add Event form
+        async function submitAddEvent(event) {
+            event.preventDefault();
+            
+            // Validate form
+            if (!validateAddEventForm()) {
+                showAddEventMessage('Please fill in all required fields.', 'error');
+                return;
+            }
+            
+            // Get form values
+            const name = document.getElementById('add-event-name').value.trim();
+            const type = document.getElementById('add-event-type').value;
+            const date = document.getElementById('add-event-date').value;
+            const time = document.getElementById('add-event-time').value.trim();
+            const location = document.getElementById('add-event-location').value.trim();
+            const duration = document.getElementById('add-event-duration').value;
+            const notes = document.getElementById('add-event-notes').value.trim();
+            
+            // Prepare data for API
+            const eventData = {
+                name,
+                type,
+                date,
+                time: time || '',
+                location: location || '',
+                duration: duration || '',
+                notes: notes || ''
+            };
+            
+            try {
+                // Show loading state
+                setAddEventLoading(true);
+                showAddEventMessage('Creating event...', 'loading');
+                
+                // Call the API
+                const response = await fetch('/api/calendar/create', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(eventData),
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok && data.success) {
+                    // Success!
+                    showAddEventMessage('Event created successfully!', 'success');
+                    
+                    // Add the new event to the local array for immediate display
+                    const newEvent = {
+                        ...eventData,
+                        details: notes,
+                        attendees: [],
+                        availability: { manus: '', andy: '', james: '' }
+                    };
+                    calendarEvents.push(newEvent);
+                    
+                    // Refresh the calendar and events table
+                    renderCalendar();
+                    renderEventsTable();
+                    
+                    // Close modal after a short delay
+                    setTimeout(() => {
+                        closeAddEventModal();
+                    }, 1500);
+                    
+                } else {
+                    // Error from API
+                    showAddEventMessage(data.error || 'Failed to create event. Please try again.', 'error');
+                }
+                
+            } catch (error) {
+                console.error('Add event error:', error);
+                showAddEventMessage('Network error. Please check your connection and try again.', 'error');
+            } finally {
+                setAddEventLoading(false);
+            }
+        }
+        
+        // ====== MISSING STUB FUNCTIONS ======
+        
+        // Open event details modal (existing functionality)
+        function openEventDetails(event) {
+            const modal = document.getElementById('eventModal');
+            const modalContent = document.getElementById('eventModalContent');
+            
+            // Build the event details HTML
+            const attendeesList = event.attendees && event.attendees.length > 0 
+                ? event.attendees.join(', ') 
+                : 'No attendees listed';
+            
+            const attending = Object.entries(event.availability || {})
+                .filter(([user, val]) => val === 'yes')
+                .map(([user]) => user.charAt(0).toUpperCase() + user.slice(1));
+            const availabilityList = attending.length ? attending.join(', ') : 'No availability data';
+            
+            modalContent.innerHTML = `
+                <h3 style="color: #1e3a8a; margin-bottom: 16px;">${event.name}</h3>
+                <div style="color: #64748b; margin-bottom: 8px;">
+                    <strong>Type:</strong> <span class="event-type-badge ${event.type}">${event.type.charAt(0).toUpperCase() + event.type.slice(1)}</span>
+                </div>
+                <div style="color: #64748b; margin-bottom: 8px;">
+                    <strong>Date:</strong> ${new Date(event.date).toLocaleDateString()}
+                </div>
+                <div style="color: #64748b; margin-bottom: 8px;">
+                    <strong>Time:</strong> ${event.time || 'Not specified'}
+                </div>
+                <div style="color: #64748b; margin-bottom: 8px;">
+                    <strong>Location:</strong> ${event.location || 'Not specified'}
+                </div>
+                ${event.duration ? `<div style="color: #64748b; margin-bottom: 8px;">
+                    <strong>Duration:</strong> ${event.duration} minutes
+                </div>` : ''}
+                <div style="color: #64748b; margin-bottom: 8px;">
+                    <strong>Details:</strong> ${event.details || 'No additional details'}
+                </div>
+                <div style="color: #64748b; margin-bottom: 8px;">
+                    <strong>Availability:</strong> ${availabilityList}
+                </div>
+            `;
+            
+            modal.style.display = 'flex';
+        }
+        
+        // Close event details modal
+        function closeEventModal() {
+            const modal = document.getElementById('eventModal');
+            modal.style.display = 'none';
+        }
+        
+        // Filter events table by column
+        function filterColumn(columnKey) {
+            const value = prompt(`Enter value to filter by ${columnKey}:`);
+            if (value !== null) {
+                columnFilter.key = columnKey;
+                columnFilter.value = value.toLowerCase();
+                eventsPage = 1; // Reset to first page
+                renderEventsTable();
+            }
+        }
+        
+        // Clear column filter
+        function clearColumnFilter() {
+            columnFilter = { key: '', value: '' };
+            eventsPage = 1;
+            renderEventsTable();
+        }
+        
+        // Toggle availability edit mode
+        function toggleAvailabilityEdit() {
+            isEditingAvailability = !isEditingAvailability;
+            
+            const userSelect = document.getElementById('availabilityUser');
+            const userLabel = document.getElementById('availabilityUserLabel');
+            const toggleBtn = document.getElementById('toggleAvailabilityBtn');
+            
+            if (isEditingAvailability) {
+                userSelect.style.display = 'block';
+                userLabel.style.display = 'block';
+                toggleBtn.textContent = '✓ Done Editing';
+                toggleBtn.style.background = '#16a34a';
+            } else {
+                userSelect.style.display = 'none';
+                userLabel.style.display = 'none';
+                toggleBtn.textContent = '+ Add Availability';
+                toggleBtn.style.background = '';
+            }
+            
+            renderEventsTable();
+        }
+        
+        // Close availability modal
+        function closeAvailabilityModal() {
+            const modal = document.getElementById('availabilityModal');
+            modal.style.display = 'none';
         }
 
         window.showSection = showSection;
