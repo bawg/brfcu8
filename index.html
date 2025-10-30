@@ -2422,7 +2422,7 @@
                                 <p style="color: #64748b; margin: 0; font-size: 14px;">Select your filled CSV file to upload calendar events (must match template format)</p>
                             </div>
                             <div>
-                                <input type="file" id="csv-upload-input" accept=".csv" style="display: none;" onchange="handleCSVUpload(event)">
+                                <input type="file" id="csv-upload-input" accept=".csv,text/csv,application/vnd.ms-excel,application/csv,text/x-csv,application/x-csv,text/comma-separated-values,text/x-comma-separated-values" style="display: none;" onchange="handleCSVUpload(event)">
                                 <button class="btn-primary" onclick="document.getElementById('csv-upload-input').click()" style="background: #059669;">Select CSV File</button>
                             </div>
                         </div>
