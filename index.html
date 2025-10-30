@@ -2286,7 +2286,7 @@
                         <div style="display: flex; justify-content: space-between; align-items: center;">
                             <div>
                                 <h4 style="color: #1e3a8a; font-weight: 600; margin: 0 0 4px 0;">📥 Download All Calendar Events</h4>
-                                <p style="color: #64748b; margin: 0; font-size: 14px;">Export all calendar events to a JSON file with metadata and timestamp</p>
+                                <p style="color: #64748b; margin: 0; font-size: 14px;">Export all calendar events to a CSV file from Firebase</p>
                             </div>
                             <button class="btn-primary" onclick="downloadAllEvents()">Download</button>
                         </div>
@@ -2969,6 +2969,10 @@
         let confirmationAction = null;
         let currentEditingDrillId = null;
         let currentEditingEventIndex = null;
+        
+        // Flag to prevent duplicate downloads
+        let isDownloadingEvents = false;
+        let currentEditingEventIndex = null;
 
         // Drill management functions
         function downloadAllDrills() {
@@ -3247,7 +3251,15 @@
 
         // Calendar Event management functions
         async function downloadAllEvents() {
+            // Prevent duplicate downloads
+            if (isDownloadingEvents) {
+                console.log('Download already in progress');
+                return;
+            }
+            
             try {
+                isDownloadingEvents = true;
+                
                 // Show loading message
                 showCalendarUploadStatus('loading', 'Fetching calendar events...');
                 
@@ -3287,6 +3299,11 @@
             } catch (error) {
                 console.error('Error downloading calendar events:', error);
                 showCalendarUploadStatus('error', error.message || 'Unable to fetch events. Please try again.');
+            } finally {
+                // Reset flag after a short delay to prevent accidental double-clicks
+                setTimeout(() => {
+                    isDownloadingEvents = false;
+                }, 1000);
             }
         }
         
