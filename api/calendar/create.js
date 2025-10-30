@@ -48,8 +48,10 @@ export default async function handler(req, res) {
       eventId: docRef.id
     });
 
-  } catch (error) {
-    console.error('Create calendar event error:', error);
-    return res.status(500).json({ error: 'Failed to create calendar event' });
-  }
+
+} catch (error) {
+  console.error('Create calendar event error:', error);
+  return res
+    .status(500)
+    .json({ error: String(error?.message || error) });   // <-- temporary debug
 }
