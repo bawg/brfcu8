@@ -2440,6 +2440,64 @@
         </div>
     </div>
 
+    <!-- Add Event Modal -->
+    <div id="addEventModal" class="confirmation-modal">
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="modal-header">
+                <span>➕</span>
+                <h3>Add New Event</h3>
+            </div>
+            <div class="modal-body">
+                <div class="form-grid">
+                    <div class="form-field">
+                        <label class="form-label" for="add-event-name">Event Name<span style="color: #dc2626;">*</span></label>
+                        <input class="form-input" id="add-event-name" type="text" placeholder="Enter event name" required>
+                        <span class="error-text" id="add-event-name-error" style="display:none; color:#dc2626; font-size:12px;"></span>
+                    </div>
+                    <div class="form-field">
+                        <label class="form-label" for="add-event-type">Type<span style="color: #dc2626;">*</span></label>
+                        <select class="form-input" id="add-event-type" required>
+                            <option value="">Select type</option>
+                            <option value="practice">Practice</option>
+                            <option value="match">Match</option>
+                            <option value="festival">Festival</option>
+                            <option value="meeting">Meeting</option>
+                        </select>
+                        <span class="error-text" id="add-event-type-error" style="display:none; color:#dc2626; font-size:12px;"></span>
+                    </div>
+                    <div class="form-field">
+                        <label class="form-label" for="add-event-date">Date<span style="color: #dc2626;">*</span></label>
+                        <input class="form-input" id="add-event-date" type="date" required>
+                        <span class="error-text" id="add-event-date-error" style="display:none; color:#dc2626; font-size:12px;"></span>
+                    </div>
+                    <div class="form-field">
+                        <label class="form-label" for="add-event-time">Time</label>
+                        <input class="form-input" id="add-event-time" type="text" placeholder="e.g., 6:00 PM - 8:00 PM">
+                    </div>
+                    <div class="form-field">
+                        <label class="form-label" for="add-event-location">Location</label>
+                        <input class="form-input" id="add-event-location" type="text" placeholder="Enter location">
+                    </div>
+                    <div class="form-field">
+                        <label class="form-label" for="add-event-duration">Duration (minutes)</label>
+                        <input class="form-input" id="add-event-duration" type="number" min="0" placeholder="e.g., 90">
+                    </div>
+                    <div class="form-field full-width">
+                        <label class="form-label" for="add-event-notes">Notes</label>
+                        <textarea class="form-input" id="add-event-notes" rows="3" placeholder="Additional notes or reminders"></textarea>
+                    </div>
+                </div>
+                <div id="add-event-message" style="margin-top: 16px; display: none;"></div>
+            </div>
+            <div class="modal-actions">
+                <button class="modal-btn cancel" onclick="closeAddEventModal()">Cancel</button>
+                <button class="modal-btn primary" id="saveEventBtn" onclick="saveEvent()">
+                    <span id="saveEventBtnText">Save Event</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Log Issue Modal -->
     <div id="logIssueModal" class="confirmation-modal">
         <div class="modal-content" style="max-width: 600px;">
@@ -3825,6 +3883,169 @@
         function closeAvailabilityModal() {
             const modal = document.getElementById('availabilityModal');
             modal.style.display = 'none';
+        }
+
+        // Add Event Modal functions
+        function openAddEventModal() {
+            const modal = document.getElementById('addEventModal');
+            modal.classList.add('show');
+            
+            // Clear form fields
+            document.getElementById('add-event-name').value = '';
+            document.getElementById('add-event-type').value = '';
+            document.getElementById('add-event-date').value = '';
+            document.getElementById('add-event-time').value = '';
+            document.getElementById('add-event-location').value = '';
+            document.getElementById('add-event-duration').value = '';
+            document.getElementById('add-event-notes').value = '';
+            
+            // Clear error messages
+            clearAddEventErrors();
+            
+            // Hide message
+            document.getElementById('add-event-message').style.display = 'none';
+        }
+
+        function closeAddEventModal() {
+            const modal = document.getElementById('addEventModal');
+            modal.classList.remove('show');
+            clearAddEventErrors();
+        }
+
+        function clearAddEventErrors() {
+            const errorFields = ['add-event-name-error', 'add-event-type-error', 'add-event-date-error'];
+            errorFields.forEach(id => {
+                const elem = document.getElementById(id);
+                if (elem) elem.style.display = 'none';
+            });
+            
+            // Remove error borders
+            ['add-event-name', 'add-event-type', 'add-event-date'].forEach(id => {
+                const elem = document.getElementById(id);
+                if (elem) elem.style.borderColor = '#cbd5e0';
+            });
+        }
+
+        function validateAddEventForm() {
+            let isValid = true;
+            clearAddEventErrors();
+            
+            // Validate name
+            const name = document.getElementById('add-event-name').value.trim();
+            if (!name) {
+                document.getElementById('add-event-name-error').textContent = 'Event name is required';
+                document.getElementById('add-event-name-error').style.display = 'block';
+                document.getElementById('add-event-name').style.borderColor = '#dc2626';
+                isValid = false;
+            }
+            
+            // Validate type
+            const type = document.getElementById('add-event-type').value;
+            if (!type) {
+                document.getElementById('add-event-type-error').textContent = 'Event type is required';
+                document.getElementById('add-event-type-error').style.display = 'block';
+                document.getElementById('add-event-type').style.borderColor = '#dc2626';
+                isValid = false;
+            }
+            
+            // Validate date
+            const date = document.getElementById('add-event-date').value;
+            if (!date) {
+                document.getElementById('add-event-date-error').textContent = 'Event date is required';
+                document.getElementById('add-event-date-error').style.display = 'block';
+                document.getElementById('add-event-date').style.borderColor = '#dc2626';
+                isValid = false;
+            }
+            
+            return isValid;
+        }
+
+        function showAddEventMessage(message, type = 'error') {
+            const messageDiv = document.getElementById('add-event-message');
+            messageDiv.className = type === 'success' ? 'success-message' : 'error-message';
+            messageDiv.textContent = message;
+            messageDiv.style.display = 'block';
+        }
+
+        function setSaveButtonLoading(loading) {
+            const btn = document.getElementById('saveEventBtn');
+            const btnText = document.getElementById('saveEventBtnText');
+            
+            if (loading) {
+                btn.disabled = true;
+                btn.style.opacity = '0.6';
+                btn.style.cursor = 'not-allowed';
+                btnText.innerHTML = '<div class="spinner" style="display:inline-block; margin-right:8px;"></div>Saving...';
+            } else {
+                btn.disabled = false;
+                btn.style.opacity = '1';
+                btn.style.cursor = 'pointer';
+                btnText.textContent = 'Save Event';
+            }
+        }
+
+        async function saveEvent() {
+            // Validate form
+            if (!validateAddEventForm()) {
+                return;
+            }
+            
+            // Get form values
+            const name = document.getElementById('add-event-name').value.trim();
+            const type = document.getElementById('add-event-type').value;
+            const date = document.getElementById('add-event-date').value;
+            const time = document.getElementById('add-event-time').value.trim();
+            const location = document.getElementById('add-event-location').value.trim();
+            const duration = document.getElementById('add-event-duration').value.trim();
+            const notes = document.getElementById('add-event-notes').value.trim();
+            
+            // Prepare event data matching API expectations
+            const eventData = {
+                name,
+                type,
+                date,
+                time: time || '',
+                location: location || '',
+                duration: duration || '',
+                notes: notes || ''
+            };
+            
+            try {
+                // Show loading state
+                setSaveButtonLoading(true);
+                
+                // Call the API
+                const response = await fetch('/api/calendar/create', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(eventData)
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok && data.success) {
+                    // Success! Show message
+                    showAddEventMessage('Event created successfully!', 'success');
+                    
+                    // Refresh events from API
+                    await fetchCalendarEvents();
+                    
+                    // Close modal after short delay
+                    setTimeout(() => {
+                        closeAddEventModal();
+                    }, 1000);
+                } else {
+                    // API returned an error
+                    showAddEventMessage(data.error || 'Failed to create event. Please try again.');
+                }
+            } catch (error) {
+                console.error('Error creating event:', error);
+                showAddEventMessage('Network error. Please check your connection and try again.');
+            } finally {
+                setSaveButtonLoading(false);
+            }
         }
 
         window.showSection = showSection;
