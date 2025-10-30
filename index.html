@@ -1488,6 +1488,17 @@
             align-items: center;
             gap: 8px;
         }
+
+        .btn-spinner {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
         
         /* Responsive Design - Mobile First */
         @media (max-width: 768px) {
@@ -2524,7 +2535,7 @@
                     <button type="button" class="btn-secondary" onclick="closeAddEventModal()">Cancel</button>
                     <button type="submit" class="btn-primary" id="saveEventBtn">
                         <span id="saveEventBtnText">Save Event</span>
-                        <span id="saveEventBtnSpinner" style="display: none;"><div class="spinner"></div>Saving...</span>
+                        <span id="saveEventBtnSpinner" class="btn-spinner" style="display: none;"></span>
                     </button>
                 </div>
             </form>
@@ -4013,14 +4024,17 @@
             if (loading) {
                 btnText.style.display = 'none';
                 btnSpinner.style.display = 'flex';
-                btnSpinner.style.alignItems = 'center';
-                btnSpinner.style.gap = '8px';
+                btnSpinner.innerHTML = '<div class="spinner"></div>Saving...';
             } else {
                 btnText.style.display = 'inline';
                 btnSpinner.style.display = 'none';
+                btnSpinner.innerHTML = '';
             }
         }
         
+        // Success message display duration in milliseconds
+        const SUCCESS_MESSAGE_DISPLAY_DURATION = 1500;
+
         // Submit the Add Event form
         async function submitAddEvent(event) {
             event.preventDefault();
@@ -4038,7 +4052,7 @@
             const time = document.getElementById('add-event-time').value.trim();
             const location = document.getElementById('add-event-location').value.trim();
             const duration = document.getElementById('add-event-duration').value;
-            const notes = document.getElementById('add-event-notes').value.trim();
+            const details = document.getElementById('add-event-notes').value.trim();
             
             // Prepare data for API
             const eventData = {
@@ -4047,8 +4061,8 @@
                 date,
                 time: time || '',
                 location: location || '',
-                duration: duration || '',
-                notes: notes || ''
+                duration: duration ? parseInt(duration, 10) : null,
+                notes: details || ''
             };
             
             try {
@@ -4073,8 +4087,13 @@
                     
                     // Add the new event to the local array for immediate display
                     const newEvent = {
-                        ...eventData,
-                        details: notes,
+                        name,
+                        type,
+                        date,
+                        time: time || '',
+                        location: location || '',
+                        duration: duration ? parseInt(duration, 10) : null,
+                        details: details || '',
                         attendees: [],
                         availability: { manus: '', andy: '', james: '' }
                     };
@@ -4087,7 +4106,7 @@
                     // Close modal after a short delay
                     setTimeout(() => {
                         closeAddEventModal();
-                    }, 1500);
+                    }, SUCCESS_MESSAGE_DISPLAY_DURATION);
                     
                 } else {
                     // Error from API
