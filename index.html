@@ -2524,6 +2524,9 @@
 
         // Function to fetch calendar events from API
         async function fetchCalendarEvents() {
+            // Ensure calendarEvents is initialized
+            if (!calendarEvents) calendarEvents = [];
+            
             try {
                 const response = await fetch('/api/calendar/list');
                 const data = await response.json();
@@ -2562,11 +2565,11 @@
                     renderEventsTable();
                 } else {
                     console.error('Failed to fetch calendar events:', data);
-                    // Keep empty array if no valid data is returned
+                    // Preserve existing data when response is invalid
                 }
             } catch (error) {
                 console.error('Error fetching calendar events:', error);
-                // Preserve existing data on error - don't clear calendarEvents
+                // Preserve existing data on network or parse errors
             }
         }
 
