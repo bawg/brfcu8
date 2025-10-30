@@ -19,13 +19,28 @@
             min-height: 100vh;
         }
         
+        body.login-active {
+            overflow: hidden;
+            height: 100vh;
+            position: fixed;
+            width: 100%;
+        }
+        
         /* === LOGIN STYLES === */
         #loginContainer {
             display: flex;
             align-items: center;
             justify-content: center;
             min-height: 100vh;
+            height: 100vh;
             padding: 24px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            overflow: auto;
+            z-index: 1000;
         }
         
         .login-card {
@@ -395,9 +410,11 @@
             if (isAuthenticated) {
                 loginContainer.classList.add('hidden');
                 appContainer.classList.remove('hidden');
+                document.body.classList.remove('login-active');
             } else {
                 loginContainer.classList.remove('hidden');
                 appContainer.classList.add('hidden');
+                document.body.classList.add('login-active');
             }
         }
 
@@ -2440,6 +2457,64 @@
         </div>
     </div>
 
+    <!-- Add Event Modal -->
+    <div id="addEventModal" class="confirmation-modal">
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="modal-header">
+                <span>➕</span>
+                <h3>Add New Event</h3>
+            </div>
+            <div class="modal-body">
+                <div class="form-grid">
+                    <div class="form-field">
+                        <label class="form-label" for="add-event-name">Event Name<span style="color: #dc2626;">*</span></label>
+                        <input class="form-input" id="add-event-name" type="text" placeholder="Enter event name" required>
+                        <span class="error-text" id="add-event-name-error" style="display:none; color:#dc2626; font-size:12px;"></span>
+                    </div>
+                    <div class="form-field">
+                        <label class="form-label" for="add-event-type">Type<span style="color: #dc2626;">*</span></label>
+                        <select class="form-input" id="add-event-type" required>
+                            <option value="">Select type</option>
+                            <option value="practice">Practice</option>
+                            <option value="match">Match</option>
+                            <option value="festival">Festival</option>
+                            <option value="meeting">Meeting</option>
+                        </select>
+                        <span class="error-text" id="add-event-type-error" style="display:none; color:#dc2626; font-size:12px;"></span>
+                    </div>
+                    <div class="form-field">
+                        <label class="form-label" for="add-event-date">Date<span style="color: #dc2626;">*</span></label>
+                        <input class="form-input" id="add-event-date" type="date" required>
+                        <span class="error-text" id="add-event-date-error" style="display:none; color:#dc2626; font-size:12px;"></span>
+                    </div>
+                    <div class="form-field">
+                        <label class="form-label" for="add-event-time">Time</label>
+                        <input class="form-input" id="add-event-time" type="text" placeholder="e.g., 6:00 PM - 8:00 PM">
+                    </div>
+                    <div class="form-field">
+                        <label class="form-label" for="add-event-location">Location</label>
+                        <input class="form-input" id="add-event-location" type="text" placeholder="Enter location">
+                    </div>
+                    <div class="form-field">
+                        <label class="form-label" for="add-event-duration">Duration (minutes)</label>
+                        <input class="form-input" id="add-event-duration" type="number" min="0" placeholder="e.g., 90">
+                    </div>
+                    <div class="form-field full-width">
+                        <label class="form-label" for="add-event-notes">Notes</label>
+                        <textarea class="form-input" id="add-event-notes" rows="3" placeholder="Additional notes or reminders"></textarea>
+                    </div>
+                </div>
+                <div id="add-event-message" style="margin-top: 16px; display: none;"></div>
+            </div>
+            <div class="modal-actions">
+                <button class="modal-btn cancel" onclick="closeAddEventModal()">Cancel</button>
+                <button class="modal-btn primary" id="saveEventBtn" onclick="saveEvent()">
+                    <span id="saveEventBtnText">Save Event</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Log Issue Modal -->
     <div id="logIssueModal" class="confirmation-modal">
         <div class="modal-content" style="max-width: 600px;">
@@ -2508,18 +2583,10 @@
             'July', 'August', 'September', 'October', 'November', 'December'
         ];
         
-        // Example events data (now with details, location, attendees)
-        const calendarEvents = [
-            { date: '2025-01-02', time: '6:00 PM - 8:00 PM', type: 'practice', name: 'Practice', location: 'Barnes Rugby Field', details: 'First practice of the year. Focus on passing drills.', attendees: ['Alice', 'Bob', 'Charlie'] },
-            { date: '2025-01-05', time: '7:00 PM - 9:00 PM', type: 'practice', name: 'Training', location: 'Barnes Rugby Field', details: 'Skills training session.', attendees: ['Alice', 'David', 'Eve'] },
-            { date: '2025-01-08', time: '9:00 AM - 4:00 PM', type: 'festival', name: 'Festival', location: 'Surrey Sports Park', details: 'Annual rugby festival.', attendees: ['Team Barnes', 'Team Surrey'] },
-            { date: '2025-01-13', time: '6:30 PM - 8:30 PM', type: 'practice', name: 'Practice', location: 'Barnes Rugby Field', details: 'Defensive drills and positioning.', attendees: ['Bob', 'Charlie', 'Eve'] },
-            { date: '2025-01-15', time: '2:00 PM - 4:00 PM', type: 'match', name: 'Championship', location: 'Twickenham Stadium', details: 'Championship match vs Team Richmond.', attendees: ['Full Squad'] },
-            { date: '2025-01-20', time: '7:00 PM - 9:00 PM', type: 'practice', name: 'Training', location: 'Barnes Rugby Field', details: 'Tactical training session.', attendees: ['Alice', 'Bob', 'Charlie', 'David', 'Eve'] },
-            { date: '2025-01-22', time: '1:00 PM - 5:00 PM', type: 'festival', name: 'Surrey Cup', location: 'Surrey Sports Park', details: 'Surrey Cup Final.', attendees: ['Team Barnes', 'Team Surrey'] },
-            { date: '2025-01-27', time: '3:00 PM - 5:00 PM', type: 'practice', name: 'Match Day', location: 'Barnes Rugby Field', details: 'Friendly match.', attendees: ['Full Squad'] },
-            { date: '2025-01-29', time: '10:00 AM - 4:00 PM', type: 'festival', name: 'Spring Festival', location: 'Barnes Rugby Field', details: 'Spring rugby festival.', attendees: ['All Teams'] }
-        ];
+        // Calendar events array - will be populated from API
+        // All attributes from list.js API: id, name, type, date, time, location, duration, notes, createdAt, updatedAt
+        // Plus UI-specific attributes: details (alias for notes), attendees, availability
+        let calendarEvents = [];
         
         // Static attendee options
         const attendeeOptions = ['manus', 'andy', 'james'];
@@ -2530,12 +2597,53 @@
         // Issues management data
         let issues = [];
 
-        // Add availability to each event (initialize as empty object if not present)
-        calendarEvents.forEach(ev => {
-            if (!ev.availability) {
-                ev.availability = { manus: '', andy: '', james: '' };
+        // Function to fetch calendar events from API
+        async function fetchCalendarEvents() {
+            try {
+                const response = await fetch('/api/calendar/list');
+                const data = await response.json();
+                
+                if (data.success && Array.isArray(data.events)) {
+                    // Map API events to calendar format, preserving all attributes from list.js
+                    calendarEvents = data.events.map(event => {
+                        return {
+                            // All attributes from list.js API
+                            id: event.id,
+                            name: event.name || '',
+                            type: event.type || '',
+                            date: event.date || '',
+                            time: event.time || '',
+                            location: event.location || '',
+                            duration: event.duration || '',
+                            notes: event.notes || '',
+                            createdAt: event.createdAt || null,
+                            updatedAt: event.updatedAt || null,
+                            // UI-specific attributes (backward compatibility)
+                            details: event.notes || '', // Alias for notes
+                            attendees: event.attendees || [],
+                            availability: event.availability || { manus: '', andy: '', james: '' }
+                        };
+                    });
+                    
+                    // Ensure all events have availability initialized
+                    calendarEvents.forEach(ev => {
+                        if (!ev.availability) {
+                            ev.availability = { manus: '', andy: '', james: '' };
+                        }
+                    });
+                    
+                    // Re-render calendar and events table after loading data
+                    renderCalendar();
+                    renderEventsTable();
+                } else {
+                    console.error('Failed to fetch calendar events:', data);
+                    // Preserve existing data when response is invalid
+                }
+            } catch (error) {
+                console.error('Error fetching calendar events:', error);
+                // Preserve existing data on network or parse errors
             }
-        });
+        }
 
         // Pinch-to-zoom functionality for events table
         let tableZoomLevel = 1;
@@ -2545,13 +2653,19 @@
         const maxZoom = 2;
         
         // Initialize calendar on page load
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', async function() {
             currentMonth = today.getMonth();
             currentYear = today.getFullYear();
             updateCalendarTitle();
+            
+            // Fetch calendar events from API first, then render
+            await fetchCalendarEvents();
+            
+            // Render after fetch completes
             renderCalendar();
             renderEventsTable();
             renderDrillsTable();
+            
             document.getElementById('availabilityUser').style.display = 'none';
             document.getElementById('availabilityUserLabel').style.display = 'none';
             document.getElementById('toggleAvailabilityBtn').textContent = '+ Add Availability';
@@ -3276,22 +3390,23 @@
                         throw new Error('Invalid file format: expected array of calendar events');
                     }
                     
-                    // Validate calendar event structure
-                    const requiredFields = ['date', 'time', 'type', 'name', 'location', 'details'];
+                    // Validate calendar event structure (based on list.js API attributes)
+                    const requiredFields = ['date', 'time', 'type', 'name'];
                     for (let calEvent of importedEvents) {
                         for (let field of requiredFields) {
                             if (!calEvent[field]) {
                                 throw new Error(`Invalid calendar event structure: missing field '${field}'`);
                             }
                         }
-                        // Ensure attendees array exists
-                        if (!calEvent.attendees) {
-                            calEvent.attendees = [];
-                        }
-                        // Ensure availability object exists
-                        if (!calEvent.availability) {
-                            calEvent.availability = { manus: '', andy: '', james: '' };
-                        }
+                        // Ensure all optional attributes from list.js exist
+                        if (!calEvent.location) calEvent.location = '';
+                        if (!calEvent.duration) calEvent.duration = '';
+                        if (!calEvent.notes) calEvent.notes = '';
+                        if (!calEvent.details) calEvent.details = calEvent.notes || ''; // Alias, ensure always string
+                        if (!calEvent.attendees) calEvent.attendees = [];
+                        if (!calEvent.availability) calEvent.availability = { manus: '', andy: '', james: '' };
+                        if (!calEvent.createdAt) calEvent.createdAt = null;
+                        if (!calEvent.updatedAt) calEvent.updatedAt = null;
                     }
                     
                     // Show confirmation modal for import options
@@ -3497,7 +3612,8 @@
             document.getElementById('edit-event-date').value = event.date;
             document.getElementById('edit-event-time').value = event.time;
             document.getElementById('edit-event-type').value = event.type;
-            document.getElementById('edit-event-details').value = event.details || '';
+            // Use notes if available, fallback to details for backward compatibility
+            document.getElementById('edit-event-details').value = event.notes || event.details || '';
             
             showEditEventModal();
         }
@@ -3515,14 +3631,17 @@
                 return;
             }
             
-            // Update the event
+            // Update the event with all attributes from list.js
             const event = calendarEvents[currentEditingEventIndex];
             event.name = name;
             event.location = location;
             event.date = date;
             event.time = time;
             event.type = type;
+            // Update both notes (API) and details (UI alias)
+            event.notes = details;
             event.details = details;
+            event.updatedAt = new Date().toISOString(); // Update timestamp
             
             // Re-render both table and calendar
             renderEventsTable();
@@ -3717,6 +3836,233 @@
             setTimeout(() => {
                 statusDiv.style.display = 'none';
             }, 3000);
+        }
+
+        // Event detail modal functions
+        function openEventDetails(event) {
+            const modal = document.getElementById('eventModal');
+            const modalContent = document.getElementById('eventModalContent');
+            
+            // Build event details HTML with all attributes from list.js
+            let detailsHTML = `
+                <h2 style="color: #1e3a8a; margin-bottom: 16px;">${event.name}</h2>
+                <div style="color: #64748b; line-height: 1.8;">
+                    <p><strong>Type:</strong> <span class="event-type-badge ${event.type}">${event.type.charAt(0).toUpperCase() + event.type.slice(1)}</span></p>
+                    <p><strong>Date:</strong> ${new Date(event.date).toLocaleDateString()}</p>
+                    <p><strong>Time:</strong> ${event.time}</p>
+                    <p><strong>Location:</strong> ${event.location || 'TBD'}</p>
+            `;
+            
+            // Add duration if available (from list.js API)
+            if (event.duration) {
+                detailsHTML += `<p><strong>Duration:</strong> ${event.duration}</p>`;
+            }
+            
+            // Add notes/details if available
+            if (event.notes || event.details) {
+                detailsHTML += `<p><strong>Details:</strong> ${event.notes || event.details}</p>`;
+            }
+            
+            // Add attendees if available
+            if (event.attendees && event.attendees.length > 0) {
+                detailsHTML += `<p><strong>Attendees:</strong> ${event.attendees.join(', ')}</p>`;
+            }
+            
+            // Add availability if available
+            if (event.availability) {
+                const attending = Object.entries(event.availability)
+                    .filter(([user, val]) => val === 'yes')
+                    .map(([user]) => user.charAt(0).toUpperCase() + user.slice(1));
+                if (attending.length > 0) {
+                    detailsHTML += `<p><strong>Attending:</strong> ${attending.join(', ')}</p>`;
+                }
+            }
+            
+            // Add timestamps if available (from list.js API)
+            if (event.createdAt) {
+                detailsHTML += `<p style="margin-top: 12px; font-size: 12px; color: #94a3b8;"><strong>Created:</strong> ${new Date(event.createdAt).toLocaleString()}</p>`;
+            }
+            if (event.updatedAt) {
+                detailsHTML += `<p style="font-size: 12px; color: #94a3b8;"><strong>Updated:</strong> ${new Date(event.updatedAt).toLocaleString()}</p>`;
+            }
+            
+            detailsHTML += `</div>`;
+            
+            modalContent.innerHTML = detailsHTML;
+            modal.style.display = 'flex';
+        }
+
+        function closeEventModal() {
+            const modal = document.getElementById('eventModal');
+            modal.style.display = 'none';
+        }
+
+        function closeAvailabilityModal() {
+            const modal = document.getElementById('availabilityModal');
+            modal.style.display = 'none';
+        }
+
+        // Add Event Modal functions
+        function openAddEventModal() {
+            const modal = document.getElementById('addEventModal');
+            modal.classList.add('show');
+            
+            // Clear form fields
+            document.getElementById('add-event-name').value = '';
+            document.getElementById('add-event-type').value = '';
+            document.getElementById('add-event-date').value = '';
+            document.getElementById('add-event-time').value = '';
+            document.getElementById('add-event-location').value = '';
+            document.getElementById('add-event-duration').value = '';
+            document.getElementById('add-event-notes').value = '';
+            
+            // Clear error messages
+            clearAddEventErrors();
+            
+            // Hide message
+            document.getElementById('add-event-message').style.display = 'none';
+        }
+
+        function closeAddEventModal() {
+            const modal = document.getElementById('addEventModal');
+            modal.classList.remove('show');
+            clearAddEventErrors();
+        }
+
+        function clearAddEventErrors() {
+            const errorFields = ['add-event-name-error', 'add-event-type-error', 'add-event-date-error'];
+            errorFields.forEach(id => {
+                const elem = document.getElementById(id);
+                if (elem) elem.style.display = 'none';
+            });
+            
+            // Remove error borders
+            ['add-event-name', 'add-event-type', 'add-event-date'].forEach(id => {
+                const elem = document.getElementById(id);
+                if (elem) elem.style.borderColor = '#cbd5e0';
+            });
+        }
+
+        function validateAddEventForm() {
+            let isValid = true;
+            clearAddEventErrors();
+            
+            // Validate name
+            const name = document.getElementById('add-event-name').value.trim();
+            if (!name) {
+                document.getElementById('add-event-name-error').textContent = 'Event name is required';
+                document.getElementById('add-event-name-error').style.display = 'block';
+                document.getElementById('add-event-name').style.borderColor = '#dc2626';
+                isValid = false;
+            }
+            
+            // Validate type
+            const type = document.getElementById('add-event-type').value;
+            if (!type) {
+                document.getElementById('add-event-type-error').textContent = 'Event type is required';
+                document.getElementById('add-event-type-error').style.display = 'block';
+                document.getElementById('add-event-type').style.borderColor = '#dc2626';
+                isValid = false;
+            }
+            
+            // Validate date
+            const date = document.getElementById('add-event-date').value;
+            if (!date) {
+                document.getElementById('add-event-date-error').textContent = 'Event date is required';
+                document.getElementById('add-event-date-error').style.display = 'block';
+                document.getElementById('add-event-date').style.borderColor = '#dc2626';
+                isValid = false;
+            }
+            
+            return isValid;
+        }
+
+        function showAddEventMessage(message, type = 'error') {
+            const messageDiv = document.getElementById('add-event-message');
+            messageDiv.className = type === 'success' ? 'success-message' : 'error-message';
+            messageDiv.textContent = message;
+            messageDiv.style.display = 'block';
+        }
+
+        function setSaveButtonLoading(loading) {
+            const btn = document.getElementById('saveEventBtn');
+            const btnText = document.getElementById('saveEventBtnText');
+            
+            if (loading) {
+                btn.disabled = true;
+                btn.style.opacity = '0.6';
+                btn.style.cursor = 'not-allowed';
+                btnText.innerHTML = '<div class="spinner" style="display:inline-block; margin-right:8px;"></div>Saving...';
+            } else {
+                btn.disabled = false;
+                btn.style.opacity = '1';
+                btn.style.cursor = 'pointer';
+                btnText.textContent = 'Save Event';
+            }
+        }
+
+        async function saveEvent() {
+            // Validate form
+            if (!validateAddEventForm()) {
+                return;
+            }
+            
+            // Get form values
+            const name = document.getElementById('add-event-name').value.trim();
+            const type = document.getElementById('add-event-type').value;
+            const date = document.getElementById('add-event-date').value;
+            const time = document.getElementById('add-event-time').value.trim();
+            const location = document.getElementById('add-event-location').value.trim();
+            const duration = document.getElementById('add-event-duration').value.trim();
+            const notes = document.getElementById('add-event-notes').value.trim();
+            
+            // Prepare event data matching API expectations
+            const eventData = {
+                name,
+                type,
+                date,
+                time: time || '',
+                location: location || '',
+                duration: duration || '',
+                notes: notes || ''
+            };
+            
+            try {
+                // Show loading state
+                setSaveButtonLoading(true);
+                
+                // Call the API
+                const response = await fetch('/api/calendar/create', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(eventData)
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok && data.success) {
+                    // Success! Show message
+                    showAddEventMessage('Event created successfully!', 'success');
+                    
+                    // Refresh events from API
+                    await fetchCalendarEvents();
+                    
+                    // Close modal after short delay
+                    setTimeout(() => {
+                        closeAddEventModal();
+                    }, 1000);
+                } else {
+                    // API returned an error
+                    showAddEventMessage(data.error || 'Failed to create event. Please try again.');
+                }
+            } catch (error) {
+                console.error('Error creating event:', error);
+                showAddEventMessage('Network error. Please check your connection and try again.');
+            } finally {
+                setSaveButtonLoading(false);
+            }
         }
 
         window.showSection = showSection;
