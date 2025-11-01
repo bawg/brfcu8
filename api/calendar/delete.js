@@ -22,15 +22,15 @@ export default async function handler(req, res) {
   try {
     console.log('Delete request body:', typeof req.body, req.body);
 
-    const { eventId } = req.body;
+    const { id } = req.body;
 
-    // Validate eventId
-    if (!eventId) {
-      return res.status(400).json({ error: 'eventId is required' });
+    // Validate id
+    if (!id) {
+      return res.status(400).json({ error: 'id is required' });
     }
 
     // Get reference to the document
-    const docRef = db.collection('calendar_events').doc(eventId);
+    const docRef = db.collection('calendar_events').doc(id);
     
     // Check if document exists
     const doc = await docRef.get();
@@ -43,8 +43,7 @@ export default async function handler(req, res) {
 
     return res.status(200).json({ 
       success: true, 
-      message: 'Event deleted successfully', 
-      eventId: eventId 
+      message: 'Event deleted successfully'
     });
 
   } catch (error) {
