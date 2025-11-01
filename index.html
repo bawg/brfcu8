@@ -3686,12 +3686,8 @@
                     // Success! Show message
                     showCalendarUploadStatus('success', data.message || 'Event deleted successfully');
                     
-                    // Refresh events from API
+                    // Refresh events from API (this will also re-render calendar and table)
                     await fetchCalendarEvents();
-                    
-                    // Re-render calendar and events table
-                    renderCalendar();
-                    renderEventsTable();
                 } else {
                     // API returned an error
                     showCalendarUploadStatus('error', data.error || 'Failed to delete event');
